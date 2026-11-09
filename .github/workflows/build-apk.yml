@@ -37,11 +37,14 @@ jobs:
 
       - name: Publish GitHub Release on main
         if: github.ref == 'refs/heads/main'
-        uses: softprops/action-github-release@v2
-        with:
-          tag_name: apk-latest
-          name: CARANTIN Android APK (v2.3)
-          body: |
-            Готовый установочный APK-файл для Android (горизонтальный режим, увеличенные джойстики движения и стрельбы, траектория прицеливания, офлайн-работа и 30 видов зомби).
-          files: CARANTIN.apk
-          make_latest: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view apk-latest >/dev/null 2>&1; then
+            gh release upload apk-latest CARANTIN.apk --clobber
+          else
+            gh release create apk-latest CARANTIN.apk \
+              --title "CARANTIN Android APK (v2.3)" \
+              --notes "Готовый установочный APK-файл для Android (горизонтальный режим, увеличенные джойстики движения и стрельбы, траектория прицеливания, офлайн-работа и 30 видов зомби)." \
+              --latest
+          fi
