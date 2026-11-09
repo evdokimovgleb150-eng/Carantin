@@ -3842,6 +3842,7 @@ function closeBagModal(){
 function updateZoneUI(){
  if(!player)return;
  const d=getDistrictAt(player.x,player.y);
+ if(typeof gameMode!=='undefined'&&gameMode==='free'&&$('locBadge'))$('locBadge').textContent=d.short;
  if(d.id!==currentDistrict){
   currentDistrict=d.id;
   if(running){
@@ -5186,6 +5187,9 @@ function closeStoryModal(){
 
 function init(){
  if(typeof campaignReset==='function')campaignReset();
+ // A previous campaign paints its arena and obstacles onto the cached city canvas.
+ // Rebuild the original map before starting a free-survival run.
+ if(typeof gameMode!=='undefined'&&gameMode==='free')buildWorldGround();
  player={x:SAFE_ZONE.x,y:SAFE_ZONE.y+115,r:15,speed:195,angle:-Math.PI/2,inv:0,walkPhase:0,recoil:0,muzzleFlash:0,moving:false,regenAcc:0,slowTimer:0,vampKills:0,vampCd:0,stimTimer:0,inVehicle:null,carRegenAcc:0};
  const c=clampCamera(player.x,player.y);
  cam.x=c.x;cam.y=c.y;
@@ -5365,7 +5369,9 @@ function spawnZombie(forceType,sx,sy,opts){
   if(player){
    for(let i=0;i<zombies.length;i++){
     const zz=zombies[i];
-    if(zz.aggro||zz.isWaveBoss)continue;
+    // Campaign targets must never be recycled: their removal without a kill
+    // would leave the polygon's objective counter impossible to complete.
+    if(zz.aggro||zz.isWaveBoss||zz.campaignTag!==undefined)continue;
     const dd=Math.hypot(zz.x-player.x,zz.y-player.y);
     if(dd>farDist){farDist=dd;farIdx=i;}
    }
@@ -6102,6 +6108,10 @@ function buyHelicopterAndEscape(){
 }
 
 function victoryEscape(){
+ // Award evacuation trophies while the run is still active. checkAchievements
+ // intentionally ignores non-running games, so doing this after running=false
+ // permanently lost the "Крылья свободы" achievement.
+ checkAchievements();
  running=false;waveChoosing=false;activeNpc=null;
  stopAllControls();
  $('waveModal').style.display='none';

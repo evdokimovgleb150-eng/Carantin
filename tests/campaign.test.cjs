@@ -31,13 +31,27 @@ run("setGameMode('free'); startGame();");
 assert.equal(run('gameMode'),'free');
 assert.equal(run('evacHeli!==null'),true);
 run('update(.016,1015);render(1015);');
-run('running=false; setGameMode("campaign"); startGame(); campaignSkipDialogue();');
+const freeObstacleCount=run('obstacles.length');
+assert.equal(run('$("locBadge").textContent'),'База');
+// The evacuation achievement used to be checked only after running=false.
+run('evacHeli.bought=true;victoryEscape();');
+assert.equal(run('!!metaStats.unlocked.evac'),true);
+run('setGameMode("campaign"); startGame(); campaignSkipDialogue();');
 assert.equal(run('campaignStage'),0);
 assert.equal(run('paused'),false);
 run('update(.016,1016);render(1016);');
 assert.equal(run('evacHeli'),null);
 assert.equal(run('campaignBarrels.length'),5);
 assert.equal(run('campaignNearbyCheckpoint()'),false);
+assert.ok(run('obstacles.length')>freeObstacleCount,'Campaign adds its own arena barriers');
+// A distant campaign target may be non-aggro; the ambient spawn cap must not
+// recycle it and make the kill objective permanently unreachable.
+assert.equal(run(`(()=>{const saved=zombies;
+ zombies=[{x:3500,y:1800,aggro:false,campaignTag:0},
+  ...Array.from({length:getMaxActiveZombies()-1},()=>({x:2500,y:1800,aggro:true}))];
+ const target=zombies[0];const result=spawnZombie('walker',2500,1800);
+ const intact=zombies.includes(target);zombies=saved;
+ return result===null&&intact;})()`),true);
 // Choices change resources, and skipping cannot drop an interactive choice.
 assert.equal(run('shieldHp'),35);
 // On entering polygon, fight three stages; second ends in a timed holdout.
@@ -102,4 +116,12 @@ for(let stage=1;stage<4;stage++){
 assert.equal(run('storyCompleted'),true);
 assert.equal(run('running'),false);
 assert.equal(run('campaignStage'),3);
-console.log('CAMPAIGN / SURVIVAL / TRAVEL / HOLDOUT / FINAL BOSS TESTS PASSED');
+// Starting free survival after a campaign must remove its polygon barriers,
+// checkpoint paint and tinted ground rather than retaining the final sector.
+run('setGameMode("free"); startGame();');
+assert.equal(run('obstacles.length'),freeObstacleCount);
+assert.equal(run('campaignBarrels.length'),0);
+assert.equal(run('$("locBadge").textContent'),'База');
+assert.equal(run('gameMode'),'free');
+run('update(.016,1515);render(1515);');
+console.log('CAMPAIGN / SURVIVAL / TRAVEL / HOLDOUT / ACHIEVEMENTS / RESET TESTS PASSED');
