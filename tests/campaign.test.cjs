@@ -39,6 +39,12 @@ assert.equal(run('$("start").textContent'),'🌍 НАЧАТЬ ОТКРЫТЫЙ �
 assert.equal(run('groundIsCampaign'),false);
 assert.equal(run('evacHeli!==null'),true);
 assert.equal(run('worldBuilds'),0);
+assert.ok(html.includes('id="expandedRadar" width="544"'));
+run('openMap();');
+assert.equal(run('paused'),true);
+assert.equal(run('$("mapModal").style.display'),'flex');
+run('closeMap();');
+assert.equal(run('paused'),false);
 run('gameOver();setGameMode("campaign");startGame();campaignSkipDialogue();');
 assert.equal(run('gameMode'),'campaign');
 assert.equal(run('campaignState'),'investigate');
@@ -64,6 +70,16 @@ assert.equal(loaded('campaignState'),'investigate');
 assert.equal(loaded('campaignObjectiveIndex'),1);
 assert.equal(loaded('campaignCurrentSite().name'),'Маршрутный лист');
 loaded('update(.016,1016);render(1016);');
+// Pause → Menu requires confirmation but does not erase the campaign slot.
+loaded('pauseGame();');
+assert.equal(loaded('paused'),true);
+assert.equal(loaded('$("pauseScreen").style.display'),'flex');
+loaded('returnToMenu();');
+assert.equal(loaded('running'),false);
+assert.equal(loaded('$("overlay").style.display'),'flex');
+assert.equal(store.get('carantin_campaign_v1'),firstSave);
+assert.equal(loaded('loadCampaign()'),true);
+assert.equal(loaded('campaignObjectiveIndex'),1);
 // Old manual saves are accepted and routed into the new investigation.
 const legacy={...JSON.parse(firstSave),version:1,state:'approach'};
 store.set('carantin_campaign_v1',JSON.stringify(legacy));
