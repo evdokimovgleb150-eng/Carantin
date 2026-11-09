@@ -562,7 +562,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   gap:5px;
  }
  #healthbar{height:10px}
- #threatBadge,#zoneBadge{font-size:9px;padding:1px 5px}
+ #threatBadge,#zoneBadge,#evacBadge{font-size:9px;padding:1px 5px}
  .hudBtn{height:28px;font-size:11px;border-radius:8px}
  #codexButton{padding:0 7px}
  #codexBadge{display:none}
@@ -618,6 +618,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    <div id="badgeRow">
     <div id="threatBadge">ВОЛНА 1 · 0/10 🧟</div>
     <div id="zoneBadge">🛡️ БЕЗОПАСНАЯ ЗОНА</div>
+    <div id="evacBadge">🚁 ЭВАК: 0/2000 🪙</div>
    </div>
    <div id="activeItems"></div>
   </div>
@@ -660,7 +661,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    <img class="emblem" src="./icon-192.png" alt="CARANTIN">
    <h1>CARA<span class="titleAccent">NTIN</span></h1>
    <div class="titleSlash"></div>
-   <p>Огромный город с 4 районами и Безопасной зоной в центре. Заходи в здания, собирай ценный лут, продавай его на базе скупщику и прокачивайся.</p>
+   <p>Огромный город с 4 районами и Безопасной зоной в центре. Заходи в разные здания, собирай лут, продавай его скупщику — накопи <b style="color:#ffe082">2000 🪙</b>, найди эвакуационный <b style="color:#7cff8c">вертолёт 🚁</b> на окраине карты и улети в убежище!</p>
    <div class="controlsGrid">
     <div class="ctrlCard"><b>📱 Горизонт. сенсор</b>Левый стик — движение<br>Правый стик — прицел и огонь<br>Кнопка ⛶ — полный экран</div>
     <div class="ctrlCard"><b>⌨️ Клавиатура + Мышь</b>WASD — шаг · Мышь/ЛКМ — огонь<br>1–6 — оружие · E — Лут/NPC · I — Индекс</div>
@@ -898,10 +899,25 @@ const glows={
  cutSoft:makeGlowSprite(128,[[0,'rgba(255,255,255,1)'],[0.4,'rgba(255,255,255,0.72)'],[0.78,'rgba(255,255,255,0.22)'],[1,'rgba(255,255,255,0)']])
 };
 
+const HELI_PRICE=2000;
+const HELI_SPOTS=[
+ {id:'nw',x:190,y:1510,dir:0.35,label:'Северо-Западный край'},
+ {id:'ne',x:3410,y:890,dir:2.62,label:'Северо-Восточный край'},
+ {id:'sw',x:190,y:2705,dir:-0.45,label:'Юго-Западный край'},
+ {id:'se',x:3410,y:2105,dir:-2.65,label:'Юго-Восточный край'}
+];
+function isNearAnyHeliSpot(x,y,pad=105){
+ for(let i=0;i<HELI_SPOTS.length;i++){
+  if(Math.hypot(x-HELI_SPOTS[i].x,y-HELI_SPOTS[i].y)<=pad)return true;
+ }
+ return false;
+}
+
 let W=0,H=0,DPR=1;
 let player=null,zombies=[],bullets=[],enemyProjectiles=[],hazardZones=[],particles=[],popups=[],decals=[],lightningBolts=[],railBeams=[];
 let lamps=[],toxicPools=[],canopies=[],obstacles=[],ambientSpores=[],puddles=[],beacons=[],radarBuildings=[],rainDrops=[],mistPatches=[];
 let buildings=[],wallRects=[],lootNodes=[],groundLoot=[],lootBag=[],nearbyLootNode=null,lootFullToastCd=0,lootRespawnTimer=0;
+let evacHeli=null,nearbyHeli=false,evacReadyShown=false;
 let cam={x:WORLD_W/2,y:WORLD_H/2};
 let score=0,money=0,health=100,maxHealth=100,shieldHp=0,kills=0;
 let seenZombieTypes=new Set();
@@ -933,32 +949,32 @@ const weapons={
  pistol:{
   name:'Пистолет',short:'ПИСТОЛЕТ',price:0,damage:.9,delay:.35,spread:.022,count:1,speed:520,range:440,
   desc:'Надёжный табельный ствол',
-  svg:'<svg viewBox="0 0 40 18" fill="none"><rect x="6" y="4" width="24" height="6" rx="1.5" fill="#9fb0ad"/><rect x="26" y="5" width="7" height="4" rx="1" fill="#4f5f63"/><path d="M10 10h7l-2 7H9z" fill="#6b5139"/><rect x="8" y="4" width="19" height="2.2" fill="#d3e0dc"/></svg>'
+  svg:'<svg viewBox="0 0 42 18" fill="none"><path d="M8 10h8l-2.5 7H7.2z" fill="#4f3b2b"/><rect x="9" y="3.5" width="24" height="5.5" rx="1.4" fill="#a7b9b5"/><rect x="12" y="3.5" width="16" height="2" fill="#dce8e4"/><rect x="15" y="5.8" width="4" height="2" fill="#324044"/><rect x="23" y="9" width="7" height="2.6" rx="1" fill="#2b3a3e"/><rect x="29" y="4.5" width="7" height="3.6" rx="1" fill="#445559"/><rect x="30" y="3" width="2" height="1.5" fill="#5cff3a"/></svg>'
  },
  shotgun:{
   name:'Дробовик',short:'ДРОБОВИК',price:35,damage:.65,delay:.92,spread:.15,count:6,speed:415,range:335,
   desc:'6 дробин кучным веером вблизи',
-  svg:'<svg viewBox="0 0 44 18" fill="none"><path d="M2 7l9-1v7l-9 1z" fill="#8b623f"/><rect x="10" y="6" width="15" height="6" rx="1" fill="#4f6066"/><rect x="24" y="6.5" width="17" height="2" fill="#9fb0ad"/><rect x="24" y="9.5" width="17" height="2" fill="#708085"/><rect x="19" y="11.5" width="10" height="3" rx="1" fill="#8b623f"/></svg>'
+  svg:'<svg viewBox="0 0 46 18" fill="none"><path d="M2 7l10-1.2v7.2l-10 1.2z" fill="#7c5434"/><rect x="11" y="5.5" width="15" height="6.2" rx="1.2" fill="#44545a"/><rect x="13" y="7" width="3" height="3.2" fill="#c93e3e"/><rect x="17" y="7" width="3" height="3.2" fill="#c93e3e"/><rect x="26" y="5.5" width="18" height="2.4" fill="#b4c4c0"/><rect x="26" y="9" width="16" height="2.2" fill="#6f8084"/><rect x="22" y="10.8" width="10" height="3.2" rx="1" fill="#8b623f"/></svg>'
  },
  rifle:{
   name:'Автомат',short:'АВТОМАТ',price:65,damage:.42,delay:.125,spread:.03,count:1,speed:590,range:485,
   desc:'Точная прицельная очередь',
-  svg:'<svg viewBox="0 0 46 18" fill="none"><path d="M2 7l9-1v6l-9 1z" fill="#6a4e37"/><rect x="10" y="6" width="18" height="5.5" rx="1" fill="#45555b"/><rect x="27" y="7.5" width="17" height="2.5" fill="#93a5a1"/><rect x="16" y="3.2" width="7" height="2.2" rx=".8" fill="#5cff3a"/><path d="M18 11.5h5l1.5 5.5h-4.5z" fill="#2e3b3f"/><rect x="27" y="11" width="5" height="4" rx=".8" fill="#6a4e37"/></svg>'
+  svg:'<svg viewBox="0 0 48 18" fill="none"><path d="M2 6.8l9.5-1v6.2l-9.5 1z" fill="#5c422f"/><rect x="11" y="5.6" width="18" height="5.6" rx="1.2" fill="#3d4c52"/><rect x="29" y="7" width="15" height="2.6" fill="#9eb0ac"/><rect x="43" y="6.3" width="3.5" height="4" rx=".6" fill="#697a7e"/><rect x="16" y="2.8" width="8" height="2.6" rx=".8" fill="#232f33"/><circle cx="20" cy="4.1" r="1" fill="#5cff3a"/><path d="M19 11.2h5.5l2.5 5.6H22z" fill="#2b383c"/><rect x="28" y="10.4" width="9" height="3.2" rx=".8" fill="#506266"/></svg>'
  },
  minigun:{
   name:'Пулемёт «Вулкан»',short:'ПУЛЕМЁТ',price:110,damage:.24,delay:.085,spread:.048,count:2,speed:630,range:500,
   desc:'Шквал из 2 точных пуль с высокой плотностью огня',
-  svg:'<svg viewBox="0 0 48 18" fill="none"><rect x="3" y="6" width="17" height="7" rx="2" fill="#3a4a4e"/><rect x="20" y="5" width="24" height="2.2" fill="#9eb0ac"/><rect x="20" y="8.2" width="24" height="2.2" fill="#7d8f8b"/><rect x="20" y="11.4" width="24" height="2.2" fill="#9eb0ac"/><rect x="36" y="4.5" width="3" height="9.5" fill="#d98e32"/><rect x="12" y="12" width="7" height="4" rx="1" fill="#5b6659"/></svg>'
+  svg:'<svg viewBox="0 0 50 18" fill="none"><rect x="3" y="5.2" width="17" height="8" rx="2.2" fill="#334347"/><rect x="5" y="2.8" width="11" height="2.5" rx="1" fill="#59696d"/><rect x="20" y="4.5" width="26" height="2" fill="#b4c4c0"/><rect x="20" y="7.9" width="26" height="2" fill="#7c8e8a"/><rect x="20" y="11.3" width="26" height="2" fill="#b4c4c0"/><rect x="29" y="4" width="3" height="9.8" fill="#d98e32"/><rect x="40" y="4" width="3" height="9.8" fill="#d98e32"/><rect x="10" y="13.2" width="8" height="3.8" rx="1" fill="#c99b3b"/></svg>'
  },
  plasma:{
   name:'Плазмаган «Ион-7»',short:'ПЛАЗМА',price:150,damage:1.45,delay:.44,spread:.015,count:1,speed:490,range:510,aoe:50,
   desc:'Плазменные заряды со взрывом по площади',
-  svg:'<svg viewBox="0 0 46 18" fill="none"><path d="M2 8l10-2v7l-10 1z" fill="#293d45"/><rect x="11" y="5" width="20" height="7" rx="2" fill="#35525c"/><rect x="31" y="6.5" width="12" height="4" rx="1" fill="#46c9e8"/><rect x="15" y="6.8" width="11" height="3.2" rx="1" fill="#8cf6ff"/></svg>'
+  svg:'<svg viewBox="0 0 48 18" fill="none"><path d="M2 7.8l10-2v7.2l-10 1z" fill="#22353d"/><rect x="11" y="4.5" width="22" height="8" rx="2.2" fill="#314e59"/><rect x="14" y="6.4" width="14" height="4.2" rx="1.5" fill="#46d6f5"/><rect x="33" y="5.5" width="11" height="6" rx="1.4" fill="#1e3138"/><circle cx="38" cy="8.5" r="2.2" fill="#9cfaff"/><rect x="20" y="2.8" width="9" height="1.8" rx=".8" fill="#6deeff"/></svg>'
  },
  railgun:{
   name:'Рельсотрон «Луч»',short:'РЕЛЬСОТРОН',price:200,damage:2.35,delay:1.15,spread:.002,count:1,speed:0,range:560,rail:true,
   desc:'Пробивной луч насквозь через толпу зомби',
-  svg:'<svg viewBox="0 0 48 18" fill="none"><path d="M2 7l11-1v7l-11 1z" fill="#233238"/><rect x="12" y="5.5" width="14" height="7" rx="1.5" fill="#3b4d54"/><rect x="26" y="5.2" width="20" height="2.2" fill="#72f3ff"/><rect x="26" y="10.2" width="20" height="2.2" fill="#72f3ff"/><rect x="17" y="7.5" width="25" height="2.6" fill="#d8ffff"/></svg>'
+  svg:'<svg viewBox="0 0 50 18" fill="none"><path d="M2 7l11-1.2v7.2l-11 1z" fill="#1f2d33"/><rect x="12" y="5" width="15" height="7.6" rx="1.5" fill="#364850"/><rect x="16" y="2.6" width="8" height="2.4" rx=".8" fill="#465c64"/><rect x="27" y="4.6" width="21" height="2.4" rx=".8" fill="#6bf2ff"/><rect x="27" y="10.4" width="21" height="2.4" rx=".8" fill="#6bf2ff"/><rect x="16" y="7.5" width="29" height="2.6" fill="#e6ffff"/><rect x="30" y="6.8" width="2.4" height="4" fill="#d99438"/><rect x="37" y="6.8" width="2.4" height="4" fill="#d99438"/></svg>'
  }
 };
 
@@ -1236,9 +1252,9 @@ function hasWallBetween(x1,y1,x2,y2){
 }
 
 function addEnterableBuilding(g,cfg){
- const {id,cx,cy,w,h,style,label,districtId,doorSide,isTent=false,hasBeacon=false,lootCount=3}=cfg;
+ const {id,cx,cy,w,h,style,model=style,label,districtId,doorSide,isTent=false,hasBeacon=false,lootCount=3}=cfg;
  const x=cx-w/2,y=cy-h/2;
- const wallT=isTent?9:13;
+ const wallT=model==='bunker'?16:isTent?9:13;
  const doorW=60;
  const doorX=doorSide==='W'?x:(doorSide==='E'?x+w:cx);
  const doorY=doorSide==='N'?y:(doorSide==='S'?y+h:cy);
@@ -1278,11 +1294,11 @@ function addEnterableBuilding(g,cfg){
  }
 
  const b={
-  id,cx,cy,x,y,w,h,style,label,districtId,doorSide,doorX,doorY,doorW,
+  id,cx,cy,x,y,w,h,style,model,label,districtId,doorSide,doorX,doorY,doorW,
   wallT,isTent,hasBeacon,lootCount,roofAlpha:1,guardSpawned:false
  };
  buildings.push(b);
- radarBuildings.push({x,y,w,h,style,id,doorSide,doorX,doorY});
+ radarBuildings.push({x,y,w,h,style,model,id,doorSide,doorX,doorY});
 
  // Draw exterior entry step / welcome threshold mat + directional entry chevron
  g.save();
@@ -1298,48 +1314,132 @@ function addEnterableBuilding(g,cfg){
  g.closePath();g.fill();
  g.restore();
 
- // Draw interior floor & corner furniture onto static groundCanvas
+ // Draw interior floor & unique architectural furniture onto static groundCanvas
  g.save();
  g.translate(x,y);
- g.fillStyle='rgba(3,8,10,0.42)';
+ g.fillStyle='rgba(3,8,10,0.44)';
  g.beginPath();g.roundRect(10,12,w,h,6);g.fill();
 
- if(isTent){
-  g.fillStyle='#2b3024';
+ if(model==='med_tent'){
+  g.fillStyle='#293c3d';
+  g.beginPath();g.roundRect(0,0,w,h,5);g.fill();
+  g.strokeStyle='rgba(130,210,210,0.18)';g.lineWidth=1;
+  for(let px=14;px<w-10;px+=18){g.beginPath();g.moveTo(px,8);g.lineTo(px,h-8);g.stroke()}
+  // Two field stretchers inside medical tent
+  g.fillStyle='rgba(220,242,240,0.22)';
+  g.fillRect(w/2-26,h/2-18,18,10);g.fillRect(w/2+8,h/2-18,18,10);
+  g.fillStyle='rgba(205,55,62,0.45)';
+  g.fillRect(w/2-3,h/2-10,6,20);g.fillRect(w/2-10,h/2-3,20,6);
+ }else if(model==='camp_tent'||model==='mil_tent'||isTent){
+  g.fillStyle=model==='mil_tent'?'#283123':'#2e2f24';
   g.beginPath();g.roundRect(0,0,w,h,5);g.fill();
   g.strokeStyle='rgba(14,18,12,0.55)';g.lineWidth=1;
   for(let px=10;px<w-8;px+=14){g.beginPath();g.moveTo(px,8);g.lineTo(px,h-8);g.stroke()}
-  g.fillStyle='rgba(220,235,215,0.10)';
-  g.beginPath();g.arc(w/2,h/2,16,0,Math.PI*2);g.fill();
- }else if(style==='med'){
-  g.fillStyle='#243b3e';
+  // Field table & cots
+  g.fillStyle='rgba(180,165,120,0.22)';
+  g.fillRect(w/2-16,h/2-10,32,20);
+ }else if(model==='clinic'){
+  g.fillStyle='#2a4447';
   g.fillRect(0,0,w,h);
-  g.strokeStyle='rgba(130,205,210,0.16)';g.lineWidth=1;
+  g.strokeStyle='rgba(165,235,235,0.18)';g.lineWidth=1;
   for(let gx=wallT;gx<w-wallT;gx+=20){g.beginPath();g.moveTo(gx,wallT);g.lineTo(gx,h-wallT);g.stroke()}
   for(let gy=wallT;gy<h-wallT;gy+=20){g.beginPath();g.moveTo(wallT,gy);g.lineTo(w-wallT,gy);g.stroke()}
-  g.fillStyle='rgba(235,245,242,0.10)';
-  g.fillRect(w/2-5,h/2-18,10,36);g.fillRect(w/2-18,h/2-5,36,10);
- }else if(style==='tech'){
-  g.fillStyle='#202a30';
+  // Operating table & hospital cross floor emblem
+  g.fillStyle='rgba(235,245,245,0.14)';
+  g.fillRect(w/2-6,h/2-20,12,40);g.fillRect(w/2-20,h/2-6,40,12);
+  g.fillStyle='rgba(190,235,235,0.26)';
+  g.beginPath();g.roundRect(w/2-15,h/2-9,30,18,3);g.fill();
+ }else if(model==='pharmacy'){
+  g.fillStyle='#21373b';
   g.fillRect(0,0,w,h);
-  g.strokeStyle='rgba(120,175,195,0.14)';g.lineWidth=1;
-  for(let gx=wallT;gx<w-wallT;gx+=28){g.beginPath();g.moveTo(gx,wallT);g.lineTo(gx,h-wallT);g.stroke()}
-  for(let gy=wallT;gy<h-wallT;gy+=28){g.beginPath();g.moveTo(wallT,gy);g.lineTo(w-wallT,gy);g.stroke()}
-  g.strokeStyle='rgba(235,185,55,0.22)';g.lineWidth=3;
+  g.strokeStyle='rgba(110,195,190,0.15)';g.lineWidth=1;
+  for(let gx=wallT;gx<w-wallT;gx+=16){g.beginPath();g.moveTo(gx,wallT);g.lineTo(gx,h-wallT);g.stroke()}
+  for(let gy=wallT;gy<h-wallT;gy+=16){g.beginPath();g.moveTo(wallT,gy);g.lineTo(w-wallT,gy);g.stroke()}
+  // Pharmacy counter & shelves
+  g.fillStyle='rgba(110,220,210,0.20)';
+  g.beginPath();g.roundRect(w*0.32,h*0.24,w*0.36,10,2);g.fill();
+  g.fillStyle='rgba(235,90,95,0.28)';
+  g.fillRect(w/2-4,h/2-4,8,20);g.fillRect(w/2-10,h/2+2,20,8);
+ }else if(model==='lab'){
+  g.fillStyle='#1d2e2b';
+  g.fillRect(0,0,w,h);
+  g.strokeStyle='rgba(115,245,145,0.14)';g.lineWidth=1;
+  for(let gx=wallT;gx<w-wallT;gx+=22){g.beginPath();g.moveTo(gx,wallT);g.lineTo(gx,h-wallT);g.stroke()}
+  for(let gy=wallT;gy<h-wallT;gy+=22){g.beginPath();g.moveTo(wallT,gy);g.lineTo(w-wallT,gy);g.stroke()}
+  // Lab benches with glowing green flasks
+  g.fillStyle='rgba(65,90,85,0.65)';
+  g.beginPath();g.roundRect(w/2-26,h/2-12,52,24,3);g.fill();
+  g.fillStyle='rgba(130,255,85,0.55)';
+  g.beginPath();g.arc(w/2-12,h/2,4.5,0,Math.PI*2);g.arc(w/2+10,h/2-2,3.5,0,Math.PI*2);g.fill();
+ }else if(model==='refinery'){
+  g.fillStyle='#242826';
+  g.fillRect(0,0,w,h);
+  g.strokeStyle='rgba(235,190,55,0.18)';g.lineWidth=2;
   g.strokeRect(wallT+8,wallT+8,w-wallT*2-16,h-wallT*2-16);
+  // Industrial floor pipes
+  g.strokeStyle='rgba(130,150,140,0.42)';g.lineWidth=5;
+  g.beginPath();g.moveTo(wallT+4,h*0.38);g.lineTo(w-wallT-4,h*0.38);g.stroke();
+  g.fillStyle='rgba(160,255,65,0.35)';
+  g.beginPath();g.arc(w/2,h*0.38,7,0,Math.PI*2);g.fill();
+ }else if(model==='bunker'){
+  g.fillStyle='#1e2629';
+  g.fillRect(0,0,w,h);
+  g.strokeStyle='rgba(245,180,55,0.24)';g.lineWidth=2.5;
+  g.strokeRect(wallT+6,wallT+6,w-wallT*2-12,h-wallT*2-12);
+  // Tactical holographic map table in command bunker
+  g.fillStyle='rgba(45,65,75,0.85)';
+  g.beginPath();g.roundRect(w/2-24,h/2-14,48,28,4);g.fill();
+  g.fillStyle='rgba(90,225,255,0.35)';
+  g.beginPath();g.roundRect(w/2-18,h/2-9,36,18,2);g.fill();
+ }else if(model==='hangar'){
+  g.fillStyle='#212726';
+  g.fillRect(0,0,w,h);
+  // Hangar bay markings
+  g.strokeStyle='rgba(230,185,60,0.26)';g.lineWidth=2;
+  g.setLineDash([10,8]);
+  g.strokeRect(wallT+14,wallT+12,w-wallT*2-28,h-wallT*2-24);
+  g.setLineDash([]);
+  g.fillStyle='rgba(115,130,115,0.18)';
+  g.fillRect(w*0.26,h*0.35,w*0.48,h*0.30);
+ }else if(model==='store'){
+  g.fillStyle='#2c3133';
+  g.fillRect(0,0,w,h);
+  // Checkerboard convenience store tiles
+  g.fillStyle='rgba(225,235,230,0.06)';
+  for(let gx=wallT;gx<w-wallT;gx+=18){
+   for(let gy=wallT;gy<h-wallT;gy+=18){
+    if(((gx+gy)/18)%2===0)g.fillRect(gx,gy,16,16);
+   }
+  }
+  // Store aisles & checkout counter
+  g.fillStyle='rgba(75,115,135,0.48)';
+  g.fillRect(w*0.32,h*0.26,w*0.36,10);
+  g.fillRect(w*0.32,h*0.64,w*0.36,10);
+ }else if(model==='apartment'){
+  g.fillStyle='#2a2724';
+  g.fillRect(0,0,w,h);
+  g.strokeStyle='rgba(16,14,12,0.35)';g.lineWidth=1;
+  for(let gx=wallT;gx<w-wallT;gx+=16){g.beginPath();g.moveTo(gx,wallT);g.lineTo(gx,h-wallT);g.stroke()}
+  // Two room rugs & living table
+  g.fillStyle='rgba(82,112,120,0.35)';
+  g.beginPath();g.roundRect(w*0.22,h*0.26,w*0.24,h*0.44,3);g.fill();
+  g.fillStyle='rgba(135,88,65,0.35)';
+  g.beginPath();g.roundRect(w*0.54,h*0.26,w*0.24,h*0.44,3);g.fill();
  }else{
-  g.fillStyle='#2f2720';
+  // 'cottage' residential house floor & rug
+  g.fillStyle='#31271e';
   g.fillRect(0,0,w,h);
   g.strokeStyle='rgba(18,14,10,0.38)';g.lineWidth=1;
   for(let gy=wallT;gy<h-wallT;gy+=13){g.beginPath();g.moveTo(wallT,gy);g.lineTo(w-wallT,gy);g.stroke()}
-  // Central rug in residential house
-  g.fillStyle='rgba(120,66,52,0.42)';
-  g.beginPath();g.roundRect(w*0.30,h*0.32,w*0.40,h*0.36,4);g.fill();
-  g.strokeStyle='rgba(225,185,120,0.22)';g.lineWidth=1.2;g.stroke();
+  g.fillStyle='rgba(128,64,48,0.48)';
+  g.beginPath();g.roundRect(w*0.30,h*0.30,w*0.40,h*0.40,4);g.fill();
+  g.strokeStyle='rgba(235,195,125,0.25)';g.lineWidth=1.2;g.stroke();
+  g.fillStyle='rgba(95,70,45,0.65)';
+  g.beginPath();g.roundRect(w*0.41,h*0.41,w*0.18,h*0.18,3);g.fill();
  }
 
  // Interior walls drawn on floor layer (matching wallRects)
- g.fillStyle=isTent?'#47583f':'#354446';
+ g.fillStyle=isTent?'#47583f':(model==='bunker'?'#424d50':model==='clinic'?'#4f696b':'#354446');
  g.strokeStyle='#101819';
  g.lineWidth=1.5;
  const drawWallSeg=(wx,wy,ww,wh)=>{
@@ -1372,79 +1472,206 @@ function addEnterableBuilding(g,cfg){
  // Doorway porch lamp + roof beacon
  lamps.push({x:doorX,y:doorY,phase:(cx+cy)*0.01,soft:true});
  if(hasBeacon){
-  beacons.push({x:x+w-12,y:y+12,kind:'amber',phase:(cx*0.013+cy*0.007)%6.28});
+  beacons.push({x:x+w-12,y:y+12,kind:model==='clinic'?'cyan':'amber',phase:(cx*0.013+cy*0.007)%6.28});
  }
 }
 
 function drawDynamicBuildingRoof(b,now){
- const {cx,cy,w,h,style,label,isTent,hasBeacon,doorSide}=b;
+ const {cx,cy,w,h,style,model=style,label,isTent,hasBeacon,doorSide}=b;
  ctx.save();
  ctx.globalAlpha=b.roofAlpha;
  ctx.translate(cx,cy);
 
- if(isTent){
+ if(model==='med_tent'){
   const tg=ctx.createLinearGradient(0,-h/2,0,h/2);
-  tg.addColorStop(0,'#4f6346');tg.addColorStop(0.5,'#5e7552');tg.addColorStop(1,'#34442f');
+  tg.addColorStop(0,'#4f7572');tg.addColorStop(0.5,'#64928e');tg.addColorStop(1,'#34514e');
+  ctx.fillStyle=tg;
+  ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,8);ctx.fill();
+  ctx.strokeStyle='#192a29';ctx.lineWidth=2;ctx.stroke();
+  ctx.strokeStyle='rgba(235,255,250,0.32)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(-w/2+8,0);ctx.lineTo(w/2-8,0);ctx.stroke();
+  ctx.fillStyle='rgba(245,252,250,0.88)';
+  ctx.beginPath();ctx.arc(0,0,14,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#cf323a';
+  ctx.fillRect(-3,-9,6,18);ctx.fillRect(-9,-3,18,6);
+ }else if(model==='mil_tent'||model==='camp_tent'||isTent){
+  const tg=ctx.createLinearGradient(0,-h/2,0,h/2);
+  if(model==='mil_tent'){tg.addColorStop(0,'#4f593b');tg.addColorStop(0.5,'#616e47');tg.addColorStop(1,'#323b26')}
+  else{tg.addColorStop(0,'#635842');tg.addColorStop(0.5,'#786a4e');tg.addColorStop(1,'#423a2b')}
   ctx.fillStyle=tg;
   ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,7);ctx.fill();
   ctx.strokeStyle='#1c2619';ctx.lineWidth=2;ctx.stroke();
-  ctx.strokeStyle='rgba(255,255,235,0.22)';ctx.lineWidth=2;
-  if(w>=h){
-   ctx.beginPath();ctx.moveTo(-w/2+6,0);ctx.lineTo(w/2-6,0);ctx.stroke();
-  }else{
-   ctx.beginPath();ctx.moveTo(0,-h/2+6);ctx.lineTo(0,h/2-6);ctx.stroke();
+  // Guy-wire tent pegs
+  ctx.strokeStyle='rgba(220,210,180,0.28)';ctx.lineWidth=1.2;
+  for(const sx of [-1,1]){for(const sy of [-1,1]){
+   ctx.beginPath();ctx.moveTo(sx*(w/2-2),sy*(h/2-2));ctx.lineTo(sx*(w/2+7),sy*(h/2+7));ctx.stroke();
+  }}
+  ctx.strokeStyle='rgba(255,245,220,0.22)';ctx.lineWidth=2;
+  if(w>=h){ctx.beginPath();ctx.moveTo(-w/2+6,0);ctx.lineTo(w/2-6,0);ctx.stroke()}
+  else{ctx.beginPath();ctx.moveTo(0,-h/2+6);ctx.lineTo(0,h/2-6);ctx.stroke()}
+  if(model==='mil_tent'){
+   ctx.fillStyle='rgba(235,210,115,0.68)';
+   ctx.font='900 16px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+   ctx.fillText('★',0,0);
   }
-  ctx.fillStyle='rgba(240,248,238,0.75)';
-  ctx.beginPath();ctx.arc(0,0,12,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#c9383e';
-  ctx.fillRect(-2.8,-8,5.6,16);ctx.fillRect(-8,-2.8,16,5.6);
+ }else if(model==='cottage'){
+  // Gabled terracotta tile roof with chimney
+  ctx.fillStyle='#2b1b16';
+  ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,6);ctx.fill();
+  const rgTop=ctx.createLinearGradient(0,-h/2,0,0);
+  rgTop.addColorStop(0,'#6e3b2e');rgTop.addColorStop(1,'#8c4c3b');
+  ctx.fillStyle=rgTop;
+  ctx.beginPath();ctx.roundRect(-w/2+4,-h/2+4,w-8,h/2-4,4);ctx.fill();
+  const rgBot=ctx.createLinearGradient(0,0,0,h/2);
+  rgBot.addColorStop(0,'#5c3126');rgBot.addColorStop(1,'#3e2018');
+  ctx.fillStyle=rgBot;
+  ctx.beginPath();ctx.roundRect(-w/2+4,0,w-8,h/2-4,4);ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.22)';ctx.lineWidth=1.2;
+  for(let rx=-w/2+14;rx<w/2-10;rx+=12){ctx.beginPath();ctx.moveTo(rx,-h/2+6);ctx.lineTo(rx,h/2-6);ctx.stroke()}
+  // Ridge beam & brick chimney
+  ctx.fillStyle='#a86652';ctx.fillRect(-w/2+3,-3,w-6,6);
+  ctx.fillStyle='#57342c';ctx.strokeStyle='#1f120f';ctx.lineWidth=1.5;
+  ctx.fillRect(w*0.24,-h*0.30,18,16);ctx.strokeRect(w*0.24,-h*0.30,18,16);
+  ctx.fillStyle='#1c1412';ctx.fillRect(w*0.24+4,-h*0.30+4,10,8);
+ }else if(model==='store'){
+  // Convenience store flat roof with striped storefront awning & neon sign
+  ctx.fillStyle='#1e272b';
+  ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,5);ctx.fill();
+  ctx.fillStyle='#324047';
+  ctx.beginPath();ctx.roundRect(-w/2+5,-h/2+5,w-10,h-10,4);ctx.fill();
+  // AC units
+  ctx.fillStyle='#5b6d73';ctx.fillRect(-w*0.28,-h*0.26,24,18);ctx.fillRect(w*0.14,-h*0.24,20,16);
+  // Striped awning on doorway side
+  ctx.save();
+  if(doorSide==='E'){
+   for(let sy=-28;sy<28;sy+=8){
+    ctx.fillStyle=((sy/8)%2===0)?'#d9534f':'#f2f2ee';
+    ctx.fillRect(w/2-6,sy,12,8);
+   }
+  }else if(doorSide==='S'){
+   for(let sx=-28;sx<28;sx+=8){
+    ctx.fillStyle=((sx/8)%2===0)?'#d9534f':'#f2f2ee';
+    ctx.fillRect(sx,h/2-6,8,12);
+   }
+  }
+  ctx.restore();
+  ctx.fillStyle='rgba(255,198,82,0.88)';
+  ctx.font='900 10px monospace';ctx.textAlign='center';
+  ctx.fillText('МАРКЕТ 24',0,h*0.26);
+ }else if(model==='apartment'){
+  // Multi-story concrete roof with elevator penthouse, solar panels & satellite dishes
+  ctx.fillStyle='#202426';
+  ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,5);ctx.fill();
+  ctx.fillStyle='#353b3e';
+  ctx.beginPath();ctx.roundRect(-w/2+6,-h/2+6,w-12,h-12,3);ctx.fill();
+  // Solar panels
+  ctx.fillStyle='#1b3a54';ctx.strokeStyle='#5a8fb8';ctx.lineWidth=1;
+  for(let px=-w*0.34;px<=-w*0.08;px+=22){
+   ctx.fillRect(px,-h*0.26,18,24);ctx.strokeRect(px,-h*0.26,18,24);
+  }
+  // Elevator shaft box & dishes
+  ctx.fillStyle='#4a5256';ctx.fillRect(w*0.10,-h*0.28,32,26);
+  ctx.strokeStyle='#181c1e';ctx.lineWidth=1.5;ctx.strokeRect(w*0.10,-h*0.28,32,26);
+  ctx.fillStyle='#b8c4c8';ctx.beginPath();ctx.arc(-w*0.30,h*0.22,7,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#1d2426';ctx.beginPath();ctx.arc(-w*0.30,h*0.22,2,0,Math.PI*2);ctx.fill();
+ }else if(model==='lab'){
+  // Biohazard laboratory with central glass skylight & dual turbine vents
+  ctx.fillStyle='#192825';
+  ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,6);ctx.fill();
+  ctx.fillStyle='#2a403c';
+  ctx.beginPath();ctx.roundRect(-w/2+5,-h/2+5,w-10,h-10,4);ctx.fill();
+  // Glowing glass skylight
+  ctx.fillStyle='rgba(85,220,165,0.22)';
+  ctx.strokeStyle='rgba(135,255,195,0.55)';ctx.lineWidth=1.8;
+  ctx.beginPath();ctx.roundRect(-34,-20,68,40,4);ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-34,0);ctx.lineTo(34,0);ctx.moveTo(0,-20);ctx.lineTo(0,20);ctx.stroke();
+  // Exhaust turbines
+  for(const tx of [-w*0.32,w*0.32]){
+   ctx.fillStyle='#495d5a';ctx.beginPath();ctx.arc(tx,-h*0.22,10,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#1c2726';ctx.beginPath();ctx.arc(tx,-h*0.22,6,0,Math.PI*2);ctx.fill();
+  }
+ }else if(model==='refinery'){
+  // Industrial chemical plant with hazard stripes & twin rooftop tanks
+  ctx.fillStyle='#212520';
+  ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,5);ctx.fill();
+  ctx.fillStyle='#3a4238';
+  ctx.beginPath();ctx.roundRect(-w/2+5,-h/2+5,w-10,h-10,3);ctx.fill();
+  ctx.strokeStyle='rgba(235,190,45,0.55)';ctx.lineWidth=2.4;
+  ctx.setLineDash([10,8]);ctx.strokeRect(-w/2+9,-h/2+9,w-18,h-18);ctx.setLineDash([]);
+  // Two cylindrical mini-tanks
+  for(const ty of [-h*0.20,h*0.20]){
+   ctx.fillStyle='#5c6b58';ctx.strokeStyle='#242c22';ctx.lineWidth=1.5;
+   ctx.beginPath();ctx.roundRect(-w*0.34,ty-9,44,18,8);ctx.fill();ctx.stroke();
+  }
+  ctx.fillStyle='#a6ff4d';ctx.beginPath();ctx.arc(w*0.24,0,6,0,Math.PI*2);ctx.fill();
+ }else if(model==='clinic'){
+  // Main Medical Hospital with bright white roof, bold red cross & helipad-like skylight
+  ctx.fillStyle='#2b3f40';
+  ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,6);ctx.fill();
+  ctx.fillStyle='#cededc';
+  ctx.beginPath();ctx.roundRect(-w/2+6,-h/2+6,w-12,h-12,4);ctx.fill();
+  ctx.strokeStyle='#88a8a6';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.fillStyle='rgba(218,45,54,0.88)';
+  ctx.fillRect(-6,-22,12,44);ctx.fillRect(-22,-6,44,12);
+  ctx.fillStyle='#537072';ctx.fillRect(-w*0.36,-h*0.32,20,16);ctx.fillRect(w*0.20,h*0.18,22,16);
+ }else if(model==='pharmacy'){
+  // Turquoise diagnostic/pharmacy building
+  ctx.fillStyle='#1c2f32';
+  ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,6);ctx.fill();
+  ctx.fillStyle='#2d5559';
+  ctx.beginPath();ctx.roundRect(-w/2+5,-h/2+5,w-10,h-10,4);ctx.fill();
+  ctx.fillStyle='rgba(235,248,246,0.22)';
+  ctx.beginPath();ctx.arc(0,0,22,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#54e8b4';
+  ctx.fillRect(-4,-14,8,28);ctx.fillRect(-14,-4,28,8);
+ }else if(model==='bunker'){
+  // Reinforced Military Command Bunker with chamfered concrete armor & radar dish
+  ctx.fillStyle='#1e2422';
+  ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,8);ctx.fill();
+  ctx.fillStyle='#45524b';
+  ctx.beginPath();ctx.roundRect(-w/2+6,-h/2+6,w-12,h-12,6);ctx.fill();
+  ctx.strokeStyle='#242d28';ctx.lineWidth=3;ctx.stroke();
+  // Corner armor plates
+  ctx.fillStyle='#627068';
+  for(const sx of [-1,1]){for(const sy of [-1,1]){
+   ctx.fillRect(sx>0?w/2-24:-w/2+8,sy>0?h/2-20:-h/2+8,16,12);
+  }}
+  // Radar dish
+  ctx.save();ctx.translate(-w*0.22,-h*0.12);ctx.rotate((now||0)*0.0012);
+  ctx.fillStyle='#788c82';ctx.beginPath();ctx.arc(0,0,13,0,Math.PI*1.3);ctx.lineTo(0,0);ctx.fill();
+  ctx.strokeStyle='#b8d0c4';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(12,4);ctx.stroke();
+  ctx.restore();
+ }else if(model==='hangar'){
+  // Ribbed arched camo hangar roof
+  ctx.fillStyle='#1e2420';
+  ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,10);ctx.fill();
+  const hg=ctx.createLinearGradient(0,-h/2,0,h/2);
+  hg.addColorStop(0,'#2f3a32');hg.addColorStop(0.5,'#536355');hg.addColorStop(1,'#29332b');
+  ctx.fillStyle=hg;
+  ctx.beginPath();ctx.roundRect(-w/2+4,-h/2+4,w-8,h-8,9);ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.32)';ctx.lineWidth=2;
+  for(let rx=-w/2+14;rx<w/2-10;rx+=12){ctx.beginPath();ctx.moveTo(rx,-h/2+5);ctx.lineTo(rx,h/2-5);ctx.stroke()}
+  // Camo patches
+  ctx.fillStyle='rgba(92,80,52,0.38)';
+  ctx.beginPath();ctx.ellipse(-28,-14,22,12,0.4,0,Math.PI*2);ctx.ellipse(26,16,20,11,-0.3,0,Math.PI*2);ctx.fill();
  }else{
   ctx.fillStyle='#192425';
   ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,6);ctx.fill();
-
-  const rg=ctx.createLinearGradient(-w/2,-h/2,w/2,h/2);
-  if(style==='med'){rg.addColorStop(0,'#3b4e4c');rg.addColorStop(1,'#243233')}
-  else if(style==='tech'){rg.addColorStop(0,'#39474e');rg.addColorStop(1,'#1f282e')}
-  else{rg.addColorStop(0,'#454944');rg.addColorStop(1,'#252a28')}
-  ctx.fillStyle=rg;
+  ctx.fillStyle='#3b4744';
   ctx.beginPath();ctx.roundRect(-w/2+5,-h/2+5,w-10,h-10,4);ctx.fill();
+ }
 
-  ctx.strokeStyle='rgba(0,0,0,0.22)';ctx.lineWidth=1.4;
-  for(let rx=-w/2+14;rx<w/2-10;rx+=14){
-   ctx.beginPath();ctx.moveTo(rx,-h/2+7);ctx.lineTo(rx,h/2-7);ctx.stroke();
-  }
-  ctx.strokeStyle='rgba(175,215,210,0.28)';ctx.lineWidth=2;
-  ctx.beginPath();
-  ctx.moveTo(-w/2+4,h/2-6);ctx.lineTo(-w/2+4,-h/2+4);ctx.lineTo(w/2-6,-h/2+4);
-  ctx.stroke();
-
-  ctx.strokeStyle='#101819';ctx.lineWidth=2.5;
-  ctx.beginPath();ctx.roundRect(-w/2+1,-h/2+1,w-2,h-2,5);ctx.stroke();
-
-  const vx=-w*0.22,vy=-h*0.18;
-  ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(vx-13,vy-11,30,26);
-  ctx.fillStyle='#596b6d';ctx.beginPath();ctx.roundRect(vx-15,vy-13,28,24,3);ctx.fill();
-  ctx.strokeStyle='#222c2e';ctx.lineWidth=1.5;ctx.strokeRect(vx-15,vy-13,28,24);
-  ctx.fillStyle='#1c2527';ctx.beginPath();ctx.arc(vx-1,vy-1,7.5,0,Math.PI*2);ctx.fill();
-
-  ctx.fillStyle='#323f40';ctx.fillRect(w*0.12,-h*0.22,22,18);
-  ctx.strokeStyle='#171f20';ctx.lineWidth=1.5;ctx.strokeRect(w*0.12,-h*0.22,22,18);
-
-  if(style==='med'){
-   ctx.fillStyle='rgba(235,245,240,0.18)';
-   ctx.beginPath();ctx.arc(0,h*0.12,17,0,Math.PI*2);ctx.fill();
-   ctx.fillStyle='rgba(218,58,64,0.72)';
-   ctx.fillRect(-4,h*0.12-11,8,22);ctx.fillRect(-11,h*0.12-4,22,8);
-  }else if(label){
-   ctx.fillStyle='rgba(235,190,62,0.58)';
+ if(!isTent){
+  if(label&&model!=='store'){
+   ctx.fillStyle=model==='clinic'?'rgba(32,58,60,0.72)':'rgba(235,190,62,0.68)';
    ctx.font='800 10px monospace';
    ctx.textAlign='center';
-   ctx.fillText(label,0,h*0.28);
+   ctx.fillText(label,0,h*0.30);
   }
   if(hasBeacon){
    const bx=w/2-12,by=-h/2+12;
    ctx.fillStyle='#242c2d';ctx.beginPath();ctx.arc(bx,by,5,0,Math.PI*2);ctx.fill();
-   ctx.fillStyle='#ffbe44';ctx.beginPath();ctx.arc(bx,by,2.8,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle=model==='clinic'?'#66f0ff':'#ffbe44';ctx.beginPath();ctx.arc(bx,by,2.8,0,Math.PI*2);ctx.fill();
   }
  }
 
@@ -1979,37 +2206,37 @@ function buildWorldGround(){
  // 4a. Central Safe Zone Plaza & NPC Outpost (at 1800, 1800)
  drawSafeZoneGround(g);
 
- // 4b. Enterable Buildings, Chem Tanks, Helipads & Medical Tents across all 4 districts
+ // 4b. Enterable Buildings (diverse architectural models), Chem Tanks, Helipads & Medical Tents across all 4 districts
  // NW: Residential Suburb
- addEnterableBuilding(g,{id:'RES-01',cx:1210,cy:1175,w:204,h:144,style:'ind',label:'RES-01',districtId:'suburb',doorSide:'S',hasBeacon:false,lootCount:3});
- addEnterableBuilding(g,{id:'RES-02',cx:315,cy:1190,w:184,h:132,style:'ind',label:'RES-02',districtId:'suburb',doorSide:'E',hasBeacon:true,lootCount:3});
- addEnterableBuilding(g,{id:'APT-03',cx:1210,cy:305,w:196,h:136,style:'ind',label:'APT-03',districtId:'suburb',doorSide:'S',hasBeacon:false,lootCount:3});
- addEnterableBuilding(g,{id:'TENT-NW',cx:310,cy:315,w:148,h:96,style:'tent',label:'ЛАГЕРЬ-СЗ',districtId:'suburb',doorSide:'E',isTent:true,lootCount:2});
+ addEnterableBuilding(g,{id:'RES-01',cx:1210,cy:1175,w:204,h:144,style:'ind',model:'cottage',label:'КОТТЕДЖ-01',districtId:'suburb',doorSide:'S',hasBeacon:false,lootCount:3});
+ addEnterableBuilding(g,{id:'RES-02',cx:315,cy:1190,w:184,h:132,style:'ind',model:'store',label:'МАРКЕТ-24',districtId:'suburb',doorSide:'E',hasBeacon:true,lootCount:3});
+ addEnterableBuilding(g,{id:'APT-03',cx:1210,cy:305,w:196,h:136,style:'ind',model:'apartment',label:'БЛОК-03',districtId:'suburb',doorSide:'S',hasBeacon:false,lootCount:3});
+ addEnterableBuilding(g,{id:'TENT-NW',cx:310,cy:315,w:148,h:96,style:'tent',model:'camp_tent',label:'ЛАГЕРЬ-СЗ',districtId:'suburb',doorSide:'E',isTent:true,lootCount:2});
 
  // NE: Chemical Zone
- addEnterableBuilding(g,{id:'CHEM-A',cx:2390,cy:1185,w:204,h:144,style:'tech',label:'CHEM-A',districtId:'chem',doorSide:'S',hasBeacon:true,lootCount:3});
- addEnterableBuilding(g,{id:'CHEM-B',cx:3290,cy:1190,w:188,h:134,style:'tech',label:'CHEM-B',districtId:'chem',doorSide:'W',hasBeacon:true,lootCount:3});
+ addEnterableBuilding(g,{id:'CHEM-A',cx:2390,cy:1185,w:204,h:144,style:'tech',model:'lab',label:'ЛАБ-ХИМ А',districtId:'chem',doorSide:'S',hasBeacon:true,lootCount:3});
+ addEnterableBuilding(g,{id:'CHEM-B',cx:3290,cy:1190,w:188,h:134,style:'tech',model:'refinery',label:'ХИМЦЕХ-Б',districtId:'chem',doorSide:'W',hasBeacon:true,lootCount:3});
  drawChemTank(g,2315,310,48,rng);
  drawChemTank(g,2455,310,48,rng);
  drawChemTank(g,3295,310,54,rng);
 
  // SW: Medical Campus
- addEnterableBuilding(g,{id:'MED-A',cx:1115,cy:2410,w:198,h:140,style:'med',label:'MED-A',districtId:'hospital',doorSide:'N',hasBeacon:true,lootCount:3});
- addEnterableBuilding(g,{id:'MED-B',cx:315,cy:2410,w:186,h:134,style:'med',label:'MED-B',districtId:'hospital',doorSide:'E',hasBeacon:false,lootCount:3});
+ addEnterableBuilding(g,{id:'MED-A',cx:1115,cy:2410,w:198,h:140,style:'med',model:'clinic',label:'ГОСПИТАЛЬ',districtId:'hospital',doorSide:'N',hasBeacon:true,lootCount:3});
+ addEnterableBuilding(g,{id:'MED-B',cx:315,cy:2410,w:186,h:134,style:'med',model:'pharmacy',label:'АПТЕКА-Б',districtId:'hospital',doorSide:'E',hasBeacon:false,lootCount:3});
  drawHelipad(g,1395,2410,66,'med');
- addEnterableBuilding(g,{id:'TENT-SW1',cx:1210,cy:3285,w:152,h:98,style:'tent',label:'МЕД-ЮЗ1',districtId:'hospital',doorSide:'N',isTent:true,lootCount:2});
- addEnterableBuilding(g,{id:'TENT-SW2',cx:315,cy:3285,w:150,h:96,style:'tent',label:'МЕД-ЮЗ2',districtId:'hospital',doorSide:'N',isTent:true,lootCount:2});
+ addEnterableBuilding(g,{id:'TENT-SW1',cx:1210,cy:3285,w:152,h:98,style:'tent',model:'med_tent',label:'МЕД-ЮЗ1',districtId:'hospital',doorSide:'N',isTent:true,lootCount:2});
+ addEnterableBuilding(g,{id:'TENT-SW2',cx:315,cy:3285,w:150,h:96,style:'tent',model:'med_tent',label:'МЕД-ЮЗ2',districtId:'hospital',doorSide:'N',isTent:true,lootCount:2});
 
  // SE: Military Outpost
- addEnterableBuilding(g,{id:'BASE-1',cx:2410,cy:2410,w:206,h:144,style:'tech',label:'BASE-1',districtId:'military',doorSide:'N',hasBeacon:true,lootCount:3});
- addEnterableBuilding(g,{id:'MIL-02',cx:3290,cy:2410,w:190,h:136,style:'tech',label:'MIL-02',districtId:'military',doorSide:'W',hasBeacon:true,lootCount:3});
+ addEnterableBuilding(g,{id:'BASE-1',cx:2410,cy:2410,w:206,h:144,style:'tech',model:'bunker',label:'ШТАБ ДОТ-1',districtId:'military',doorSide:'N',hasBeacon:true,lootCount:3});
+ addEnterableBuilding(g,{id:'MIL-02',cx:3290,cy:2410,w:190,h:136,style:'tech',model:'hangar',label:'АНГАР-02',districtId:'military',doorSide:'W',hasBeacon:true,lootCount:3});
  drawHelipad(g,2395,3295,72,'mil');
- addEnterableBuilding(g,{id:'TENT-SE',cx:3295,cy:3295,w:102,h:152,style:'tent',label:'ПОСТ-ЮВ',districtId:'military',doorSide:'W',isTent:true,lootCount:2});
+ addEnterableBuilding(g,{id:'TENT-SE',cx:3295,cy:3295,w:102,h:152,style:'tent',model:'mil_tent',label:'ПОСТ-ЮВ',districtId:'military',doorSide:'W',isTent:true,lootCount:2});
 
- // 4c. Wet rain puddles outside Safe Zone and outside Buildings
+ // 4c. Wet rain puddles outside Safe Zone, Buildings & Evac Heli Spots
  for(let i=0;i<74;i++){
   const px=90+rng()*(WORLD_W-180),py=90+rng()*(WORLD_H-180);
-  if(isInSafeZone(px,py,45)||isNearAnyBuilding(px,py,38))continue;
+  if(isInSafeZone(px,py,45)||isNearAnyBuilding(px,py,38)||isNearAnyHeliSpot(px,py,95))continue;
   const rx=18+rng()*26,ry=12+rng()*18,rot=rng()*Math.PI;
   puddles.push({x:px,y:py,rx,ry,rot,phase:rng()*6.28});
   g.save();g.translate(px,py);g.rotate(rot);
@@ -2064,7 +2291,7 @@ function buildWorldGround(){
   const nCrates=2+Math.floor(rng()*3);
   for(let k=0;k<nCrates;k++){
    const kx=ax+(rng()-.5)*105,ky=ay+(rng()-.5)*105;
-   if(isOnRoad(kx,ky,22)||isInSafeZone(kx,ky,56)||isNearAnyBuilding(kx,ky,38))continue;
+   if(isOnRoad(kx,ky,22)||isInSafeZone(kx,ky,56)||isNearAnyBuilding(kx,ky,38)||isNearAnyHeliSpot(kx,ky,98))continue;
    let overlap=false;
    for(const ob of obstacles){if(Math.hypot(ob.x-kx,ob.y-ky)<ob.r+24){overlap=true;break}}
    if(overlap)continue;
@@ -2073,7 +2300,7 @@ function buildWorldGround(){
   const nBarrels=dist.id==='chem'?4:2+Math.floor(rng()*2);
   for(let k=0;k<nBarrels;k++){
    const bx=ax+(rng()-.5)*125,by=ay+(rng()-.5)*125;
-   if(isOnRoad(bx,by,20)||isInSafeZone(bx,by,56)||isNearAnyBuilding(bx,by,38))continue;
+   if(isOnRoad(bx,by,20)||isInSafeZone(bx,by,56)||isNearAnyBuilding(bx,by,38)||isNearAnyHeliSpot(bx,by,98))continue;
    let overlap=false;
    for(const ob of obstacles){if(Math.hypot(ob.x-bx,ob.y-by)<ob.r+22){overlap=true;break}}
    if(overlap)continue;
@@ -2088,7 +2315,7 @@ function buildWorldGround(){
  for(let i=0;i<135;i++){
   const tx=110+rng()*(WORLD_W-220);
   const ty=110+rng()*(WORLD_H-220);
-  if(isOnRoad(tx,ty,30)||isInSafeZone(tx,ty,64)||isNearAnyBuilding(tx,ty,44))continue;
+  if(isOnRoad(tx,ty,30)||isInSafeZone(tx,ty,64)||isNearAnyBuilding(tx,ty,44)||isNearAnyHeliSpot(tx,ty,108))continue;
   const dist=getDistrictAt(tx,ty);
   if((dist.id==='chem'||dist.id==='military')&&rng()>.35)continue;
   let nearProp=false;
@@ -2527,6 +2754,23 @@ function updateUI(){
   $('healthfill').style.boxShadow='0 0 14px rgba(255,77,88,0.6)';
  }
  $('threatBadge').textContent=`ВОЛНА ${wave} · ${waveKills}/${waveGoal} 🧟`;
+ const eb=$('evacBadge');
+ if(eb){
+  if(evacHeli&&evacHeli.bought){
+   eb.textContent='🚁 ЭВАКУАЦИЯ!';
+   eb.classList.add('ready');
+  }else if(money>=HELI_PRICE){
+   eb.textContent=`🚁 ВЕРТОЛЁТ ГОТОВ! (${HELI_PRICE} 🪙)`;
+   eb.classList.add('ready');
+   if(!evacReadyShown&&running&&evacHeli){
+    evacReadyShown=true;
+    if(player)addPopup(player.x,player.y-46,`🚁 ${HELI_PRICE} 🪙 НАБРАНО! ЛЕТИ: ${evacHeli.label}`,'#8bff98',13);
+   }
+  }else{
+   eb.textContent=`🚁 ЭВАК: ${money}/${HELI_PRICE} 🪙`;
+   eb.classList.remove('ready');
+  }
+ }
  updateZoneUI();
  updateShopBadge();
 }
@@ -2578,6 +2822,13 @@ function init(){
  prices={damage:25,speed:20,rate:25};
  ownedItems={};
  itemMods={dmgMult:1,rateMult:1,speedMult:1,rangeMult:1,armor:0,crit:0,lootCapacity:0,lootBonus:0,extraShots:0,tesla:0,explosive:0,vamp:0,hasLaser:false};
+ const heliSpot=HELI_SPOTS[Math.floor(Math.random()*HELI_SPOTS.length)];
+ evacHeli={
+  x:heliSpot.x,y:heliSpot.y,padX:heliSpot.x,padY:heliSpot.y,
+  dir:heliSpot.dir,label:heliSpot.label,r:56,
+  bought:false,takeoff:false,timer:0,rotorAngle:0.4,rotorSpeed:1.2,alt:0
+ };
+ nearbyHeli=false;evacReadyShown=false;
  initLootState();
  $('waveModal').style.display='none';
  if($('npcModal'))$('npcModal').style.display='none';
@@ -3307,6 +3558,68 @@ function openWaveChoice(clearedWave){
  $('waveModal').style.display='flex';
 }
 
+function buyHelicopterAndEscape(){
+ if(!evacHeli||evacHeli.bought||!running||!player)return false;
+ if(money<HELI_PRICE){
+  addPopup(player.x,player.y-36,`Нужно ${HELI_PRICE} 🪙 (не хватает ${HELI_PRICE-money})`,'#ffd078',13);
+  return false;
+ }
+ money-=HELI_PRICE;
+ evacHeli.bought=true;
+ evacHeli.takeoff=true;
+ evacHeli.timer=0;
+ evacHeli.rotorSpeed=4.5;
+ nearbyHeli=false;
+ stopAllControls();
+ player.inv=999;
+ if($('interactBtn')){$('interactBtn').style.display='none';$('interactBtn').classList.remove('evac')}
+ if($('npcModal'))$('npcModal').style.display='none';
+ if($('bagModal'))$('bagModal').style.display='none';
+ if($('shop'))$('shop').style.display='none';
+ activeNpc=null;
+ addParticles(evacHeli.x,evacHeli.y,'#9effa8',20,175,'spark');
+ particles.push({x:evacHeli.x,y:evacHeli.y,vx:0,vy:0,life:.45,max:.45,color:'#7cff8c',size:72,kind:'ring',rot:0,vrot:0});
+ addPopup(evacHeli.x,evacHeli.y-42,'🚁 ВЗЛЁТ! КУРС НА УБЕЖИЩЕ!','#8bff9c',16);
+ updateUI();
+ return true;
+}
+
+function victoryEscape(){
+ running=false;waveChoosing=false;activeNpc=null;
+ stopAllControls();
+ $('waveModal').style.display='none';
+ if($('npcModal'))$('npcModal').style.display='none';
+ if($('bagModal'))$('bagModal').style.display='none';
+ if($('interactBtn'))$('interactBtn').style.display='none';
+ if($('bossBanner'))$('bossBanner').style.display='none';
+ uiEl.style.transform='';
+ score+=500;
+ if(score>bestScore){
+  bestScore=score;
+  try{localStorage.setItem('carantin_best',String(bestScore))}catch(_){}
+ }
+ $('overlay').innerHTML=`
+  <div class="box">
+   <div class="hazardStrip"></div>
+   <div class="boxBody">
+    <h1 style="color:#80ff96">🚁 УБЕЖИЩЕ ДОСТИГНУТО!</h1>
+    <div class="titleSlash"></div>
+    <p class="small">Вы выкупили эвакуационный вертолёт за <b style="color:#ffe082">${HELI_PRICE} 🪙</b> на точке «${evacHeli?evacHeli.label:'Окраина'}» и успешно покинули карантин! (+500 бонус)</p>
+    <div class="statsSummary">
+     <div class="sumCard"><div class="k">Счёт</div><div class="v" style="color:#80ff96">${score}</div></div>
+     <div class="sumCard"><div class="k">Волна / Убито</div><div class="v">${wave} · ${kills}</div></div>
+     <div class="sumCard"><div class="k">Рекорд</div><div class="v" style="color:#ffe082">${bestScore}</div></div>
+    </div>
+    <p class="small">Осталось монет: <b style="color:#ffe082">${money}</b> 🪙 · Индекс зомби: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
+   </div>
+   <div class="boxFooter">
+    <button type="button" class="mainbtn" id="restart">ИГРАТЬ СНОВА</button>
+    <button type="button" class="mainbtn secondary" id="overCodex">🧟 ИНДЕКС ЗОМБИ (${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length})</button>
+   </div>
+  </div>`;
+ $('overlay').style.display='flex';
+}
+
 function gameOver(){
  running=false;waveChoosing=false;activeNpc=null;
  stopAllControls();
@@ -3450,6 +3763,44 @@ function update(dt,now){
  }
  if(paused||!player)return;
 
+ if(evacHeli&&evacHeli.takeoff){
+  evacHeli.timer+=dt;
+  evacHeli.rotorSpeed=Math.min(28,evacHeli.rotorSpeed+dt*24);
+  evacHeli.rotorAngle+=evacHeli.rotorSpeed*dt;
+  if(evacHeli.timer<1.1){
+   shake=Math.max(shake,3.4);
+   if(Math.random()<0.45){
+    const ang=Math.random()*Math.PI*2;
+    particles.push({x:evacHeli.x+Math.cos(ang)*32,y:evacHeli.y+Math.sin(ang)*32,vx:Math.cos(ang)*115,vy:Math.sin(ang)*115,life:.45,max:.45,color:'rgba(185,205,195,0.55)',size:10+Math.random()*8,kind:'smoke',rot:0,vrot:0});
+   }
+  }else{
+   const liftT=evacHeli.timer-1.1;
+   evacHeli.alt+=dt*95;
+   const spd=Math.min(440,80+liftT*220);
+   evacHeli.x+=Math.cos(evacHeli.dir)*spd*dt;
+   evacHeli.y+=(Math.sin(evacHeli.dir)*spd-95)*dt;
+   player.x=evacHeli.x;player.y=evacHeli.y;
+  }
+  const c=clampCamera(evacHeli.x,evacHeli.y);
+  cam.x+=(c.x-cam.x)*Math.min(1,dt*8);
+  cam.y+=(c.y-cam.y)*Math.min(1,dt*8);
+  for(let i=particles.length-1;i>=0;i--){
+   const p=particles[i];
+   p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.92;p.vy*=.92;p.life-=dt;
+   if(p.life<=0)particles.splice(i,1);
+  }
+  for(let i=popups.length-1;i>=0;i--){
+   const u=popups[i];
+   u.y+=u.vy*dt;u.life-=dt;
+   if(u.life<=0)popups.splice(i,1);
+  }
+  if(evacHeli.timer>=3.2)victoryEscape();
+  return;
+ }
+ if(evacHeli&&!evacHeli.bought){
+  evacHeli.rotorAngle+=dt*1.1;
+ }
+
  syncJoyInput();
  const moveMag=Math.hypot(joy.x,joy.y);
  player.moving=moveMag>0.06;
@@ -3493,7 +3844,7 @@ function update(dt,now){
   }
  }
 
- // Check nearby NPC in Safe Zone or nearby unopened loot container in buildings
+ // Check nearby NPC in Safe Zone, Evacuation Helicopter, or nearby unopened loot container
  let nearNpc=null,nearNpcD=84;
  for(const npc of NPCS){
   const d=Math.hypot(player.x-npc.x,player.y-npc.y);
@@ -3501,8 +3852,10 @@ function update(dt,now){
  }
  nearbyNpc=nearNpc;
 
+ nearbyHeli=!!(evacHeli&&!evacHeli.bought&&Math.hypot(player.x-evacHeli.x,player.y-evacHeli.y)<=110);
+
  let nearNode=null,nearNodeD=52;
- if(!nearbyNpc){
+ if(!nearbyNpc&&!nearbyHeli){
   for(let i=0;i<lootNodes.length;i++){
    const ln=lootNodes[i];
    if(ln.opened)continue;
@@ -3528,14 +3881,26 @@ function update(dt,now){
  const ib=$('interactBtn');
  if(ib){
   if(nearbyNpc){
+   ib.classList.remove('evac');
    ib.textContent=(nearbyNpc.id==='trader'&&lootBag.length>0)
     ?`💰 Продать лут (${getLootBagTotalValue()} 🪙) [E]`
     :`💬 Поговорить: ${nearbyNpc.short} [E]`;
    ib.style.display='block';
+  }else if(nearbyHeli){
+   if(money>=HELI_PRICE){
+    ib.classList.add('evac');
+    ib.textContent=`🚁 КУПИТЬ ВЕРТОЛЁТ И УЛЕТЕТЬ (${HELI_PRICE} 🪙) [E]`;
+   }else{
+    ib.classList.remove('evac');
+    ib.textContent=`🔒 Вертолёт: нужно ${HELI_PRICE} 🪙 (${money}/${HELI_PRICE})`;
+   }
+   ib.style.display='block';
   }else if(nearbyLootNode){
+   ib.classList.remove('evac');
    ib.textContent='🔍 Обыскать ящик [E]';
    ib.style.display='block';
   }else{
+   ib.classList.remove('evac');
    ib.style.display='none';
   }
  }
@@ -4033,81 +4398,323 @@ function drawPuddles(now,viewX,viewY){
  }
 }
 
-function drawWeaponModel(type){
+function drawWeaponModel(type,now){
+ const t=now||0;
  if(type==='pistol'){
+  // Arms & gloved hands
   ctx.fillStyle='#213740';
   ctx.beginPath();ctx.roundRect(0,-13,13,6,3);ctx.fill();
   ctx.beginPath();ctx.roundRect(1,7,12,6,3);ctx.fill();
   ctx.fillStyle='#171e21';
   ctx.beginPath();ctx.arc(13,-7,3.4,0,Math.PI*2);ctx.arc(13,6,3.4,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#242e33';ctx.beginPath();ctx.roundRect(10,-4.4,19,8.8,2);ctx.fill();
-  ctx.fillStyle='#86989b';ctx.fillRect(12,-3.2,14,3.2);
-  ctx.fillStyle='#12181a';ctx.fillRect(27,-2.7,7,5.4);
-  ctx.fillStyle='#3b4a4e';ctx.fillRect(29,-1.8,4,1.4);
-  ctx.fillStyle='#5cff3a';ctx.fillRect(24,-0.8,2.2,1.6);
-  if(itemMods.hasLaser){ctx.fillStyle='#22d445';ctx.fillRect(19,2.8,6,2.2)}
+  // Polymer grip & frame
+  ctx.fillStyle='#1f272b';ctx.beginPath();ctx.roundRect(9,-4.6,21,9.2,2.2);ctx.fill();
+  // Brushed metallic slide with serrations & ejection port
+  ctx.fillStyle='#96a8aa';ctx.beginPath();ctx.roundRect(11,-3.5,17,7,1.4);ctx.fill();
+  ctx.fillStyle='#46565a';ctx.fillRect(14,-2.4,6,4.8);
+  ctx.fillStyle='#2b3639';
+  for(let sx=11.5;sx<14;sx+=1.4)ctx.fillRect(sx,-3.2,0.8,6.4);
+  // Tactical muzzle compensator + underbarrel flashlight/laser module
+  ctx.fillStyle='#141c1e';ctx.beginPath();ctx.roundRect(27,-3.1,8.5,6.2,1.2);ctx.fill();
+  ctx.fillStyle='#4a5c60';ctx.fillRect(29,-2,5,1.5);ctx.fillRect(29,0.6,5,1.5);
+  ctx.fillStyle='#2a393d';ctx.fillRect(21,2.6,8,2.6);
+  // Tritium iron sights
+  ctx.fillStyle='#5cff3a';ctx.fillRect(12,-0.8,1.8,1.6);ctx.fillRect(26,-0.8,2.2,1.6);
+  if(itemMods.hasLaser){ctx.fillStyle='#35ff5a';ctx.fillRect(22,3.4,7,2)}
  }else if(type==='shotgun'){
   ctx.fillStyle='#213740';
   ctx.beginPath();ctx.roundRect(-1,-13,12,6,3);ctx.fill();
   ctx.beginPath();ctx.roundRect(4,6,18,5.5,3);ctx.fill();
   ctx.fillStyle='#171e21';
   ctx.beginPath();ctx.arc(11,-6,3.3,0,Math.PI*2);ctx.arc(22,4,3.4,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#785232';ctx.beginPath();ctx.roundRect(-3,-3.8,12,7.6,2);ctx.fill();
-  ctx.fillStyle='#c43c3c';ctx.fillRect(0,-2.6,2,5.2);ctx.fillRect(3,-2.6,2,5.2);
-  ctx.fillStyle='#2d3a3f';ctx.fillRect(8,-4.2,15,8.4);
-  ctx.fillStyle='#7e8e8d';ctx.fillRect(10,-2.6,11,2.6);
-  ctx.fillStyle='#171f21';ctx.fillRect(22,-3.7,17,3.3);ctx.fillRect(22,0.4,17,3.3);
-  ctx.fillStyle='#a2b0aa';ctx.fillRect(35,-3.7,4,3.3);ctx.fillRect(35,0.4,4,3.3);
-  ctx.fillStyle='#91643c';ctx.beginPath();ctx.roundRect(19,0.5,10,4.5,1.5);ctx.fill();
-  if(itemMods.hasLaser){ctx.fillStyle='#22d445';ctx.fillRect(26,3.2,6,2)}
+  // Walnut stock with side saddle shells
+  ctx.fillStyle='#784f30';ctx.beginPath();ctx.roundRect(-4,-4,13,8,2);ctx.fill();
+  ctx.fillStyle='#5c3a21';ctx.fillRect(-3,-1,10,2);
+  ctx.fillStyle='#cf3b3b';
+  for(let sx=-1;sx<=5;sx+=3){ctx.fillRect(sx,-4.5,2.2,2.2)}
+  // Receiver + ejection port
+  ctx.fillStyle='#2b383d';ctx.beginPath();ctx.roundRect(8,-4.5,16,9,1.6);ctx.fill();
+  ctx.fillStyle='#7e8e8d';ctx.fillRect(11,-2.8,10,2.8);
+  ctx.fillStyle='#141b1d';ctx.fillRect(14,1,5,2.4);
+  // Twin barrel + ventilated heat shield + underbarrel tube
+  ctx.fillStyle='#192224';ctx.fillRect(23,-3.8,18,3.2);ctx.fillRect(23,0.6,17,3.1);
+  ctx.fillStyle='#8c9d99';ctx.fillRect(24,-2.6,11,1.4);
+  ctx.fillStyle='#1d2426';
+  for(let hx=24;hx<=33;hx+=3)ctx.fillRect(hx,-3.3,1.4,2);
+  ctx.fillStyle='#b3c2bc';ctx.fillRect(37,-3.9,4.2,3.3);
+  // Ribbed pump forend
+  ctx.fillStyle='#8f5f39';ctx.beginPath();ctx.roundRect(19,0.5,11,4.8,1.5);ctx.fill();
+  ctx.fillStyle='#4d311c';
+  for(let px=20.5;px<=28;px+=2.5)ctx.fillRect(px,0.8,1,4.2);
+  if(itemMods.hasLaser){ctx.fillStyle='#35ff5a';ctx.fillRect(28,3.8,7,2)}
  }else if(type==='minigun'){
   ctx.fillStyle='#213740';
   ctx.beginPath();ctx.roundRect(1,-13,12,6,3);ctx.fill();
   ctx.beginPath();ctx.roundRect(6,6,16,5.5,3);ctx.fill();
-  ctx.fillStyle='#2c383b';ctx.beginPath();ctx.roundRect(6,-5.8,16,11.6,2.5);ctx.fill();
-  ctx.fillStyle='#596852';ctx.fillRect(10,3,9,6);
-  // Multi-barrel rotary cluster
-  ctx.fillStyle='#192224';ctx.fillRect(22,-4.6,20,2.4);ctx.fillRect(22,-1.2,20,2.4);ctx.fillRect(22,2.2,20,2.4);
-  ctx.fillStyle='#96a8a4';ctx.fillRect(26,-4.4,16,1.2);ctx.fillRect(26,-1.0,16,1.2);ctx.fillRect(26,2.4,16,1.2);
-  ctx.fillStyle='#d98e32';ctx.fillRect(36,-5.1,3,10.2);
-  if(itemMods.hasLaser){ctx.fillStyle='#22d445';ctx.fillRect(28,4.6,6,2)}
+  // Heavy motor housing & top carry handle
+  ctx.fillStyle='#2a373a';ctx.beginPath();ctx.roundRect(4,-6.4,18,12.8,2.8);ctx.fill();
+  ctx.strokeStyle='#151d1f';ctx.lineWidth=1.2;ctx.stroke();
+  ctx.fillStyle='#4f6166';ctx.fillRect(7,-4.6,12,9.2);
+  ctx.fillStyle='#324044';ctx.fillRect(10,-1.5,7,3);
+  // Brass ammo belt feed on side
+  ctx.fillStyle='#d4a03b';
+  for(let ax=8;ax<=18;ax+=2.4){ctx.fillRect(ax,4.5,1.6,4.2)}
+  ctx.fillStyle='#637059';ctx.beginPath();ctx.roundRect(7,6.5,13,4.2,1.4);ctx.fill();
+  // Animated spinning 6-barrel rotary cluster
+  const spin=(player&&(player.recoil>0||player.muzzleFlash>0))?Math.sin(t*0.09)*1.4:0;
+  const offsets=[-4.2+spin,-1.4-spin*0.5,1.4+spin*0.5,4.2-spin];
+  for(let bi=0;bi<offsets.length;bi++){
+   const oy=offsets[bi];
+   ctx.fillStyle='#192224';ctx.fillRect(22,oy-1.1,21,2.2);
+   ctx.fillStyle=bi%2===0?'#a2b5b1':'#7c8f8b';ctx.fillRect(24,oy-0.7,18,1.1);
+  }
+  // Dual bronze barrel clamp collars
+  ctx.fillStyle='#d98e32';ctx.fillRect(30,-5.3,2.8,10.6);ctx.fillRect(39,-5.3,3,10.6);
+  ctx.fillStyle='#8c5618';ctx.fillRect(30.6,-4.5,1.5,9);ctx.fillRect(39.6,-4.5,1.5,9);
+  if(itemMods.hasLaser){ctx.fillStyle='#35ff5a';ctx.fillRect(30,5,7,2)}
  }else if(type==='plasma'){
   ctx.fillStyle='#213740';
   ctx.beginPath();ctx.roundRect(0,-13,12,6,3);ctx.fill();
   ctx.beginPath();ctx.roundRect(4,6,18,5.5,3);ctx.fill();
-  ctx.fillStyle='#243b45';ctx.beginPath();ctx.roundRect(2,-4.5,24,9,3);ctx.fill();
-  ctx.fillStyle='#3b5e6b';ctx.fillRect(10,-3.5,14,7);
-  ctx.fillStyle='#4ce6ff';ctx.fillRect(12,-1.6,12,3.2);
-  ctx.fillStyle='#1d2e36';ctx.fillRect(26,-3.8,13,7.6);
-  ctx.fillStyle='#8cf7ff';ctx.fillRect(36,-2.5,5,5);
-  if(itemMods.hasLaser){ctx.fillStyle='#22d445';ctx.fillRect(26,3.4,6,2)}
+  // Futuristic energy chassis + cooling fins
+  ctx.fillStyle='#1d3038';ctx.beginPath();ctx.roundRect(1,-5.2,26,10.4,3.2);ctx.fill();
+  ctx.fillStyle='#345562';ctx.beginPath();ctx.roundRect(9,-4.2,16,8.4,2);ctx.fill();
+  // Pulsing ionized plasma core
+  const pulse=0.68+Math.sin(t*0.012)*0.32;
+  ctx.fillStyle=`rgba(72,232,255,${pulse.toFixed(2)})`;
+  ctx.beginPath();ctx.roundRect(12,-2.2,13,4.4,1.8);ctx.fill();
+  ctx.fillStyle='#d9ffff';ctx.fillRect(14,-0.9,9,1.8);
+  // Heat radiator ribs + containment shroud
+  ctx.fillStyle='#263d47';
+  for(let rx=13;rx<=22;rx+=3)ctx.fillRect(rx,-5.4,1.5,1.6);
+  ctx.fillStyle='#1b2b33';ctx.beginPath();ctx.roundRect(26,-4.2,14,8.4,1.8);ctx.fill();
+  ctx.fillStyle='#59e6ff';ctx.fillRect(32,-3.6,3,7.2);
+  ctx.fillStyle='#9cfaff';ctx.beginPath();ctx.arc(39.5,0,2.7,0,Math.PI*2);ctx.fill();
+  if(itemMods.hasLaser){ctx.fillStyle='#35ff5a';ctx.fillRect(27,3.8,7,2)}
  }else if(type==='railgun'){
   ctx.fillStyle='#213740';
   ctx.beginPath();ctx.roundRect(0,-13,12,6,3);ctx.fill();
   ctx.beginPath();ctx.roundRect(4,6,18,5.5,3);ctx.fill();
-  ctx.fillStyle='#212e33';ctx.beginPath();ctx.roundRect(0,-4.4,24,8.8,2);ctx.fill();
-  ctx.fillStyle='#3b4f57';ctx.fillRect(10,-3.4,14,6.8);
-  // Twin magnetic rails + glowing core
-  ctx.fillStyle='#6cf2ff';ctx.fillRect(24,-4.2,21,2.2);ctx.fillRect(24,2.0,21,2.2);
-  ctx.fillStyle='#dfffff';ctx.fillRect(16,-1.2,27,2.4);
-  if(itemMods.hasLaser){ctx.fillStyle='#22d445';ctx.fillRect(28,4.2,6,2)}
+  // Heavy capacitor stock & reinforced receiver
+  ctx.fillStyle='#1b272c';ctx.beginPath();ctx.roundRect(-2,-4.8,26,9.6,2.2);ctx.fill();
+  ctx.fillStyle='#334750';ctx.fillRect(9,-3.8,14,7.6);
+  // Optical sight + glowing battery cell
+  ctx.fillStyle='#121b1e';ctx.beginPath();ctx.roundRect(10,-2.8,8,5.6,1.2);ctx.fill();
+  ctx.fillStyle='#4ff0ff';ctx.fillRect(12,-1.2,4,2.4);
+  // Long twin electromagnetic rails + copper induction coils + glowing core arc
+  ctx.fillStyle='#4d646d';ctx.fillRect(24,-4.8,22,2.8);ctx.fillRect(24,2.0,22,2.8);
+  ctx.fillStyle='#72f4ff';ctx.fillRect(25,-4.2,20,1.4);ctx.fillRect(25,2.8,20,1.4);
+  const arc=0.72+Math.sin(t*0.018)*0.28;
+  ctx.fillStyle=`rgba(218,255,255,${arc.toFixed(2)})`;ctx.fillRect(17,-1.2,28,2.4);
+  ctx.fillStyle='#d99438';
+  for(let cx=27;cx<=40;cx+=4.2){ctx.fillRect(cx,-5,1.8,2);ctx.fillRect(cx,3,1.8,2)}
+  if(itemMods.hasLaser){ctx.fillStyle='#35ff5a';ctx.fillRect(29,4.6,7,2)}
  }else{
+  // Assault Rifle: angled curved mag, polymer stock, rail handguard, red-dot optic, muzzle brake
   ctx.fillStyle='#213740';
   ctx.beginPath();ctx.roundRect(0,-13,12,6,3);ctx.fill();
   ctx.beginPath();ctx.roundRect(4,6,18,5.5,3);ctx.fill();
   ctx.fillStyle='#171e21';
   ctx.beginPath();ctx.arc(12,-5,3.3,0,Math.PI*2);ctx.arc(22,3,3.3,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#1c2426';
-  ctx.beginPath();ctx.roundRect(14,2,7,10,2);ctx.fill();
-  ctx.fillStyle='#5c4532';ctx.beginPath();ctx.roundRect(-4,-3.4,12,6.8,1.5);ctx.fill();
-  ctx.fillStyle='#2c393c';ctx.fillRect(7,-4.3,19,8.6);
-  ctx.fillStyle='#7b8c8a';ctx.fillRect(9,-2.7,15,2.6);
-  ctx.fillStyle='#182123';ctx.fillRect(25,-2.6,16,5.2);
-  ctx.fillStyle='#9aa8a4';ctx.fillRect(38,-3.3,4.5,6.6);
-  ctx.fillStyle='#141c1e';ctx.fillRect(12,-3.6,7,7.2);
-  ctx.fillStyle='#5cff3a';ctx.fillRect(14.5,-1.1,2.6,2.2);
-  if(itemMods.hasLaser){ctx.fillStyle='#22d445';ctx.fillRect(28,2.2,6,2)}
+  // Curved side magazine protruding visibly
+  ctx.fillStyle='#1d2528';
+  ctx.beginPath();ctx.moveTo(15,2);ctx.lineTo(22,2);ctx.lineTo(25,11.5);ctx.lineTo(18.5,12.5);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#435357';ctx.lineWidth=1;ctx.stroke();
+  // Buttstock
+  ctx.fillStyle='#5c4532';ctx.beginPath();ctx.roundRect(-5,-3.8,13,7.6,1.6);ctx.fill();
+  ctx.fillStyle='#3b2b1e';ctx.fillRect(-5,-3.6,2.5,7.2);
+  // Receiver + picatinny top rail
+  ctx.fillStyle='#2b383b';ctx.fillRect(7,-4.4,19,8.8);
+  ctx.fillStyle='#788987';ctx.fillRect(9,-2.8,15,2.8);
+  // Forend handguard + barrel + muzzle brake
+  ctx.fillStyle='#38474a';ctx.beginPath();ctx.roundRect(24,-3.3,11,6.6,1.2);ctx.fill();
+  ctx.fillStyle='#182123';ctx.fillRect(34,-2.1,7,4.2);
+  ctx.fillStyle='#9aa8a4';ctx.fillRect(39,-3.3,4.5,6.6);
+  // Holographic sight with glowing reticle dot
+  ctx.fillStyle='#141c1e';ctx.beginPath();ctx.roundRect(12,-3.7,8,7.4,1.2);ctx.fill();
+  ctx.fillStyle='#5cff3a';ctx.fillRect(14.8,-1.1,2.6,2.2);
+  if(itemMods.hasLaser){ctx.fillStyle='#35ff5a';ctx.fillRect(28,2.6,7,2)}
  }
+}
+
+function drawEvacHelipad(now,viewX,viewY){
+ if(!evacHeli)return;
+ const px=evacHeli.padX,py=evacHeli.padY;
+ if(px<viewX-150||px>viewX+W+150||py<viewY-150||py>viewY+H+150)return;
+ const ready=money>=HELI_PRICE||evacHeli.bought;
+ const pulse=0.55+Math.sin(now*0.006)*0.35;
+
+ ctx.save();
+ ctx.translate(px,py);
+
+ // Octagonal concrete evac apron
+ ctx.fillStyle='#20292b';
+ ctx.beginPath();ctx.arc(0,0,76,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#11181a';ctx.lineWidth=3;ctx.stroke();
+
+ // Hazard yellow-black outer ring
+ ctx.strokeStyle=ready?'rgba(115,255,140,0.68)':'rgba(240,185,55,0.55)';
+ ctx.lineWidth=3.5;ctx.setLineDash([14,10]);
+ ctx.beginPath();ctx.arc(0,0,66,0,Math.PI*2);ctx.stroke();
+ ctx.setLineDash([]);
+
+ // Inner circle + bold 'H' landing pad marking
+ ctx.strokeStyle=ready?'rgba(145,255,170,0.8)':'rgba(225,245,235,0.45)';
+ ctx.lineWidth=2.5;
+ ctx.beginPath();ctx.arc(0,0,46,0,Math.PI*2);ctx.stroke();
+
+ ctx.fillStyle=ready?'rgba(120,255,140,0.28)':'rgba(225,240,235,0.18)';
+ ctx.fillRect(-16,-22,7,44);
+ ctx.fillRect(9,-22,7,44);
+ ctx.fillRect(-16,-3.5,32,7);
+
+ // 4 corner landing beacon lights
+ for(let i=0;i<4;i++){
+  const a=i*Math.PI/2+Math.PI/4;
+  const bx=Math.cos(a)*68,by=Math.sin(a)*68;
+  ctx.fillStyle='#1c2627';ctx.beginPath();ctx.arc(bx,by,5.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=ready?`rgba(102,255,140,${pulse.toFixed(2)})`:`rgba(255,192,68,${pulse.toFixed(2)})`;
+  ctx.beginPath();ctx.arc(bx,by,3.2,0,Math.PI*2);ctx.fill();
+ }
+
+ // Ground label when waiting
+ if(!evacHeli.bought){
+  ctx.fillStyle=ready?'rgba(140,255,165,0.92)':'rgba(255,214,102,0.85)';
+  ctx.font='800 10.5px monospace';ctx.textAlign='center';
+  ctx.fillText(ready?'🚁 ЭВАК ГОТОВ [2000 🪙]':'🚁 ЭВАКУАЦИЯ · 2000 🪙',0,88);
+ }
+ ctx.restore();
+}
+
+function drawEvacHelicopter(now,viewX,viewY){
+ if(!evacHeli)return;
+ if(evacHeli.x<viewX-170||evacHeli.x>viewX+W+170||evacHeli.y<viewY-170||evacHeli.y>viewY+H+170)return;
+ const h=evacHeli;
+ const scale=1+h.alt*0.0042;
+ const shadowOff=8+h.alt*0.42;
+
+ // Ground shadow under helicopter
+ ctx.save();
+ ctx.translate(h.x+shadowOff,h.y+shadowOff*1.1);
+ ctx.rotate(h.dir);
+ ctx.fillStyle=`rgba(0,0,0,${Math.max(0.14,0.44-h.alt*0.0014).toFixed(2)})`;
+ ctx.beginPath();ctx.ellipse(0,0,46,19,0,0,Math.PI*2);ctx.fill();
+ ctx.beginPath();ctx.rect(-62,-4,32,8);ctx.fill();
+ ctx.restore();
+
+ // Main helicopter airframe
+ ctx.save();
+ ctx.translate(h.x,h.y);
+ ctx.scale(scale,scale);
+ ctx.rotate(h.dir);
+
+ // Landing skids
+ ctx.strokeStyle='#7a8e8c';ctx.lineWidth=3.2;
+ ctx.beginPath();
+ ctx.moveTo(-18,-18);ctx.lineTo(22,-18);
+ ctx.moveTo(-18,18);ctx.lineTo(22,18);
+ ctx.moveTo(-10,-18);ctx.lineTo(-8,-11);ctx.moveTo(10,-18);ctx.lineTo(10,-11);
+ ctx.moveTo(-10,18);ctx.lineTo(-8,11);ctx.moveTo(10,18);ctx.lineTo(10,11);
+ ctx.stroke();
+
+ // Tail boom + horizontal stabilizers + spinning tail rotor
+ ctx.fillStyle='#2f4b3e';
+ ctx.beginPath();ctx.moveTo(-14,-7);ctx.lineTo(-62,-3.2);ctx.lineTo(-62,3.2);ctx.lineTo(-14,7);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='#15241e';ctx.lineWidth=1.5;ctx.stroke();
+ ctx.fillStyle='#466a58';ctx.fillRect(-52,-12,7,24);
+ ctx.fillStyle='#d9942a';ctx.fillRect(-56,-3.5,5,7);
+ const tailSpin=Math.sin(h.rotorAngle*3.2)*9;
+ ctx.strokeStyle='#c9dcd6';ctx.lineWidth=2.2;
+ ctx.beginPath();ctx.moveTo(-60,-Math.abs(tailSpin)-3);ctx.lineTo(-60,Math.abs(tailSpin)+3);ctx.stroke();
+
+ // Fuselage body + rescue stripe
+ ctx.fillStyle='#345445';
+ ctx.beginPath();ctx.ellipse(2,0,32,16,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#13211b';ctx.lineWidth=2;ctx.stroke();
+
+ // Rescue orange/amber stripe & medical/evac cross
+ ctx.fillStyle='#e5942c';
+ ctx.fillRect(-16,-13.5,18,4);ctx.fillRect(-16,9.5,18,4);
+ ctx.fillStyle='#527a66';
+ ctx.beginPath();ctx.ellipse(-4,0,22,11,0,0,Math.PI*2);ctx.fill();
+
+ // Cockpit canopy glass
+ const cg=ctx.createLinearGradient(10,-11,30,11);
+ cg.addColorStop(0,'#7be2ff');cg.addColorStop(0.5,'#347d96');cg.addColorStop(1,'#183a4a');
+ ctx.fillStyle=cg;
+ ctx.beginPath();ctx.ellipse(21,0,12,11.5,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#132329';ctx.lineWidth=1.6;ctx.stroke();
+ ctx.strokeStyle='rgba(255,255,255,0.45)';ctx.lineWidth=1.5;
+ ctx.beginPath();ctx.arc(21,-3,7,-0.9,0.5);ctx.stroke();
+
+ // Side engine pods & exhausts
+ ctx.fillStyle='#243631';
+ ctx.beginPath();ctx.roundRect(-12,-14.5,18,5,2);ctx.roundRect(-12,9.5,18,5,2);ctx.fill();
+
+ // Anti-collision navigation strobes
+ const strobe=Math.sin(now*0.015)>0.2;
+ if(strobe){
+  ctx.fillStyle='#ff4852';ctx.beginPath();ctx.arc(-62,0,3.2,0,Math.PI*2);ctx.fill();
+ }
+ ctx.fillStyle='#5cff76';ctx.beginPath();ctx.arc(8,14,2.2,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#ff5454';ctx.beginPath();ctx.arc(8,-14,2.2,0,Math.PI*2);ctx.fill();
+
+ // 4-blade main rotor + rotor blur disc during takeoff
+ if(h.rotorSpeed>6){
+  ctx.fillStyle=`rgba(210,245,235,${Math.min(0.24,(h.rotorSpeed-6)*0.012).toFixed(2)})`;
+  ctx.beginPath();ctx.arc(0,0,58,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(215,255,230,0.34)';ctx.lineWidth=1.5;ctx.stroke();
+ }
+ ctx.save();
+ ctx.rotate(h.rotorAngle);
+ for(let bi=0;bi<4;bi++){
+  ctx.rotate(Math.PI/2);
+  ctx.fillStyle='#1c2628';
+  ctx.fillRect(0,-2.6,56,5.2);
+  ctx.fillStyle='#d9942a';
+  ctx.fillRect(49,-2.6,7,5.2);
+ }
+ ctx.fillStyle='#627478';ctx.beginPath();ctx.arc(0,0,6.5,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#151d1f';ctx.lineWidth=1.5;ctx.stroke();
+ ctx.restore();
+
+ ctx.restore();
+}
+
+function drawHeliPointer(now){
+ if(!running||!evacHeli||evacHeli.takeoff||!player)return;
+ const viewX=cam.x-W/2,viewY=cam.y-H/2;
+ if(evacHeli.x>=viewX+24&&evacHeli.x<=viewX+W-24&&evacHeli.y>=viewY+24&&evacHeli.y<=viewY+H-24)return;
+ const dx=evacHeli.x-cam.x,dy=evacHeli.y-cam.y;
+ const ang=Math.atan2(dy,dx);
+ const padX=Math.max(46,W/2-38),padY=Math.max(46,H/2-52);
+ const cos=Math.cos(ang),sin=Math.sin(ang);
+ const scale=Math.min(Math.abs(cos)>0.001?padX/Math.abs(cos):9999,Math.abs(sin)>0.001?padY/Math.abs(sin):9999);
+ const ix=W/2+cos*scale,iy=H/2+sin*scale;
+ const distM=Math.round(Math.hypot(evacHeli.x-player.x,evacHeli.y-player.y)/10);
+ const ready=money>=HELI_PRICE;
+ const pulse=ready?(0.78+Math.sin(now*0.009)*0.22):0.72;
+
+ ctx.save();
+ ctx.translate(ix,iy);
+ ctx.globalAlpha=pulse;
+ ctx.fillStyle=ready?'rgba(16,66,34,0.92)':'rgba(12,26,32,0.82)';
+ ctx.strokeStyle=ready?'#7cff8c':'#ffd166';
+ ctx.lineWidth=2;
+ ctx.beginPath();ctx.roundRect(-28,-16,56,32,12);ctx.fill();ctx.stroke();
+
+ // Directional arrow tip
+ ctx.save();
+ ctx.rotate(ang);
+ ctx.fillStyle=ready?'#7cff8c':'#ffd166';
+ ctx.beginPath();ctx.moveTo(35,0);ctx.lineTo(25,-6);ctx.lineTo(25,6);ctx.closePath();ctx.fill();
+ ctx.restore();
+
+ ctx.fillStyle='#ffffff';
+ ctx.font='800 11px system-ui,sans-serif';
+ ctx.textAlign='center';ctx.textBaseline='middle';
+ ctx.fillText(`🚁 ${distM}м`,0,0);
+ ctx.restore();
 }
 
 function drawSafeZoneBarrier(now){
@@ -4278,7 +4885,7 @@ function drawBuildingLoot(now,viewX,viewY){
 }
 
 function drawPlayer(now){
- if(!player)return;
+ if(!player||(evacHeli&&evacHeli.takeoff))return;
  ctx.save();
  ctx.translate(player.x,player.y);
 
@@ -4361,7 +4968,7 @@ function drawPlayer(now){
  const kick=player.recoil*(weapon==='shotgun'||weapon==='railgun'?6.5:3.5);
  ctx.save();
  ctx.translate(-kick,0);
- drawWeaponModel(weapon);
+ drawWeaponModel(weapon,now);
 
  if(player.muzzleFlash>0&&weapon!=='railgun'){
   const tipX=weapon==='pistol'?34:weapon==='shotgun'?40:weapon==='minigun'?42:weapon==='plasma'?41:43;
@@ -4872,6 +5479,16 @@ function drawNightMask(now,viewX,viewY){
  lightCtx.globalAlpha=0.72;
  lightCtx.drawImage(glows.cutSoft,SAFE_ZONE.x-SAFE_ZONE.r*1.08,SAFE_ZONE.y-SAFE_ZONE.r*1.08,SAFE_ZONE.r*2.16,SAFE_ZONE.r*2.16);
 
+ // Evacuation helicopter landing pad cutout
+ if(evacHeli){
+  lightCtx.globalAlpha=0.82;
+  lightCtx.drawImage(glows.cutSoft,evacHeli.padX-125,evacHeli.padY-125,250,250);
+  if(evacHeli.takeoff){
+   lightCtx.globalAlpha=0.95;
+   lightCtx.drawImage(glows.cutSoft,evacHeli.x-170,evacHeli.y-170,340,340);
+  }
+ }
+
  // Entered building interior visibility cutout
  for(let i=0;i<buildings.length;i++){
   const b=buildings[i];
@@ -4957,7 +5574,18 @@ function drawWorldLights(now,viewX,viewY){
   ctx.drawImage(glows.green,tp.x-42,tp.y-42,84,84);
  }
 
- if(player){
+ if(evacHeli){
+  const ready=money>=HELI_PRICE||evacHeli.bought;
+  const pulse=0.4+Math.sin(now*0.008)*0.3;
+  ctx.globalAlpha=pulse;
+  ctx.drawImage(ready?glows.green:glows.amber,evacHeli.padX-85,evacHeli.padY-85,170,170);
+  if(evacHeli.takeoff){
+   ctx.globalAlpha=0.55;
+   ctx.drawImage(glows.cyan,evacHeli.x-90,evacHeli.y-90,180,180);
+  }
+ }
+
+ if(player&&!(evacHeli&&evacHeli.takeoff)){
   ctx.save();
   ctx.translate(player.x,player.y);
   ctx.rotate(player.angle);
@@ -5091,9 +5719,13 @@ function renderRadar(now){
   g.fillRect((rd.pos-rd.w/2)*sx,0,rd.w*sx,rh);
  }
 
- // Buildings & tents on radar (golden dot marks buildings that still have loot)
+ // Buildings & tents on radar (model-coded silhouettes + golden dot marks loot)
  for(const b of radarBuildings){
-  g.fillStyle=b.style==='tent'?'rgba(105,148,96,0.45)':'rgba(130,165,165,0.42)';
+  g.fillStyle=b.model==='clinic'||b.model==='pharmacy'?'rgba(110,220,225,0.48)':
+   b.model==='bunker'||b.model==='hangar'?'rgba(195,165,98,0.46)':
+   b.model==='lab'||b.model==='refinery'?'rgba(135,215,105,0.46)':
+   b.model==='cottage'?'rgba(175,112,92,0.48)':
+   b.style==='tent'?'rgba(105,148,96,0.45)':'rgba(130,165,165,0.44)';
   g.fillRect(b.x*sx,b.y*sy,Math.max(2,b.w*sx),Math.max(2,b.h*sy));
  }
  for(const b of buildings){
@@ -5113,6 +5745,19 @@ function renderRadar(now){
  for(const npc of NPCS){
   g.fillStyle=npc.id==='armorer'?'#ffb84d':npc.id==='trader'?'#ffe766':'#62f5e6';
   g.beginPath();g.arc(npc.x*sx,npc.y*sy,2.8,0,Math.PI*2);g.fill();
+ }
+
+ // Evacuation helicopter landing site on radar
+ if(evacHeli){
+  const hx=Math.max(6,Math.min(rw-6,evacHeli.padX*sx));
+  const hy=Math.max(6,Math.min(rh-6,evacHeli.padY*sy));
+  const ready=money>=HELI_PRICE||evacHeli.bought;
+  const pulse=ready?(4.8+Math.sin((now||0)*0.01)*1.8):4.2;
+  g.strokeStyle=ready?'rgba(124,255,140,0.95)':'rgba(255,214,96,0.82)';
+  g.lineWidth=1.6;
+  g.beginPath();g.arc(hx,hy,pulse,0,Math.PI*2);g.stroke();
+  g.fillStyle=ready?'#7cff8c':'#ffd166';
+  g.fillRect(hx-2.6,hy-2.6,5.2,5.2);
  }
 
  // Rotating scanner sweep
@@ -5195,6 +5840,7 @@ function render(now){
   ctx.restore();
  }
  drawSafeZoneBarrier(now);
+ drawEvacHelipad(now,viewX,viewY);
  drawTargetReticle(now);
  drawBuildingLoot(now,viewX,viewY);
 
@@ -5315,6 +5961,7 @@ function render(now){
  }
 
  drawCanopies(now,viewX,viewY);
+ drawEvacHelicopter(now,viewX,viewY);
  drawMist(now,viewX,viewY);
 
  ctx.restore(); // end world-space geometry pass
@@ -5342,9 +5989,10 @@ function render(now){
  ctx.globalAlpha=1;
  ctx.restore();
 
- // Screen-space rain, lighting vignette & hurt overlay
+ // Screen-space rain, lighting vignette, evac pointer & hurt overlay
  drawRain();
  drawScreenVignette(now);
+ drawHeliPointer(now);
  ctx.restore();
 
  renderRadar(now);
@@ -5612,6 +6260,7 @@ if($('lootStatBtn'))$('lootStatBtn').addEventListener('click',openBagModal);
 if($('bagClose'))$('bagClose').addEventListener('click',closeBagModal);
 if($('interactBtn'))$('interactBtn').addEventListener('click',()=>{
  if(nearbyNpc)openNpcDialog(nearbyNpc);
+ else if(nearbyHeli)buyHelicopterAndEscape();
  else if(nearbyLootNode)openLootNode(nearbyLootNode);
 });
 if($('npcClose'))$('npcClose').addEventListener('click',closeNpcDialog);
@@ -5627,6 +6276,10 @@ canvas.addEventListener('pointerdown',e=>{
    openNpcDialog(npc);
    return;
   }
+ }
+ if(evacHeli&&!evacHeli.bought&&Math.hypot(wx-evacHeli.x,wy-evacHeli.y)<=72&&Math.hypot(player.x-evacHeli.x,player.y-evacHeli.y)<=110){
+  buyHelicopterAndEscape();
+  return;
  }
  for(let i=0;i<lootNodes.length;i++){
   const ln=lootNodes[i];
@@ -5750,6 +6403,7 @@ window.addEventListener('keydown',e=>{
  }
  if((e.code==='KeyE'||e.key==='e'||e.key==='E'||e.key==='у'||e.key==='У')&&running&&!paused){
   if(nearbyNpc)openNpcDialog(nearbyNpc);
+  else if(nearbyHeli)buyHelicopterAndEscape();
   else if(nearbyLootNode)openLootNode(nearbyLootNode);
  }
  if(['1','2','3','4','5','6'].includes(e.key)){
