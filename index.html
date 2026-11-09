@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#0b1416">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>CARANTIN 2.2</title>
+<title>CARANTIN 2.3</title>
 <style>
 :root{
  --bg-dark:#081012;
@@ -100,7 +100,7 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
 
 #interactBtn{
  display:none;pointer-events:auto;
- position:absolute;bottom:210px;left:50%;transform:translateX(-50%);
+ position:absolute;bottom:258px;left:50%;transform:translateX(-50%);
  z-index:20;
  padding:9px 18px;border-radius:999px;
  background:linear-gradient(180deg,#2d88b8,#195273);
@@ -153,13 +153,13 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
 }
 
 #weaponInfo{
- position:absolute;bottom:184px;left:0;right:0;
+ position:absolute;bottom:232px;left:0;right:0;
  text-align:center;color:#dcead9;
  font-size:12px;font-weight:600;letter-spacing:.3px;
  text-shadow:0 2px 8px rgba(0,0,0,0.95);
 }
 #weaponBar{
- position:absolute;bottom:124px;left:0;right:0;
+ position:absolute;bottom:172px;left:0;right:0;
  display:flex;justify-content:center;gap:7px;padding:0 10px;
  overflow-x:auto;scrollbar-width:none;
  pointer-events:auto;
@@ -199,7 +199,7 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
 }
 .control{
  position:relative;
- width:clamp(88px,22vw,118px);height:clamp(88px,22vw,118px);
+ width:clamp(124px,31vw,160px);height:clamp(124px,31vw,160px);
  border-radius:50%;pointer-events:auto;
  display:flex;align-items:center;justify-content:center;
  transition:transform .08s ease;
@@ -249,7 +249,7 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  box-shadow:0 4px 12px rgba(0,0,0,0.55),0 0 14px rgba(255,130,60,0.42);
  pointer-events:none;
  display:flex;align-items:center;justify-content:center;
- font-size:15px;font-weight:900;color:#fff6e5;line-height:1;
+ font-size:20px;font-weight:900;color:#fff6e5;line-height:1;
  transform:translate(0px,0px);
  transition:transform .06s linear,box-shadow .12s ease;
 }
@@ -464,13 +464,13 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
 
 @media(max-height:570px){
  #bottom{bottom:8px}
- .control{width:76px;height:76px}
+ .control{width:116px;height:116px}
  .joyLabel{display:none}
- #weaponBar{bottom:92px;gap:6px}
+ #weaponBar{bottom:132px;gap:6px}
  .weapon{min-width:64px;padding:5px 7px;font-size:9px}
  .weapon svg{width:26px;height:12px}
- #weaponInfo{bottom:142px;font-size:11px}
- #interactBtn{bottom:164px;padding:7px 14px;font-size:12px}
+ #weaponInfo{bottom:182px;font-size:11px}
+ #interactBtn{bottom:204px;padding:7px 14px;font-size:12px}
  #radar{width:54px;height:54px;top:calc(max(8px,env(safe-area-inset-top)) + 84px)}
  .box{padding:12px 14px}
  .emblem{width:46px;height:46px;margin-bottom:6px}
@@ -481,7 +481,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
 @media(orientation:landscape) and (min-width:640px){
  #weaponBar{
   bottom:max(14px,env(safe-area-inset-bottom));
-  left:156px;right:156px;gap:6px;padding:0 6px;
+  left:192px;right:192px;gap:6px;padding:0 6px;
  }
  #weaponInfo{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 54px)}
  #interactBtn{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 78px)}
@@ -511,11 +511,11 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   width:54px;height:54px;
  }
  #bottom{bottom:max(8px,env(safe-area-inset-bottom))}
- .control{width:clamp(78px,19.5vh,98px);height:clamp(78px,19.5vh,98px)}
+ .control{width:clamp(124px,35vh,158px);height:clamp(124px,35vh,158px)}
  #weaponBar{
   bottom:max(8px,env(safe-area-inset-bottom));
-  left:calc(max(12px,env(safe-area-inset-left)) + clamp(88px,21vh,108px));
-  right:calc(max(12px,env(safe-area-inset-right)) + clamp(88px,21vh,108px));
+  left:calc(max(12px,env(safe-area-inset-left)) + clamp(132px,37vh,166px));
+  right:calc(max(12px,env(safe-area-inset-right)) + clamp(132px,37vh,166px));
   gap:5px;padding:0 4px;
  }
  .weapon{min-width:58px;padding:4px 6px;font-size:8.5px;border-radius:10px}
