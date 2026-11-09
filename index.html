@@ -1590,7 +1590,7 @@ function shoot(target){
   const isCrit=itemMods.crit>0&&Math.random()<itemMods.crit;
   const dmg=w.damage*upgrades.damage*itemMods.dmgMult*(isCrit?2:1);
   bullets.push({
-   x:mx,y:my,px:mx,py:my,
+   x:mx,y:my,px:mx,py:my,sx:mx,sy:my,
    vx:Math.cos(a)*w.speed,vy:Math.sin(a)*w.speed,
    angle:a,damage:dmg,crit:isCrit,
    life:1.25*(itemMods.rangeMult||1),
@@ -2747,9 +2747,13 @@ function render(now){
  ctx.lineCap='round';
  for(const b of bullets){
   const sp=Math.hypot(b.vx,b.vy)||1;
-  const tail=weapon==='shotgun'?18:30;
+  const maxTail=weapon==='shotgun'?18:30;
+  const traveled=b.sx!==undefined?Math.hypot(b.x-b.sx,b.y-b.sy):maxTail;
+  const tail=Math.min(maxTail,Math.max(4,traveled));
   const tx=b.x-(b.vx/sp)*tail;
   const ty=b.y-(b.vy/sp)*tail;
+  const cx=b.x-(b.vx/sp)*(tail*0.52);
+  const cy=b.y-(b.vy/sp)*(tail*0.52);
   ctx.strokeStyle=b.color;
   ctx.lineWidth=5.2;
   ctx.globalAlpha=0.58;
@@ -2757,7 +2761,7 @@ function render(now){
   ctx.strokeStyle='#ffffff';
   ctx.lineWidth=2.1;
   ctx.globalAlpha=0.98;
-  ctx.beginPath();ctx.moveTo((tx+b.x)*0.45,(ty+b.y)*0.45);ctx.lineTo(b.x,b.y);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(b.x,b.y);ctx.stroke();
  }
  ctx.globalAlpha=1;
 
