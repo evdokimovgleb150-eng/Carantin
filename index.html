@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#0b1416">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>CARANTIN 4.0 — Кампания и Полигоны</title>
+<title>CARANTIN 4.2 — История и открытый мир</title>
 <style>
 :root{
  --bg-dark:#081012;
@@ -355,6 +355,13 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  pointer-events:none;
  display:block;
 }
+
+/* Game mode selector on start and result screens */
+.modeRow{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}
+.modeBtn{padding:9px 6px;border-radius:11px;font-size:11.5px;font-weight:800;background:#102522;border:1px solid #547469;color:#d2e8d9;display:flex;flex-direction:column;align-items:center;gap:3px}
+.modeBtn small{font-size:9.5px;line-height:1.3;font-weight:600}
+.modeBtn.active{background:#164255;border-color:#7ce8ff;box-shadow:0 0 12px #4cd4ff44;color:#fff}
+.modeBtn[data-mode="free"].active{background:#1b5234;border-color:#72ff8c;box-shadow:0 0 12px #54ff8844}
 
 /* Modern RPG-style Dialogue Cutscene Panel */
 #dialogueOverlay{
@@ -984,7 +991,11 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    <img class="emblem" src="./icon-192.png" alt="CARANTIN">
    <h1>CARA<span class="titleAccent">NTIN</span></h1>
    <div class="titleSlash"></div>
-   <p>«Протокол Зачистки 4.1»: <b style="color:#8be6ff">сюжетная кампания с диалогами</b>, <b style="color:#ffd878">боями на полигонах</b>, <b style="color:#7cff9c">переездами на машинах между локациями</b> и битвой с <b style="color:#ff848a">Патриархом-0</b>! Сохраняй прогресс через меню паузы и загружай его позже на этом устройстве.</p>
+   <p>«Протокол Зачистки 4.2»: расследуй исчезновение конвоя, останови реактор, спаси врачей «Маяка» и добудь сыворотку в Цитадели. <b style="color:#7cff9c">Четыре района, разные задания и открытый мир</b>. Прогресс сюжета сохраняется через паузу на этом устройстве.</p>
+   <div class="modeRow" role="group" aria-label="Выбор режима игры">
+    <button type="button" class="modeBtn active" data-mode="campaign"><span>📖 История карантина</span><small>Расследование · спасение · финал</small></button>
+    <button type="button" class="modeBtn" data-mode="free"><span>🌍 Открытый мир</span><small>Исследование · добыча · вылазки</small></button>
+   </div>
    <div id="diffRow" role="group" aria-label="Выбор сложности">
     <button type="button" class="diffBtn active" data-diff="normal"><span>🟢 Стандарт</span><small>1.0× баланс</small></button>
     <button type="button" class="diffBtn" data-diff="hard"><span>🟠 Выживание+</span><small>1.35× HP · +30% 🪙</small></button>
@@ -5174,8 +5185,8 @@ function closeStoryModal(){
 
 function init(){
  if(typeof campaignReset==='function')campaignReset();
- // The next campaign sector rebuilds its map in campaignLoadLocation(),
- // so init() must not allocate another large canvas here.
+ // A free run following the story must restore the original untinted city.
+ if(gameMode==='free'&&groundIsCampaign)buildWorldGround();
  player={x:SAFE_ZONE.x,y:SAFE_ZONE.y+115,r:15,speed:195,angle:-Math.PI/2,inv:0,walkPhase:0,recoil:0,muzzleFlash:0,moving:false,regenAcc:0,slowTimer:0,vampKills:0,vampCd:0,stimTimer:0,inVehicle:null,carRegenAcc:0};
  const c=clampCamera(player.x,player.y);
  cam.x=c.x;cam.y=c.y;
@@ -5816,7 +5827,7 @@ function openNpcDialog(npc){
  if(npc.id==='commander'){
   if(gameMode==='campaign'){
    const loc=CAMPAIGN_LOCATIONS[campaignStage];
-   campaignShowDialogue([{who:'ШРАМ',role:'КОМАНДИР',text:campaignState==='ready'?`Полигон «${loc.name}» зачищен. Сядь в машину и проезжай КПП на восточном шоссе.`:`Следующая цель — полигон «${loc.name}». Три этапа атаки, затем босс. Нажми [Q], чтобы открыть карту операции.`}]);
+   campaignShowDialogue([{who:'ШРАМ',role:'КОМАНДИР',text:campaignState==='ready'?`Задание «${CAMPAIGN_MISSIONS[campaignStage].title}» выполнено. Сядь в машину и проезжай к отмеченному КПП.`:`Продолжай расследование «${CAMPAIGN_MISSIONS[campaignStage].title}»: ${CAMPAIGN_MISSIONS[campaignStage].goal}. Следуй к отметке на радаре или открой КПК [Q].`}]);
   }else openStoryModal('story');
   return;
  }
@@ -6138,6 +6149,10 @@ function victoryEscape(){
      <div class="sumCard"><div class="k">Волна / Убито</div><div class="v">${wave} · ${kills}</div></div>
      <div class="sumCard"><div class="k">Рекорд</div><div class="v" style="color:#ffe082">${bestScore}</div></div>
     </div>
+    <div class="modeRow" role="group" aria-label="Выбор режима игры">
+    <button type="button" class="modeBtn${gameMode==='campaign'?' active':''}" data-mode="campaign"><span>📖 История карантина</span><small>Расследование · спасение · финал</small></button>
+    <button type="button" class="modeBtn${gameMode==='free'?' active':''}" data-mode="free"><span>🌍 Открытый мир</span><small>Исследование · добыча · вылазки</small></button>
+   </div>
     <div id="diffRow" aria-label="Сложность игры">
      <button type="button" class="diffBtn${currentDifficulty==='normal'?' active':''}" data-diff="normal">🟢 СТАНДАРТ</button>
      <button type="button" class="diffBtn${currentDifficulty==='hard'?' active':''}" data-diff="hard">🟠 ХАРДКОР</button>
@@ -6194,6 +6209,10 @@ function gameOver(){
      <div class="sumCard"><div class="k">Убито</div><div class="v">${kills}</div></div>
      <div class="sumCard"><div class="k">Рекорд</div><div class="v" style="color:#ffe082">${bestScore}</div></div>
     </div>
+    <div class="modeRow" role="group" aria-label="Выбор режима игры">
+    <button type="button" class="modeBtn${gameMode==='campaign'?' active':''}" data-mode="campaign"><span>📖 История карантина</span><small>Расследование · спасение · финал</small></button>
+    <button type="button" class="modeBtn${gameMode==='free'?' active':''}" data-mode="free"><span>🌍 Открытый мир</span><small>Исследование · добыча · вылазки</small></button>
+   </div>
     <div id="diffRow" aria-label="Сложность игры">
      <button type="button" class="diffBtn${currentDifficulty==='normal'?' active':''}" data-diff="normal">🟢 СТАНДАРТ</button>
      <button type="button" class="diffBtn${currentDifficulty==='hard'?' active':''}" data-diff="hard">🟠 ХАРДКОР</button>
@@ -6237,6 +6256,8 @@ $('overlay').addEventListener('pointerup',e=>{
  startGame();
 });
 $('overlay').addEventListener('click',e=>{
+ const modeBtn=e.target.closest('.modeBtn[data-mode]');
+ if(modeBtn){e.preventDefault();setGameMode(modeBtn.dataset.mode);return;}
  if(e.target.closest('#loadCampaign')){e.preventDefault();loadCampaign();return;}
  const diffBtn=e.target.closest('.diffBtn[data-diff]');
  if(diffBtn){
@@ -6542,7 +6563,9 @@ function update(dt,now){
  const ib=$('interactBtn');
  const heliCost=getHeliPrice();
  if(ib){
-  if(typeof gameMode!=='undefined'&&gameMode==='campaign'&&typeof campaignNearbyCheckpoint==='function'&&campaignNearbyCheckpoint()){
+  if(gameMode==='campaign'&&campaignNearbySite()){
+   ib.classList.add('evac');ib.textContent=`🔎 ${campaignNearbySite().name} [E]`;ib.style.display='block';
+  }else if(typeof gameMode!=='undefined'&&gameMode==='campaign'&&typeof campaignNearbyCheckpoint==='function'&&campaignNearbyCheckpoint()){
    ib.classList.add('evac');ib.textContent=player.inVehicle?'🚗 КПП: перейти в следующий сектор [E]':'🚗 КПП: сядь в машину, затем [E]';ib.style.display='block';
   }else if(nearbyNpc){
    ib.classList.remove('evac');
@@ -9457,6 +9480,7 @@ function pauseGame(){
  if($('pauseDiffInfo'))$('pauseDiffInfo').innerHTML=`Кампания: сектор <b>${campaignStage+1}/4</b> · <b style="color:${d.color}">${d.icon} ${d.name}</b> · Счёт <b>${score}</b>`;
  $('pauseScreen').style.display='flex';
  refreshSaveInfo();
+ if(gameMode==='free'&&$('pauseSaveInfo'))$('pauseSaveInfo').textContent='Сохраняется только сюжетная кампания';
 }
 function resumeGame(){paused=false;$('pauseScreen').style.display='none';last=performance.now()}
 
@@ -9687,7 +9711,8 @@ if($('turretBtn'))$('turretBtn').addEventListener('click',()=>{
 });
 if($('quickUseBtn'))$('quickUseBtn').addEventListener('click',useQuickAid);
 if($('interactBtn'))$('interactBtn').addEventListener('click',()=>{
- if(gameMode==='campaign'&&campaignNearbyCheckpoint())campaignStartTravel();
+ if(gameMode==='campaign'&&campaignNearbySite())campaignInspectSite();
+ else if(gameMode==='campaign'&&campaignNearbyCheckpoint())campaignStartTravel();
  else if(nearbyNpc)openNpcDialog(nearbyNpc);
  else if(nearbyHeli)buyHelicopterAndEscape();
  else if(nearbyLootNode)openLootNode(nearbyLootNode);
@@ -9850,7 +9875,8 @@ window.addEventListener('keydown',e=>{
  }
  if($('dialogueOverlay').style.display==='flex'||$('travelOverlay').style.display==='flex')return;
  if((e.code==='KeyE'||e.key==='e'||e.key==='E'||e.key==='у'||e.key==='У')&&running&&!paused){
-  if(gameMode==='campaign'&&campaignNearbyCheckpoint())campaignStartTravel();
+  if(gameMode==='campaign'&&campaignNearbySite())campaignInspectSite();
+  else if(gameMode==='campaign'&&campaignNearbyCheckpoint())campaignStartTravel();
   else if(nearbyNpc)openNpcDialog(nearbyNpc);
   else if(nearbyHeli)buyHelicopterAndEscape();
   else if(nearbyLootNode)openLootNode(nearbyLootNode);
@@ -9927,28 +9953,98 @@ function loop(t){
  requestAnimationFrame(loop);
 }
 
-/* CARANTIN 4.0 — story campaign; the original free-survival city remains untouched. */
-const gameMode='campaign';
+/* CARANTIN 4.2 — city-wide story missions and independent open-world mode. */
+let gameMode='campaign';
+function setGameMode(mode){
+ if(running)return;
+ gameMode=mode==='free'?'free':'campaign';
+ document.querySelectorAll('.modeBtn').forEach(b=>b.classList.toggle('active',b.dataset.mode===gameMode));
+ const start=$('start')||$('restart');
+ if(start)start.textContent=gameMode==='free'?'🌍 НАЧАТЬ ОТКРЫТЫЙ МИР':'📖 НОВАЯ КАМПАНИЯ';
+}
+
 let campaignStage=0, campaignPhase=0, campaignState='approach';
 let campaignBarrels=[], campaignKills=0, campaignTotal=0, campaignHold=0, campaignWaveDelay=0;
 let campaignDialogue=null, campaignTypeTimer=null, campaignTravel=null;
 const CAMPAIGN_LOCATIONS=[
- {name:'Ржавый периметр',tag:'ПЕРИМЕТР · 01',district:'suburb',color:'#8ce8ac',tint:'rgba(35,84,56,0.17)',arena:{x:2660,y:1800,r:225},checkpoint:{x:3310,y:1800},pool:['walker','runner','cop','hound'],boss:'brute',speaker:'ШРАМ',role:'КОМАНДИР',accent:'#ffcf69',
-  intro:[{who:'ШРАМ',role:'КОМАНДИР',text:'Сектор один. Дорога к источнику штамма начинается здесь. Подойди к освещённому полигону — мы удержим периметр.'},{who:'ВЕКТОР',role:'ОРУЖЕЙНИК',text:'На арене стоят красные бочки. Попади в них, когда заражённые сблизятся: взрыв разнесёт всю группу.'},{who:'ШРАМ',role:'КОМАНДИР',text:'Какую тактику выбираешь?',choices:[{text:'Взять бронепластины',tag:'+35 🛡️',effect:'shield'},{text:'Запросить боевые припасы',tag:'+1 🤖 турель',effect:'turret'}]}],
+ {name:'Ржавый периметр',tag:'ПЕРИМЕТР · 01',district:'suburb',color:'#8ce8ac',tint:'rgba(35,84,56,0.17)',arena:{x:1100,y:650,r:225},checkpoint:{x:1800,y:650},pool:['walker','runner','cop','hound'],boss:'brute',speaker:'ШРАМ',role:'КОМАНДИР',accent:'#ffcf69',
+  intro:[{who:'ШРАМ',role:'КОМАНДИР',text:'Сектор один. Дорога к источнику штамма начинается здесь. Найди следы пропавшего конвоя на восточном шоссе. Его груз может объяснить, как началась вспышка.'},{who:'ВЕКТОР',role:'ОРУЖЕЙНИК',text:'В депо есть взрывные бочки. Попади в них, когда заражённые сблизятся: взрыв разнесёт всю группу.'},{who:'ШРАМ',role:'КОМАНДИР',text:'Какую тактику выбираешь?',choices:[{text:'Взять бронепластины',tag:'+35 🛡️',effect:'shield'},{text:'Запросить боевые припасы',tag:'+1 🤖 турель',effect:'turret'}]}],
   radio:[['ШРАМ','Периметр взят. КПП открывает дорогу к химическому комбинату.'],['ВЕКТОР','Проверяю мотор и боезапас. Оружие и добыча остаются с нами.'],['ДОК','У шоссе токсичный туман. Фильтры наготове.']]},
- {name:'Химический комбинат',tag:'ХИМКОМБИНАТ · 02',district:'chem',color:'#b7ff62',tint:'rgba(104,125,22,0.20)',arena:{x:2700,y:1800,r:230},checkpoint:{x:3300,y:1800},pool:['hazmat','spitter','acidic','chemist'],boss:'glowing',speaker:'ДОК',role:'ПОЛЕВОЙ МЕДИК',accent:'#73ffe1',
-  intro:[{who:'ДОК',role:'ПОЛЕВОЙ МЕДИК',text:'Реакторы ХИМ-КОМБИНАТА питают гнездо. Три рубежа: первая атака, удержание площадки и прорыв к центральной цистерне.'},{who:'ШРАМ',role:'КОМАНДИР',text:'Прожекторы обозначают границу полигона. Держись внутри, пока идёт штурм.'},{who:'ДОК',role:'ПОЛЕВОЙ МЕДИК',text:'Кого поддержать в первую очередь?',choices:[{text:'Восстановить здоровье отряда',tag:'+40 ❤️',effect:'heal'},{text:'Усилить защитный контур',tag:'+45 🛡️',effect:'shield'}]}],
-  radio:[['ДОК','Образцы в герметичных контейнерах. Медгородок ждёт наш сигнал.'],['ШРАМ','Проход через КПП открыт. Не сбрасывай скорость на шоссе.'],['ВЕКТОР','Бочки взрываются от выстрелов — и здесь это работает.']]},
- {name:'Госпиталь «Маяк»',tag:'ГОСПИТАЛЬ · 03',district:'hospital',color:'#88e8ff',tint:'rgba(30,98,125,0.19)',arena:{x:2660,y:1800,r:225},checkpoint:{x:3300,y:1800},pool:['patient','nurse','medic','surgeon'],boss:'necromancer',speaker:'АНГЕЛ',role:'МЕДИК ОТРЯДА',accent:'#81eaff',
-  intro:[{who:'АНГЕЛ',role:'МЕДИК ОТРЯДА',text:'Сигнал «Маяка» пропал после последней смены. Нам придётся отстоять операционный полигон и уничтожить реаниматора.'},{who:'ДОК',role:'ПОЛЕВОЙ МЕДИК',text:'Удерживайте зону десять секунд во второй фазе. Только потом откроется доступ к боссу.'},{who:'ШРАМ',role:'КОМАНДИР',text:'Последняя подготовка перед Цитаделью?',choices:[{text:'Полевое лечение',tag:'+45 ❤️',effect:'heal'},{text:'Снарядить турель',tag:'+1 🤖 турель',effect:'turret'}]}],
+ {name:'Химический комбинат',tag:'ХИМКОМБИНАТ · 02',district:'chem',color:'#b7ff62',tint:'rgba(104,125,22,0.20)',arena:{x:2650,y:650,r:230},checkpoint:{x:2950,y:1800},pool:['hazmat','spitter','acidic','chemist'],boss:'glowing',speaker:'ДОК',role:'ПОЛЕВОЙ МЕДИК',accent:'#73ffe1',
+  intro:[{who:'ДОК',role:'ПОЛЕВОЙ МЕДИК',text:'Реактор на комбинате продолжает выпускать реагент. Перекрой три линии на улицах и дай мне скачать журнал операций.'},{who:'ШРАМ',role:'КОМАНДИР',text:'За диспетчерской есть пульт. Прикрой меня у него, когда перекроешь насосы.'},{who:'ДОК',role:'ПОЛЕВОЙ МЕДИК',text:'Кого поддержать в первую очередь?',choices:[{text:'Восстановить здоровье отряда',tag:'+40 ❤️',effect:'heal'},{text:'Усилить защитный контур',tag:'+45 🛡️',effect:'shield'}]}],
+  radio:[['ДОК','Образцы в герметичных контейнерах. Медгородок ждёт наш сигнал.'],['ШРАМ','Проход через КПП открыт. У нас есть новые координаты из журнала комбината. Двигайся осторожно.'],['ВЕКТОР','Бочки взрываются от выстрелов — и здесь это работает.']]},
+ {name:'Госпиталь «Маяк»',tag:'ГОСПИТАЛЬ · 03',district:'hospital',color:'#88e8ff',tint:'rgba(30,98,125,0.19)',arena:{x:1100,y:2950,r:225},checkpoint:{x:1800,y:2950},pool:['patient','nurse','medic','surgeon'],boss:'necromancer',speaker:'АНГЕЛ',role:'МЕДИК ОТРЯДА',accent:'#81eaff',
+  intro:[{who:'АНГЕЛ',role:'МЕДИК ОТРЯДА',text:'Госпиталь «Маяк» замолчал. Найди врачей и записи о нулевом пациенте, потом прикрой эвакуацию.'},{who:'ДОК',role:'ПОЛЕВОЙ МЕДИК',text:'Медикам потребуется время, чтобы вывести людей. Я прикрою их, а ты найди архив.'},{who:'ШРАМ',role:'КОМАНДИР',text:'Последняя подготовка перед Цитаделью?',choices:[{text:'Полевое лечение',tag:'+45 ❤️',effect:'heal'},{text:'Снарядить турель',tag:'+1 🤖 турель',effect:'turret'}]}],
   radio:[['АНГЕЛ','Пациенты больше не представляют угрозы. Выходим на магистраль.'],['ШРАМ','Цитадель впереди. Там держат нулевой образец.'],['ВЕКТОР','Зарядил всё, что было. Теперь только вперёд.']]},
- {name:'Цитадель Ноль',tag:'ЦИТАДЕЛЬ · 04',district:'military',color:'#ffad73',tint:'rgba(122,46,35,0.22)',arena:{x:2670,y:1800,r:230},checkpoint:null,pool:['soldier','commando','cyborg','juggernaut'],boss:'patriarch',speaker:'ШРАМ',role:'КОМАНДИР',accent:'#ffb96a',
-  intro:[{who:'ШРАМ',role:'КОМАНДИР',text:'Цитадель Ноль. За воротами — первоисточник заражения. Три этапа, а затем Патриарх-0. Назад пути нет.'},{who:'ВЕКТОР',role:'ОРУЖЕЙНИК',text:'Взрывные бочки по флангам. Во второй фазе босса следи за кислотными залпами.'},{who:'ШРАМ',role:'КОМАНДИР',text:'Последний приказ отряду?',choices:[{text:'Прикрыть бойцов',tag:'+55 🛡️',effect:'shield'},{text:'Полная огневая мощь',tag:'+1 🤖 турель',effect:'turret'}]}],
+ {name:'Цитадель Ноль',tag:'ЦИТАДЕЛЬ · 04',district:'military',color:'#ffad73',tint:'rgba(122,46,35,0.22)',arena:{x:2650,y:2950,r:230},checkpoint:null,pool:['soldier','commando','cyborg','juggernaut'],boss:'patriarch',speaker:'ШРАМ',role:'КОМАНДИР',accent:'#ffb96a',
+  intro:[{who:'ШРАМ',role:'КОМАНДИР',text:'Цитадель Ноль направляет орды радиосигналом. Заглуши три передатчика, затем забери оригинал сыворотки.'},{who:'ВЕКТОР',role:'ОРУЖЕЙНИК',text:'Взрывные бочки по флангам. У Патриарха есть кислотные залпы; держись подвижно.'},{who:'ШРАМ',role:'КОМАНДИР',text:'Последний приказ отряду?',choices:[{text:'Прикрыть бойцов',tag:'+55 🛡️',effect:'shield'},{text:'Полная огневая мощь',tag:'+1 🤖 турель',effect:'turret'}]}],
   radio:[]}
 ];
+// Evidence, witnesses and sabotage sites are spread across the existing city.
+// All markers sit on open roads, so walking and driving can reach them.
+const CAMPAIGN_MISSIONS=[
+ {title:'Пропавший конвой',goal:'Найди след конвоя и узнай, куда вывезли заражённых',phases:2,
+  sites:[{x:1800,y:1330,icon:'📻',name:'Разбитая рация',text:'ВЕКТОР: В эфире последний приказ конвою: не спасать людей, а доставить контейнер на комбинат. Кто его подписал?'},
+   {x:1540,y:650,icon:'📋',name:'Маршрутный лист',text:'ШРАМ: На бумаге моя подпись. Подделка. Кто-то использует позывные командования, чтобы скрыть перевозку образца.'},
+   {x:1250,y:650,icon:'👤',name:'Выживший водитель',text:'ВОДИТЕЛЬ: Образец назвали «Ноль». Из госпиталя его отправили на комбинат. Охрана не пустила нас обратно.'}],
+  interlude:'ШРАМ: Конвой отбился от первой волны, но источник сигнала ещё впереди. Найди того, кто командовал блокадой.'},
+ {title:'Мёртвый реактор',goal:'Перекрой три линии подачи заражённого реагента',phases:2,hold:26,
+  sites:[{x:2100,y:650,icon:'🔧',name:'Вентиль подачи',text:'ДОК: Это не авария. Подачу реагента включили вручную после объявления карантина. Закрой первый контур.'},
+   {x:2950,y:380,icon:'☣️',name:'Северный фильтр',text:'ВЕКТОР: Фильтр выведен из строя изнутри. В журнале смены — пропуск Цитадели Ноль.'},
+   {x:2950,y:960,icon:'⚙️',name:'Аварийный насос',text:'ДОК: Насос заглушен. Сейчас реактор начнёт сброс — удержи диспетчерскую, пока я выведу данные.'}],
+  interlude:'ДОК: Мне нужно время у пульта. Не уходи далеко: поток реагента снова прорвётся, если сорвать загрузку.'},
+ {title:'Последняя смена «Маяка»',goal:'Найди медиков и доставь записи о первых пациентах',phases:2,hold:32,
+  sites:[{x:1800,y:2330,icon:'🚑',name:'Брошенная скорая',text:'АНГЕЛ: Мы вывозили детей, пока военные закрывали ворота. Один из врачей остался в западном корпусе.'},
+   {x:650,y:2950,icon:'👩‍⚕️',name:'Врач «Маяка»',text:'ВРАЧ: «Ноль» не был первым заражённым. Ему ввели опытную сыворотку, а потом результаты засекретили.'},
+   {x:1440,y:2950,icon:'💉',name:'Архив сыворотки',text:'ДОК: Вот исходный протокол. Он может остановить штамм, но оригинал хранится в Цитадели. Удержи связь с эвакуацией.'}],
+  interlude:'АНГЕЛ: Пациенты готовы к отправке. Пока я вывожу их из корпуса, прикрой площадку — не дай заражённым прорваться.'},
+ {title:'Цитадель Ноль',goal:'Отключи три передатчика, управляющие заражёнными',phases:3,hold:38,
+  sites:[{x:1800,y:2540,icon:'📡',name:'Западный передатчик',text:'ВЕКТОР: Сигнал заманивает орды к эвакуации. Отключаю частоту, но второй узел ещё работает.'},
+   {x:2950,y:2360,icon:'🔌',name:'Северный узел',text:'ДОК: Под архивом нашёл формулу. Цитадель не искала лекарство — она тестировала, как направлять заражённых.'},
+   {x:2950,y:3300,icon:'🛰️',name:'Южный ретранслятор',text:'ШРАМ: Передача заглушена. Теперь мы можем войти к Патриарху-0. Вернём формулу тем, кто ещё жив.'}],
+  interlude:'ШРАМ: Передатчики погасли, но система перезапускается. Удержи узел связи, пока Док отправляет протокол наружу.'}
+];
+let campaignObjectiveIndex=0,campaignSiegeTimer=0;
+function campaignCurrentSite(){
+ return gameMode==='campaign'&&campaignState==='investigate'
+  ?CAMPAIGN_MISSIONS[campaignStage].sites[campaignObjectiveIndex]||null:null;
+}
+function campaignNearbySite(){
+ const site=campaignCurrentSite();
+ return site&&player&&Math.hypot(player.x-site.x,player.y-site.y)<78?site:null;
+}
+function campaignInspectSite(){
+ const site=campaignNearbySite();if(!running||paused||!site)return false;
+ campaignObjectiveIndex++;
+ if(campaignObjectiveIndex>=CAMPAIGN_MISSIONS[campaignStage].sites.length)campaignState='approach';
+ addParticles(site.x,site.y,CAMPAIGN_LOCATIONS[campaignStage].color,14,120,'spark');
+ // Investigating has consequences: some evidence is defended, a ruptured
+ // reactor leaks acid, and the rescued medic gives a usable field kit.
+ if((campaignStage===0&&campaignObjectiveIndex===2)||
+    (campaignStage===1&&campaignObjectiveIndex===3)||
+    (campaignStage===2&&campaignObjectiveIndex===1)||
+    (campaignStage===3&&campaignObjectiveIndex===2)){
+  const loc=CAMPAIGN_LOCATIONS[campaignStage];
+  const vertical=Math.abs(site.x-1800)<10||Math.abs(site.x-2950)<10;
+  for(let i=0;i<(campaignStage===3?3:2);i++){
+   const offset=i%2?110:-110;
+   const z=spawnZombie(loc.pool[(i+campaignObjectiveIndex)%loc.pool.length],
+    site.x+(vertical?0:offset),site.y+(vertical?offset:0),{aggro:true});
+   if(z){z.aggroTimer=35;z.lastSeenX=site.x;z.lastSeenY=site.y;}
+  }
+ }
+ if(campaignStage===1&&campaignObjectiveIndex===3)
+  hazardZones.push({x:site.x+85,y:site.y,r:38,kind:'acid',life:9,max:9,tick:0});
+ if(campaignStage===2&&campaignObjectiveIndex===2)
+  addLootToBagOrDrop(LOOT_TYPES.medkit,site.x,site.y);
+ SFX.loot();
+ const split=site.text.indexOf(': '),who=site.text.slice(0,split),text=site.text.slice(split+2);
+ campaignShowDialogue([{who,role:'ПОЛЕВОЙ КАНАЛ',text}]);
+ updateUI();return true;
+}
 function campaignReset(){
  campaignStage=0;campaignPhase=0;campaignState='approach';campaignKills=0;campaignTotal=0;
- campaignHold=0;campaignWaveDelay=0;campaignBarrels=[];campaignTravel=null;campaignDialogue=null;
+ campaignHold=0;campaignWaveDelay=0;campaignObjectiveIndex=0;campaignSiegeTimer=0;campaignBarrels=[];campaignTravel=null;campaignDialogue=null;
  if(campaignTypeTimer)clearInterval(campaignTypeTimer);
  campaignTypeTimer=null;
  if($('polygonBanner'))$('polygonBanner').style.display='none';
@@ -9956,12 +10052,15 @@ function campaignReset(){
  if($('evacBadge'))$('evacBadge').style.display='';
 }
 function campaignStart(){
+ storyTab='story';
  campaignLoadLocation(0,null);
  campaignShowDialogue(CAMPAIGN_LOCATIONS[0].intro);
 }
 function campaignTheme(loc){
  const g=groundCtx,a=loc.arena;
- g.save();g.fillStyle=loc.tint;g.fillRect(30,30,WORLD_W-60,WORLD_H-60);
+ g.save();g.fillStyle=loc.tint;
+ const zoneX=campaignStage%2?WORLD_W/2:0,zoneY=campaignStage>=2?WORLD_H/2:0;
+ g.fillRect(zoneX+30,zoneY+30,WORLD_W/2-60,WORLD_H/2-60);
  // Each loaded sector has its own field installations and material palette.
  // These buildings, reactor vats, hospital tents or bastions are unique to this map.
  for(let i=0;i<6;i++){
@@ -9992,41 +10091,18 @@ function campaignTheme(loc){
  }
  // A separate road surface and tactical route are generated on every map load.
  g.strokeStyle='rgba(115,160,162,0.22)';g.lineWidth=100;
- g.beginPath();g.moveTo(SAFE_ZONE.x+250,1800);g.lineTo(3370,1800);g.stroke();
+g.beginPath();g.moveTo(SAFE_ZONE.x,SAFE_ZONE.y);g.lineTo(SAFE_ZONE.x,a.y);g.lineTo(a.x,a.y);g.stroke();
  g.strokeStyle=loc.color;g.globalAlpha=.33;g.lineWidth=3;g.setLineDash([22,22]);
- g.beginPath();g.moveTo(SAFE_ZONE.x+260,1800);g.lineTo(3380,1800);g.stroke();g.setLineDash([]);g.globalAlpha=1;
- // An octagonal live-fire polygon with an open west-side vehicle entrance.
- const points=[];
- for(let i=0;i<8;i++){
-  const t=Math.PI*i/4+Math.PI/8;
-  points.push({x:a.x+Math.cos(t)*a.r,y:a.y+Math.sin(t)*a.r});
- }
- g.fillStyle='rgba(10,16,18,0.52)';g.strokeStyle=loc.color;g.lineWidth=6;
- g.beginPath();points.forEach((p,i)=>i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y));g.closePath();g.fill();g.stroke();
- g.strokeStyle='rgba(250,212,110,0.66)';g.lineWidth=3;g.setLineDash([14,9]);
- g.beginPath();points.forEach((p,i)=>i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y));g.closePath();g.stroke();g.setLineDash([]);
- // Low cover stops projectiles at the perimeter. The western approach is open.
- for(let i=0;i<8;i++){
-  if(i===3||i===4)continue;
-  const p=points[i],q=points[(i+1)%8],angle=Math.atan2(q.y-p.y,q.x-p.x);
-  for(let t=.18;t<=.82;t+=.32)drawBarrier(g,p.x+(q.x-p.x)*t,p.y+(q.y-p.y)*t,angle,42,true);
- }
+ g.beginPath();g.moveTo(SAFE_ZONE.x,SAFE_ZONE.y);g.lineTo(a.x,a.y);g.stroke();g.setLineDash([]);g.globalAlpha=1;
+ // A landmark, not a fenced arena: players can approach from any direction.
+ g.fillStyle='rgba(10,22,26,0.7)';g.strokeStyle=loc.color;g.lineWidth=3;
+ g.beginPath();g.roundRect(a.x-92,a.y-56,184,112,16);g.fill();g.stroke();
+ g.fillStyle=loc.color;g.font='900 15px system-ui,sans-serif';g.textAlign='center';
+ g.fillText(['🚚 ДЕПО','☣️ ДИСПЕТЧЕРСКАЯ','🚑 ЭВАКУАЦИЯ','📡 УЗЕЛ СВЯЗИ'][campaignStage],a.x,a.y-9);
+ g.font='700 11px monospace';g.fillText(loc.tag,a.x,a.y+13);
  for(let i=0;i<4;i++){
-  const ang=i*Math.PI/2+Math.PI/4;
-  const px=a.x+Math.cos(ang)*(a.r+15),py=a.y+Math.sin(ang)*(a.r+15);
+  const ang=i*Math.PI/2+Math.PI/4,px=a.x+Math.cos(ang)*145,py=a.y+Math.sin(ang)*145;
   lamps.push({x:px,y:py,phase:i*.8});beacons.push({x:px,y:py,kind:i%2?'amber':'cyan',phase:i});
-  g.fillStyle='#1d2b2e';g.fillRect(px-6,py-6,12,12);
-  g.fillStyle=loc.color;g.beginPath();g.arc(px,py,4,0,Math.PI*2);g.fill();
- }
- g.textAlign='center';g.font='900 22px system-ui,sans-serif';g.fillStyle=loc.color;
- g.fillText('ПОЛИГОН '+(campaignStage+1).toString().padStart(2,'0'),a.x,a.y-35);
- g.font='800 13px monospace';g.fillText(loc.tag,a.x,a.y-15);
- // Concentric target rings and painted lane guides.
- for(let i=0;i<3;i++){
-  const tx=a.x+Math.cos(i*2.1)*115,ty=a.y+Math.sin(i*2.1)*115;
-  g.strokeStyle='rgba(255,110,94,0.48)';g.lineWidth=2;
-  for(const r of [8,17,26]){g.beginPath();g.arc(tx,ty,r,0,Math.PI*2);g.stroke();}
-  g.fillStyle='#e95349';g.beginPath();g.arc(tx,ty,4,0,Math.PI*2);g.fill();
  }
  const cp=loc.checkpoint;
  if(cp){
@@ -10045,7 +10121,7 @@ function campaignTheme(loc){
  }
 }
 function campaignLoadLocation(index,carry){
- campaignStage=index;campaignPhase=0;campaignState='approach';campaignKills=0;campaignTotal=0;
+ campaignStage=index;campaignPhase=0;campaignState='investigate';campaignObjectiveIndex=0;campaignSiegeTimer=0;campaignKills=0;campaignTotal=0;
  campaignHold=0;campaignWaveDelay=0;
  const bag=lootBag.slice();
  // The first sector can reuse the freshly generated base map. Later sectors
@@ -10086,68 +10162,79 @@ function campaignNearbyCheckpoint(){
  return !!(cp&&Math.hypot(player.x-cp.x,player.y-cp.y)<105);
 }
 function campaignThreatText(){
- if(campaignState==='ready')return '✅ ПОЛИГОН ЗАЧИЩЕН';
- if(campaignState==='approach')return '🎯 НАЙДИ ПОЛИГОН';
- if(campaignState==='combat')return `🎯 ЭТАП ${campaignPhase+1}/3 · ${campaignKills}/${campaignTotal}`;
- if(campaignState==='hold')return `⏱ УДЕРЖИВАЙ ${Math.ceil(campaignHold)}с`;
+ const mission=CAMPAIGN_MISSIONS[campaignStage];
+ if(campaignState==='investigate')return `🔎 ЗАДАНИЯ ${campaignObjectiveIndex}/${mission.sites.length}`;
+ if(campaignState==='ready')return '✅ ЗАДАНИЕ ВЫПОЛНЕНО';
+ if(campaignState==='approach')return '📍 ПРИБУДЬ К ОБЪЕКТУ';
+ if(campaignState==='combat')return `⚔️ ${campaignKills}/${campaignTotal} · ЭТАП ${campaignPhase+1}/${mission.phases}`;
+ if(campaignState==='hold')return `⏱ ЗАЩИТА ${Math.ceil(campaignHold)}с`;
  return '📡 СВЯЗЬ С ОТРЯДОМ';
 }
 function campaignUpdateHud(){
- const loc=CAMPAIGN_LOCATIONS[campaignStage],a=loc.arena;
+ const loc=CAMPAIGN_LOCATIONS[campaignStage],mission=CAMPAIGN_MISSIONS[campaignStage];
  const banner=$('polygonBanner'),mb=$('missionBar');
  if(!running){if(mb)mb.style.display='none';return;}
  banner.style.display='block';banner.className=campaignState==='ready'?'ready':campaignState==='combat'||campaignState==='hold'?'active':'';
- const dist=Math.round(Math.hypot(player.x-a.x,player.y-a.y));
- banner.textContent=campaignState==='ready'?(loc.checkpoint?'✅ ПОЛИГОН ЗАЧИЩЕН · ЕЗЖАЙ К КПП':'🏆 ЦИТАДЕЛЬ ОСВОБОЖДЕНА'):
-  campaignState==='approach'?`🎯 ${loc.name} · ПОЛИГОН ${dist}м`:
-  campaignState==='hold'?`⏱ УДЕРЖАНИЕ ПОЛИГОНА · ${Math.ceil(campaignHold)}с`:
-  `⚔️ ${loc.name} · ЭТАП ${campaignPhase+1}/3 · ${campaignKills}/${campaignTotal}`;
- if(mb){mb.style.display='block';
-  const dest=campaignState==='ready'?loc.checkpoint:a;
-  const bearing=dest?Math.atan2(dest.y-player.y,dest.x-player.x):0;
+ const target=campaignState==='investigate'?campaignCurrentSite():campaignState==='ready'?loc.checkpoint:loc.arena;
+ const dist=target?Math.round(Math.hypot(player.x-target.x,player.y-target.y)):0;
+ const goal=campaignState==='investigate'?`🔎 ${target.name} · ${dist}м (${campaignObjectiveIndex+1}/${mission.sites.length})`:
+  campaignState==='approach'?`📍 ${mission.title} · объект ${dist}м`:
+  campaignState==='hold'?`⏱ ${mission.title} · ${Math.hypot(player.x-loc.arena.x,player.y-loc.arena.y)<190?'защищай объект':'вернись к объекту'} ${Math.ceil(campaignHold)}с`:
+  campaignState==='ready'?loc.checkpoint?'✅ ${mission.title} · езжай к КПП':'🏆 Задание выполнено':
+  `⚔️ ${mission.title} · ${campaignKills}/${campaignTotal}`;
+ banner.textContent=goal;
+ if(mb){
+  mb.style.display='block';
+  const bearing=target?Math.atan2(target.y-player.y,target.x-player.x):0;
   const arrows=['→','↘','↓','↙','←','↖','↑','↗'];
   const arrow=arrows[(Math.round(bearing/(Math.PI/4))+8)%8];
-  mb.textContent=campaignState==='ready'?(dest?`🚗 ${arrow} КПП ${Math.round(Math.hypot(dest.x-player.x,dest.y-player.y))}м · Переезд на машине`:'🏆 Патриарх-0 уничтожен · Кампания завершена!'):
-   `📖 ${campaignStage+1}/4 · ${arrow} ${loc.name} · ${dist}м · ${campaignThreatText()}`;
+  mb.textContent=`📖 ${campaignStage+1}/4 · ${arrow} ${goal} · ${campaignThreatText()}`;
  }
 }
 function campaignUpdate(dt,now){
+ const loc=CAMPAIGN_LOCATIONS[campaignStage],a=loc.arena;
  if(campaignState==='approach'){
-  const a=CAMPAIGN_LOCATIONS[campaignStage].arena;
-  if(Math.hypot(player.x-a.x,player.y-a.y)<a.r+28){
+  if(Math.hypot(player.x-a.x,player.y-a.y)<145){
    campaignState='combat';campaignPhase=0;campaignStartWave();
   }
  }else if(campaignState==='hold'){
-  const a=CAMPAIGN_LOCATIONS[campaignStage].arena;
-  if(Math.hypot(player.x-a.x,player.y-a.y)<a.r+12)campaignHold=Math.max(0,campaignHold-dt);
+  // Defend the terminal rather than simply waiting: leaving the area freezes
+  // the upload while fresh infected keep approaching every few seconds.
+  if(Math.hypot(player.x-a.x,player.y-a.y)<190)campaignHold=Math.max(0,campaignHold-dt);
+  campaignSiegeTimer-=dt;
+  if(campaignSiegeTimer<=0&&campaignHold>0){
+   campaignSiegeTimer=5.5;
+   const angle=Math.random()*Math.PI*2;
+   const z=spawnZombie(loc.pool[Math.floor(Math.random()*loc.pool.length)],a.x+Math.cos(angle)*200,a.y+Math.sin(angle)*200,{aggro:true});
+   if(z){z.aggroTimer=99;z.lastSeenX=player.x;z.lastSeenY=player.y;}
+  }
   if(campaignHold<=0){campaignState='combat';campaignStartWave();}
  }else if(campaignState==='combat'&&campaignWaveDelay>0){
   campaignWaveDelay-=dt;
   if(campaignWaveDelay<=0)campaignStartWave();
  }
- // Crossing the highway checkpoint while driving launches the journey automatically.
  if(player.inVehicle&&campaignNearbyCheckpoint())campaignStartTravel();
  if(player.inVehicle){
   for(const b of campaignBarrels){
-   if(b.live&&Math.hypot(b.x-player.x,b.y-player.y)<35&&Math.hypot(player.inVehicle.vx,player.inVehicle.vy)>95){campaignExplodeBarrel(b);}
+   if(b.live&&Math.hypot(b.x-player.x,b.y-player.y)<35&&Math.hypot(player.inVehicle.vx,player.inVehicle.vy)>95)campaignExplodeBarrel(b);
   }
  }
 }
 function campaignStartWave(){
- const loc=CAMPAIGN_LOCATIONS[campaignStage],a=loc.arena;
- campaignKills=0;campaignTotal=campaignPhase===0?5+campaignStage*2:campaignPhase===1?7+campaignStage*2:5+campaignStage;
+ const loc=CAMPAIGN_LOCATIONS[campaignStage],mission=CAMPAIGN_MISSIONS[campaignStage],a=loc.arena;
+ campaignKills=0;
+ const bossPhase=campaignPhase===mission.phases-1;
+ campaignTotal=bossPhase?7+campaignStage:8+campaignStage*2+campaignPhase*2;
  campaignState='combat';campaignWaveDelay=0;campaignHold=0;
- const typePool=loc.pool;
  for(let i=0;i<campaignTotal;i++){
-  const angle=i*2.399+campaignPhase*.9;
-  const r=72+(i%3)*30;
-  const type=campaignPhase===2&&i===0?loc.boss:typePool[(i+campaignPhase)%typePool.length];
+  const angle=i*2.399+campaignPhase*.9,r=92+(i%3)*42;
+  const type=bossPhase&&i===0?loc.boss:loc.pool[(i+campaignPhase)%loc.pool.length];
   const z=spawnZombie(type,a.x+Math.cos(angle)*r,a.y+Math.sin(angle)*r,{aggro:true,bypassCap:true});
   if(z){z.campaignTag=campaignStage;z.aggroTimer=999;z.lastSeenX=player.x;z.lastSeenY=player.y;
-   if(type===loc.boss&&campaignPhase===2){z.isWaveBoss=true;z.isStoryBoss=type==='patriarch';z.hp*=type==='patriarch'?1.8:1.35;z.maxHp=z.hp;}
+   if(type===loc.boss&&bossPhase){z.isWaveBoss=true;z.isStoryBoss=type==='patriarch';z.hp*=type==='patriarch'?2:1.4;z.maxHp=z.hp;}
   }
  }
- addPopup(player.x,player.y-50,`⚔️ ${loc.tag} · ЭТАП ${campaignPhase+1}/3`,'#ffe486',16);
+ addPopup(player.x,player.y-50,`⚔️ ${mission.title} · ЭТАП ${campaignPhase+1}/${mission.phases}`,'#ffe486',16);
  SFX.wave();updateUI();
 }
 function campaignOnKill(z){
@@ -10157,31 +10244,30 @@ function campaignOnKill(z){
 function campaignCheckWave(){
  if(campaignState!=='combat'||campaignWaveDelay>0||campaignKills<campaignTotal)return;
  if(zombies.some(z=>z.campaignTag===campaignStage&&z.hp>0))return;
- if(campaignPhase===2){
-  campaignState='ready';money+=150+campaignStage*85;
-  health=Math.min(maxHealth,health+45);shieldHp+=25;
-  addPopup(player.x,player.y-40,`✅ ПОЛИГОН ЗАЧИЩЕН! +${150+campaignStage*85} 🪙`,'#8cffaa',15);
+ const mission=CAMPAIGN_MISSIONS[campaignStage];
+ if(campaignPhase===mission.phases-1){
+  campaignState='ready';money+=180+campaignStage*85;
+  health=Math.min(maxHealth,health+50);shieldHp+=25;
+  addPopup(player.x,player.y-40,`✅ ${mission.title} · +${180+campaignStage*85} 🪙`,'#8cffaa',15);
   updateUI();SFX.story();
   if(campaignStage===CAMPAIGN_LOCATIONS.length-1){
    campaignShowDialogue([
-    {who:'ШРАМ',role:'КОМАНДИР',text:'Патриарх-0 уничтожен. Источник штамма погас — город впервые за долгое время встречает рассвет.'},
-    {who:'ДОК',role:'ПОЛЕВОЙ МЕДИК',text:'Все четыре сектора под контролем. Операция «Карантин» завершена. Отряд возвращается домой.'}
+    {who:'ДОК',role:'ПОЛЕВОЙ МЕДИК',text:'Протокол сыворотки передан врачам «Маяка». Теперь мы знаем не только как остановить штамм, но и кто использовал людей для опыта.'},
+    {who:'ШРАМ',role:'КОМАНДИР',text:'Сигнал Патриарха погас. Мы не вернём тех, кого потеряли, но оставшиеся люди получили шанс. Выходим из Цитадели вместе.'}
    ],campaignFinish);
   }else{
    const next=CAMPAIGN_LOCATIONS[campaignStage+1];
    campaignShowDialogue([{who:CAMPAIGN_LOCATIONS[campaignStage].speaker,role:CAMPAIGN_LOCATIONS[campaignStage].role,
-    text:`Полигон взят. Выезжай на КПП на восточном шоссе и прорывайся в сектор «${next.name}». Всё снаряжение и твоя машина остаются с тобой.`}]);
+    text:`Мы нашли часть правды, но ответы ждут в секторе «${next.name}». Доберись до КПП на машине — отряд и снаряжение поедут с тобой.`}]);
   }
  }else{
   campaignPhase++;
-  // Between waves the player can reposition; the next stage begins in two seconds.
-  campaignWaveDelay=2.5;
-  addPopup(player.x,player.y-40,`✓ ЭТАП ${campaignPhase}/3 · СЛЕДУЮЩАЯ АТАКА!`,'#a8ffba',14);
-  if(campaignPhase===2){
-   campaignState='hold';campaignHold=8+campaignStage;
-   // A timed holdout before the boss stage.
-   addPopup(player.x,player.y-55,`⏱ УДЕРЖИ ПОЛИГОН ${campaignHold}с`,'#ffe184',14);
-  }
+  const defend=(campaignStage===1||campaignStage===2)&&campaignPhase===1||campaignStage===3&&campaignPhase===2;
+  if(defend){campaignState='hold';campaignHold=mission.hold;campaignSiegeTimer=2;}
+  else {campaignWaveDelay=7;}
+  addPopup(player.x,player.y-40,defend?'⏱ ЗАЩИТИ УЗЕЛ СВЯЗИ':'✓ СЛЕДУЮЩИЙ РУБЕЖ','#a8ffba',14);
+  const split=mission.interlude.indexOf(': '),who=mission.interlude.slice(0,split),text=mission.interlude.slice(split+2);
+  campaignShowDialogue([{who,role:'ПОЛЕВОЙ КАНАЛ',text}]);
   updateUI();
  }
 }
@@ -10219,9 +10305,20 @@ function campaignExplodeBarrel(barrel){
 function campaignDrawWorld(now){
  const loc=CAMPAIGN_LOCATIONS[campaignStage],a=loc.arena;
  ctx.save();
- const pulse=.48+.25*Math.sin(now*.005);
- ctx.strokeStyle=loc.color;ctx.globalAlpha=pulse;ctx.lineWidth=3;
- ctx.setLineDash([12,10]);ctx.beginPath();ctx.arc(a.x,a.y,a.r-24,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
+ const site=campaignCurrentSite();
+ if(site){
+  const pulse=1+Math.sin(now*.005)*.12;
+  ctx.fillStyle=loc.color;ctx.globalAlpha=.20;
+  ctx.beginPath();ctx.arc(site.x,site.y,46*pulse,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=1;ctx.strokeStyle=loc.color;ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(site.x,site.y,34*pulse,0,Math.PI*2);ctx.stroke();
+  ctx.font='26px system-ui';ctx.textAlign='center';ctx.fillText(site.icon,site.x,site.y+9);
+  ctx.font='bold 12px system-ui';ctx.fillStyle='#f4fff4';ctx.fillText(site.name,site.x,site.y-48);
+ }
+ if(campaignState==='approach'||campaignState==='hold'){
+  ctx.strokeStyle=loc.color;ctx.globalAlpha=.35;ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(a.x,a.y,campaignState==='hold'?190:85,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
+ }
  for(const b of campaignBarrels){
   if(!b.live)continue;
   ctx.fillStyle='rgba(255,75,35,0.2)';ctx.beginPath();ctx.arc(b.x,b.y,18+Math.sin(now*.006)*2,0,Math.PI*2);ctx.fill();
@@ -10238,24 +10335,24 @@ function campaignDrawWorld(now){
 }
 function campaignDrawRadar(g,sx,sy,now){
  const loc=CAMPAIGN_LOCATIONS[campaignStage],a=loc.arena;
- g.strokeStyle=loc.color;g.lineWidth=2;
- g.beginPath();g.arc(a.x*sx,a.y*sy,Math.max(6,a.r*sx),0,Math.PI*2);g.stroke();
  g.fillStyle=loc.color;g.fillRect(a.x*sx-2,a.y*sy-2,4,4);
+ const site=campaignCurrentSite();
+ if(site){g.fillStyle='#ffe082';g.beginPath();g.arc(site.x*sx,site.y*sy,4,0,Math.PI*2);g.fill();}
  if(loc.checkpoint&&campaignState==='ready'){
   const cp=loc.checkpoint;g.fillStyle='#c4ff9a';g.fillRect(cp.x*sx-3,cp.y*sy-3,6,6);
  }
 }
 function campaignRenderPda(box){
  for(let i=0;i<CAMPAIGN_LOCATIONS.length;i++){
-  const l=CAMPAIGN_LOCATIONS[i],card=document.createElement('div');
+  const l=CAMPAIGN_LOCATIONS[i],mission=CAMPAIGN_MISSIONS[i],card=document.createElement('div');
   card.className='storyCard'+(i<campaignStage?' done':i===campaignStage?' active':'');
   const head=document.createElement('div');head.className='storyHead';
-  const title=document.createElement('span');title.textContent=`${i+1}. ${l.name}`;
+  const title=document.createElement('span');title.textContent=`${i+1}. ${mission.title} · ${l.name}`;
   const badge=document.createElement('span');badge.className='storyBadge '+(i<campaignStage?'done':i===campaignStage?'active':'lock');
-  badge.textContent=i<campaignStage?'ПРОЙДЕН ✓':i===campaignStage?campaignThreatText():'ЗАКРЫТО';
+  badge.textContent=i<campaignStage?'ПРОЙДЕНО ✓':i===campaignStage?campaignThreatText():'ЗАКРЫТО';
   head.append(title,badge);card.appendChild(head);
   const body=document.createElement('div');body.className='storyBody';
-  body.textContent=i===campaignStage?`Три этапа зачистки, босс «${ZOMBIE_TYPES[l.boss].name}». ${campaignState==='ready'?'Сядь в машину и проезжай КПП.':'Войди в отмеченный полигон, стреляй по взрывным бочкам.'}`:i<campaignStage?'Полигон освобождён. Маршрут открыт.':'Въезд через предыдущий КПП.';
+  body.textContent=i===campaignStage?`${mission.goal}. ${campaignState==='investigate'?`Следующая цель: ${mission.sites[campaignObjectiveIndex].name}. Ищи отметку на радаре; подойди и нажми E.`:campaignState==='hold'?'Прикрой узел связи и держись рядом, пока идёт передача.':campaignState==='ready'?'Найди машину и отправляйся к КПП.':'Направляйся к отмеченному объекту.'}`:i<campaignStage?'Следы собраны, маршрут открыт.':'Откроется по ходу расследования.';
   card.appendChild(body);box.appendChild(card);
  }
 }
@@ -10396,11 +10493,15 @@ function campaignFinish(){
  const box=document.createElement('div');box.className='box';
  const strip=document.createElement('div');strip.className='hazardStrip';box.appendChild(strip);
  const body=document.createElement('div');body.className='boxBody';
- body.innerHTML=`<h1 style="color:#9bffb4">🏆 РАССВЕТ НАД КАРАНТИНОМ</h1><div class="titleSlash"></div><p>Патриарх-0 повержен. Все четыре полигона зачищены, отряд возвращается домой.</p><div class="statsSummary"><div class="sumCard"><div class="k">СЕКТОРОВ</div><div class="v">4 / 4</div></div><div class="sumCard"><div class="k">ПОБЕД</div><div class="v">${kills}</div></div><div class="sumCard"><div class="k">ОЧКОВ</div><div class="v">${score}</div></div></div>`;
+ body.innerHTML=`<h1 style="color:#9bffb4">🏆 РАССВЕТ НАД КАРАНТИНОМ</h1><div class="titleSlash"></div><p>Патриарх-0 повержен. Следы конвоя, данные реактора и врачи «Маяка» помогли передать формулу сыворотки. Отряд возвращается домой.</p><div class="statsSummary"><div class="sumCard"><div class="k">СЕКТОРОВ</div><div class="v">4 / 4</div></div><div class="sumCard"><div class="k">ПОБЕД</div><div class="v">${kills}</div></div><div class="sumCard"><div class="k">ОЧКОВ</div><div class="v">${score}</div></div></div>`;
  box.appendChild(body);
  const footer=document.createElement('div');footer.className='boxFooter';
  const replay=document.createElement('button');replay.type='button';replay.className='mainbtn';replay.id='restart';replay.textContent='🔄 НОВАЯ КАМПАНИЯ';footer.appendChild(replay);
  const load=document.createElement('button');load.type='button';load.className='mainbtn secondary';load.id='loadCampaign';load.textContent='📂 ЗАГРУЗИТЬ СОХРАНЕНИЕ';footer.appendChild(load);
+ const free=document.createElement('button');free.type='button';free.className='mainbtn secondary';free.textContent='🌍 ОТКРЫТЫЙ МИР';free.addEventListener('click',()=>{setGameMode('free');startGame();});footer.appendChild(free);
+ const modes=document.createElement('div');modes.className='modeRow';modes.setAttribute('role','group');modes.setAttribute('aria-label','Выбор режима игры');modes.innerHTML=`
+    <button type="button" class="modeBtn${gameMode==='campaign'?' active':''}" data-mode="campaign"><span>📖 История карантина</span><small>Расследование · спасение · финал</small></button>
+    <button type="button" class="modeBtn${gameMode==='free'?' active':''}" data-mode="free"><span>🌍 Открытый мир</span><small>Исследование · добыча · вылазки</small></button>`;body.appendChild(modes);
  box.appendChild(footer);$('overlay').replaceChildren(box);$('overlay').style.display='flex';refreshSaveInfo();
  if(score>bestScore){bestScore=score;try{localStorage.setItem('carantin_best',String(bestScore));}catch(_){}}
  SFX.ach();
@@ -10416,8 +10517,8 @@ const CAMPAIGN_SAVE_KEY='carantin_campaign_v1';
 function readCampaignSave(){
  try{
   const s=JSON.parse(localStorage.getItem(CAMPAIGN_SAVE_KEY)||'null');
-  if(!s||s.version!==1||!Number.isInteger(s.stage)||s.stage<0||s.stage>=CAMPAIGN_LOCATIONS.length||
-     !['approach','combat','hold','ready'].includes(s.state)||!s.player||
+  if(!s||(s.version!==1&&s.version!==2)||!Number.isInteger(s.stage)||s.stage<0||s.stage>=CAMPAIGN_LOCATIONS.length||
+     !['investigate','approach','combat','hold','ready'].includes(s.state)||!s.player||
      !Number.isFinite(s.player.x)||!Number.isFinite(s.player.y)||
      s.player.x<0||s.player.x>WORLD_W||s.player.y<0||s.player.y>WORLD_H||
      !Number.isFinite(s.health)||s.health<=0||!Array.isArray(s.zombies)||
@@ -10428,6 +10529,9 @@ function readCampaignSave(){
      !Array.isArray(s.turrets)||!Array.isArray(s.hazardZones)||
      !s.upgrades||!s.prices||!s.ownedItems||!s.itemMods||!s.storyStats||
      !Number.isInteger(s.phase)||s.phase<0||s.phase>2||
+     (s.version===2&&(!Number.isInteger(s.objectiveIndex)||s.objectiveIndex<0||
+      s.objectiveIndex>CAMPAIGN_MISSIONS[s.stage].sites.length||
+      (s.state==='investigate'&&s.objectiveIndex===CAMPAIGN_MISSIONS[s.stage].sites.length)))||
      !Number.isFinite(s.stageKills)||!Number.isFinite(s.total)||
      !Number.isFinite(s.hold)||!Number.isFinite(s.delay)||
      !Number.isFinite(s.money)||!Number.isFinite(s.maxHealth)||
@@ -10445,12 +10549,14 @@ function refreshSaveInfo(){
  const text=s?`💾 Сектор ${s.stage+1}/4 · ${CAMPAIGN_LOCATIONS[s.stage].name} · ${new Date(s.savedAt).toLocaleString('ru-RU')}`:'Сохранений пока нет';
  for(const id of ['saveInfo','pauseSaveInfo'])if($(id))$(id).textContent=text;
  document.querySelectorAll('#loadCampaign,#pauseLoadCampaign').forEach(b=>{b.disabled=!s;});
+ if($('saveCampaign'))$('saveCampaign').disabled=gameMode!=='campaign';
 }
 function saveCampaign(){
  if(!running||gameMode!=='campaign'||!player||campaignDialogue||campaignTravel||health<=0)return false;
  const carId=player.inVehicle?player.inVehicle.id:null;
  const snapshot={
-  version:1,savedAt:Date.now(),stage:campaignStage,state:campaignState,
+  version:2,savedAt:Date.now(),stage:campaignStage,state:campaignState,
+  objectiveIndex:campaignObjectiveIndex,siegeTimer:campaignSiegeTimer,
   phase:campaignPhase,stageKills:campaignKills,total:campaignTotal,hold:campaignHold,delay:campaignWaveDelay,
   difficulty:currentDifficulty,player:{...player,inVehicle:null},carId,
   health,maxHealth,shieldHp,score,money,kills,shotCount,maxHpBuys,
@@ -10476,12 +10582,16 @@ function saveCampaign(){
 function loadCampaign(){
  const s=readCampaignSave();
  if(!s){refreshSaveInfo();return false;}
+ gameMode='campaign';storyTab='story';
  // Recreate the deterministic sector geometry and loot, then restore the
  // combat state. Do not call campaignStart(): that would restart sector one.
  init();
  setDifficulty(s.difficulty);
  campaignLoadLocation(s.stage,null);
- campaignState=s.state;campaignPhase=s.phase;campaignKills=s.stageKills;
+ campaignObjectiveIndex=s.version===2?s.objectiveIndex:(s.state==='approach'?0:CAMPAIGN_MISSIONS[s.stage].sites.length);
+ campaignSiegeTimer=s.version===2?s.siegeTimer:2;
+ campaignState=s.version===1&&s.state==='approach'?'investigate':s.state;
+ campaignPhase=s.version===1?Math.min(s.phase,CAMPAIGN_MISSIONS[s.stage].phases-1):s.phase;campaignKills=s.stageKills;
  campaignTotal=s.total;campaignHold=s.hold;campaignWaveDelay=s.delay;
  player={...player,...s.player,inVehicle:null};
  health=s.health;maxHealth=s.maxHealth;shieldHp=s.shieldHp;
