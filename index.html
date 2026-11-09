@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#0b1416">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>CARANTIN 3.1</title>
+<title>CARANTIN 4.0 — Кампания и Полигоны</title>
 <style>
 :root{
  --bg-dark:#081012;
@@ -31,10 +31,28 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
 
 #ui{position:absolute;inset:0;pointer-events:none;z-index:10;will-change:transform}
 
+#hudHeader{
+ position:absolute;
+ top:max(8px,env(safe-area-inset-top));
+ left:max(8px,env(safe-area-inset-left));
+ right:max(8px,env(safe-area-inset-right));
+ display:grid;
+ grid-template-columns:minmax(0,1fr) auto;
+ gap:8px;
+ align-items:start;
+ pointer-events:none;
+}
+#hudMain{
+ min-width:0;
+ display:flex;
+ flex-direction:column;
+ gap:5px;
+ max-width:740px;
+}
+
 #top{
- position:absolute;top:max(8px,env(safe-area-inset-top));left:8px;right:8px;
- display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
- max-width:720px;margin:0 auto;
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;
+ width:100%;
 }
 .stat{
  background:var(--panel);
@@ -42,11 +60,12 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  border:1px solid var(--border);
  border-top-color:rgba(180,230,195,0.28);
  border-radius:12px;
- padding:7px 6px;
- display:flex;align-items:center;justify-content:center;gap:5px;
- font-size:clamp(11px,3.1vw,15px);font-weight:700;
+ padding:6px 5px;
+ display:flex;align-items:center;justify-content:center;gap:4px;
+ font-size:clamp(11px,2.9vw,15px);font-weight:700;
  font-variant-numeric:tabular-nums;
  box-shadow:0 4px 16px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.06);
+ min-width:0;overflow:hidden;white-space:nowrap;
 }
 .stat-hp{border-color:rgba(92,255,112,0.35)}
 .stat-score{border-color:rgba(130,210,160,0.3)}
@@ -61,11 +80,11 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
 .stat-money{border-color:rgba(255,190,61,0.38);color:#ffe29a}
 
 #hudRow{
- position:absolute;top:calc(max(8px,env(safe-area-inset-top)) + 44px);
- left:10px;right:10px;max-width:680px;margin:0 auto;
- display:flex;align-items:center;gap:8px;
+ display:flex;align-items:flex-start;flex-wrap:wrap;gap:6px;
+ width:100%;min-width:0;
 }
-#healthWrap{flex:1;display:flex;flex-direction:column;gap:4px}
+#healthWrap{flex:1 1 170px;min-width:0;display:flex;flex-direction:column;gap:4px}
+#hudBtns{display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex:1 1 100%;min-width:0;width:100%}
 #healthbar{
  position:relative;height:13px;
  background:rgba(10,18,19,0.88);
@@ -88,13 +107,14 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  background:repeating-linear-gradient(90deg,transparent,transparent calc(20% - 1px),rgba(0,0,0,0.35) calc(20% - 1px),rgba(0,0,0,0.35) 20%);
 }
 #badgeRow{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-#threatBadge,#zoneBadge{
+#threatBadge,#zoneBadge,#evacBadge{
  align-self:flex-start;
- font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+ font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
  color:#a9d1b6;background:rgba(10,20,21,0.78);
  border:1px solid rgba(110,158,132,0.28);border-radius:6px;
  padding:2px 7px;
 }
+#evacBadge{color:#ffe494;border-color:rgba(255,198,84,0.4)}
 #zoneBadge.safe{
  color:#88f7ff;border-color:rgba(90,225,255,0.52);
  background:rgba(10,32,42,0.84);
@@ -104,6 +124,37 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
 }
 #zoneBadge.mil{
  color:#ffd17a;border-color:rgba(255,176,68,0.45);
+}
+#radarSlot{
+ flex:0 0 auto;
+ display:flex;
+ flex-direction:column;
+ align-items:flex-end;
+ gap:3px;
+ pointer-events:none;
+}
+#locBadge{
+ font-size:9px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
+ color:#9fd8bc;background:rgba(8,18,19,0.84);
+ border:1px solid rgba(104,210,136,0.32);border-radius:6px;
+ padding:1px 6px;max-width:94px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#polygonBanner{
+ display:none;pointer-events:none;
+ align-self:flex-start;max-width:100%;
+ padding:4px 10px;border-radius:9px;
+ background:linear-gradient(135deg,rgba(48,28,10,0.92),rgba(20,24,18,0.92));
+ border:1.5px solid rgba(255,186,66,0.68);
+ color:#ffe69e;font-size:11px;font-weight:800;letter-spacing:.35px;
+ box-shadow:0 4px 14px rgba(0,0,0,0.5),0 0 14px rgba(255,180,55,0.22);
+}
+#polygonBanner.active{
+ border-color:#ff7b4a;color:#ffd8ba;
+ background:linear-gradient(135deg,rgba(56,18,16,0.94),rgba(24,14,14,0.94));
+}
+#polygonBanner.ready{
+ border-color:#7cff96;color:#d6ffe0;
+ background:linear-gradient(135deg,rgba(16,46,28,0.94),rgba(10,24,18,0.94));
 }
 
 #actionBar{
@@ -237,13 +288,13 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
 .mercPill.dead{opacity:.5;border-color:rgba(255,100,110,0.4);color:#ffb0b8}
 #bossBanner{
  display:none;
- position:absolute;top:calc(max(8px,env(safe-area-inset-top)) + 98px);left:50%;transform:translateX(-50%);
+ position:absolute;top:calc(max(8px,env(safe-area-inset-top)) + 124px);left:50%;transform:translateX(-50%);
  width:min(330px,74vw);
  background:rgba(28,8,14,0.88);
  border:1.5px solid rgba(255,86,112,0.65);border-radius:10px;
  padding:5px 10px 6px;
  box-shadow:0 6px 20px rgba(0,0,0,0.6),0 0 18px rgba(255,58,82,0.28);
- text-align:center;
+ text-align:center;z-index:16;
 }
 #bossTitle{
  font-size:10.5px;font-weight:900;letter-spacing:.7px;text-transform:uppercase;
@@ -264,16 +315,17 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
 
 .hudBtn{
  pointer-events:auto;position:relative;
- height:32px;border-radius:10px;
+ height:30px;border-radius:9px;
  background:linear-gradient(180deg,#243f35,#162922);
  border:1px solid rgba(135,190,155,0.45);
- font-size:12px;font-weight:800;letter-spacing:.5px;
+ font-size:11.5px;font-weight:800;letter-spacing:.4px;
  box-shadow:0 4px 12px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.12);
  transition:transform .08s ease,filter .12s ease;
+ white-space:nowrap;
 }
 .hudBtn:active{transform:scale(0.95)}
-#shopButton{padding:0 10px;color:#ffe4a1;border-color:rgba(255,190,61,0.48)}
-#codexButton{padding:0 9px;color:#a2ffb0;border-color:rgba(104,235,126,0.46);display:inline-flex;align-items:center;gap:4px}
+#shopButton{padding:0 9px;color:#ffe4a1;border-color:rgba(255,190,61,0.48)}
+#codexButton{padding:0 8px;color:#a2ffb0;border-color:rgba(104,235,126,0.46);display:inline-flex;align-items:center;gap:4px}
 #codexBadge{font-size:10px;color:#d6ffe0;opacity:.92;font-variant-numeric:tabular-nums}
 #shopBadge{
  display:none;position:absolute;top:-4px;right:-4px;
@@ -282,26 +334,154 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  border:1.5px solid #091315;
 }
 #shopBadge.show{display:block;animation:pulseDot 1.1s infinite ease-in-out}
-#pauseButton,#muteButton,#fsButton{width:34px;font-size:13px}
+#pauseButton,#muteButton,#fsButton{width:30px;font-size:12.5px}
 #muteButton{color:#ffe69a;border-color:rgba(255,204,92,0.45)}
 #fsButton{color:#9de8ff;border-color:rgba(105,215,245,0.45)}
-@media(max-width:420px){
+@media(max-width:480px){
  #hudRow{gap:5px}
  #codexBadge{display:none}
- #shopButton{padding:0 8px;font-size:11px}
+ #shopButton{padding:0 7px;font-size:10.5px}
+ #storyBtn{padding:0 7px;font-size:10.5px}
+ .hudBtn{height:28px}
+ #pauseButton,#muteButton,#fsButton{width:28px;font-size:12px}
 }
 
 #radar{
- position:absolute;
- top:calc(max(8px,env(safe-area-inset-top)) + 86px);
- right:10px;
- width:68px;height:68px;
+ width:70px;height:70px;
  border-radius:12px;
- border:1px solid rgba(104,210,136,0.42);
- background:rgba(8,18,19,0.78);
- box-shadow:0 4px 16px rgba(0,0,0,0.5),inset 0 0 14px rgba(92,255,90,0.08);
+ border:1px solid rgba(104,210,136,0.45);
+ background:rgba(8,18,19,0.82);
+ box-shadow:0 4px 16px rgba(0,0,0,0.52),inset 0 0 14px rgba(92,255,90,0.08);
  pointer-events:none;
+ display:block;
 }
+
+/* Mode selector on title / result screens */
+#modeRow{
+ display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:8px 0 4px;
+}
+.modeBtn{
+ padding:8px 8px;border-radius:11px;font-size:11.5px;font-weight:800;
+ background:rgba(10,20,21,0.84);border:1.5px solid rgba(114,166,138,0.32);
+ color:#b8d0c2;display:flex;flex-direction:column;align-items:center;gap:2px;
+ transition:transform .08s ease,border-color .15s ease,background .15s ease;
+}
+.modeBtn small{font-size:9.5px;font-weight:600;opacity:.85;line-height:1.2}
+.modeBtn.active{
+ background:linear-gradient(180deg,rgba(36,88,118,0.92),rgba(16,44,64,0.95));
+ border-color:#7ce8ff;color:#f2fbff;box-shadow:0 0 14px rgba(100,225,255,0.28);
+}
+.modeBtn[data-mode="free"].active{
+ background:linear-gradient(180deg,rgba(45,98,62,0.92),rgba(21,54,34,0.95));
+ border-color:#72ff8c;color:#f5fff6;box-shadow:0 0 14px rgba(92,255,112,0.28);
+}
+
+/* Modern RPG-style Dialogue Cutscene Panel */
+#dialogueOverlay{
+ display:none;position:absolute;inset:0;z-index:1150;
+ background:linear-gradient(180deg,rgba(4,10,12,0.28) 0%,rgba(4,10,12,0.55) 58%,rgba(3,8,10,0.88) 100%);
+ pointer-events:auto;
+ align-items:flex-end;justify-content:center;
+ padding:14px max(12px,env(safe-area-inset-left)) max(14px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-right));
+}
+.dlgCard{
+ width:min(760px,100%);
+ background:linear-gradient(180deg,rgba(14,28,31,0.96),rgba(8,16,18,0.98));
+ border:1.5px solid rgba(116,210,185,0.52);
+ border-radius:18px;
+ padding:12px 14px;
+ box-shadow:0 18px 50px rgba(0,0,0,0.82),0 0 30px rgba(82,225,195,0.14),inset 0 1px 0 rgba(255,255,255,0.1);
+ display:flex;gap:12px;align-items:flex-start;
+}
+.dlgPortraitWrap{
+ flex:0 0 76px;display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+#dlgPortrait{
+ width:74px;height:74px;border-radius:14px;
+ background:radial-gradient(circle at 50% 42%,#1a3338,#091316);
+ border:2px solid #7ce8ff;
+ box-shadow:0 6px 18px rgba(0,0,0,0.55);
+}
+#dlgRole{
+ font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
+ padding:2px 6px;border-radius:6px;background:rgba(120,230,255,0.16);color:#9ef2ff;
+ text-align:center;max-width:78px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.dlgMain{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.dlgTop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+#dlgSpeaker{font-size:15px;font-weight:900;color:#f2fbf4;letter-spacing:.3px}
+#dlgStep{font-size:10.5px;font-weight:700;color:#8db6ab;font-variant-numeric:tabular-nums}
+#dlgText{
+ font-size:13.5px;line-height:1.45;color:#d6eadf;min-height:42px;
+ background:rgba(7,14,16,0.62);border:1px solid rgba(110,175,152,0.22);
+ border-radius:11px;padding:9px 11px;
+}
+#dlgChoices{display:flex;flex-direction:column;gap:6px;margin-top:2px}
+.dlgChoiceBtn{
+ text-align:left;padding:9px 12px;border-radius:10px;
+ background:linear-gradient(135deg,rgba(24,52,58,0.92),rgba(13,30,34,0.95));
+ border:1.5px solid rgba(105,220,245,0.44);
+ color:#eaf8ff;font-size:12.5px;font-weight:700;
+ display:flex;align-items:center;justify-content:space-between;gap:8px;
+ transition:transform .08s ease,border-color .15s ease,background .15s ease;
+}
+.dlgChoiceBtn:hover{border-color:#7cff9c;background:linear-gradient(135deg,rgba(28,68,52,0.94),rgba(15,38,28,0.96))}
+.dlgChoiceBtn:active{transform:scale(0.98)}
+.dlgChoiceTag{
+ font-size:10px;font-weight:800;color:#ffe28a;
+ background:rgba(255,204,78,0.16);padding:2px 7px;border-radius:6px;white-space:nowrap;
+}
+.dlgActions{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:2px}
+.dlgBtn{
+ padding:7px 14px;border-radius:9px;font-size:12px;font-weight:800;letter-spacing:.4px;
+ border:1px solid rgba(120,185,155,0.4);background:rgba(18,36,34,0.9);color:#cde5d6;
+}
+.dlgBtn.primary{
+ background:linear-gradient(180deg,#44cf66,#228b42);border-color:#88ff9e;color:#071a0c;
+}
+@media(max-width:480px){
+ .dlgCard{padding:10px;gap:9px}
+ .dlgPortraitWrap{flex:0 0 58px}
+ #dlgPortrait{width:56px;height:56px;border-radius:11px}
+ #dlgSpeaker{font-size:13.5px}
+ #dlgText{font-size:12.5px;padding:7px 9px}
+}
+
+/* Car Travel Cutscene Between Locations */
+#travelOverlay{
+ display:none;position:absolute;inset:0;z-index:1160;
+ background:radial-gradient(circle at 50% 40%,rgba(10,20,24,0.94),rgba(4,9,11,0.98));
+ align-items:center;justify-content:center;padding:12px;pointer-events:auto;
+}
+.travelBox{
+ width:min(700px,100%);
+ background:linear-gradient(180deg,rgba(16,32,34,0.97),rgba(9,17,19,0.99));
+ border:1.5px solid rgba(114,218,245,0.52);border-radius:20px;
+ padding:14px;display:flex;flex-direction:column;gap:10px;
+ box-shadow:0 24px 70px rgba(0,0,0,0.85),0 0 36px rgba(95,215,255,0.16);
+}
+#travelRoute{
+ font-size:14px;font-weight:900;text-align:center;color:#e8fbff;letter-spacing:.4px;
+}
+#travelCanvas{
+ width:100%;height:176px;border-radius:13px;display:block;
+ border:1px solid rgba(115,195,210,0.34);background:#071014;
+}
+.travelProgTrack{
+ height:7px;border-radius:999px;overflow:hidden;
+ background:rgba(8,16,18,0.9);border:1px solid rgba(115,205,235,0.32);
+}
+#travelProgFill{
+ height:100%;width:0%;
+ background:linear-gradient(90deg,#2da8ff,#6effb4);
+ transition:width .08s linear;
+}
+.travelRadio{
+ background:rgba(8,16,19,0.82);border:1px solid rgba(114,178,158,0.3);
+ border-radius:12px;padding:9px 11px;text-align:left;
+}
+#travelSpeaker{font-size:11.5px;font-weight:900;color:#8be6ff;margin-bottom:3px}
+#travelSay{font-size:12.5px;color:#d6ebdf;line-height:1.38}
 
 #weaponInfo{
  position:absolute;bottom:232px;left:0;right:0;
@@ -676,8 +856,8 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  #weaponInfo{bottom:182px;font-size:11px}
  #actionBar{bottom:204px}
  #interactBtn,#doorBtn,#vehBtn,#quickUseBtn,#nitroBtn,#turretBtn{padding:7px 14px;font-size:12px}
- #achToast{top:calc(max(8px,env(safe-area-inset-top)) + 64px);font-size:11px;padding:5px 11px}
- #radar{width:54px;height:54px;top:calc(max(8px,env(safe-area-inset-top)) + 84px)}
+ #achToast{top:calc(max(8px,env(safe-area-inset-top)) + 74px);font-size:11px;padding:5px 11px}
+ #radar{width:56px;height:56px}
  .box{padding:12px 14px}
  .emblem{width:46px;height:46px;margin-bottom:6px}
  h1{font-size:24px}
@@ -693,29 +873,23 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  #actionBar{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 78px)}
 }
 @media(orientation:landscape) and (max-height:560px){
- #top{
-  left:max(8px,env(safe-area-inset-left));right:auto;margin:0;
-  width:clamp(228px,37vw,316px);gap:4px;
+ #hudMain{
+  display:grid;
+  grid-template-columns:minmax(200px,34vw) minmax(0,1fr);
+  align-items:start;gap:6px;max-width:none;
  }
- .stat{padding:5px 4px;font-size:11.5px;border-radius:10px;gap:3px}
- #hudRow{
-  top:max(8px,env(safe-area-inset-top));margin:0;max-width:none;
-  left:calc(max(8px,env(safe-area-inset-left)) + clamp(234px,38vw,324px));
-  right:calc(max(8px,env(safe-area-inset-right)) + 64px);
-  gap:5px;
- }
+ #top{gap:4px}
+ .stat{padding:5px 4px;font-size:11px;border-radius:10px;gap:3px}
+ #hudRow{gap:4px}
  #healthbar{height:10px}
  #threatBadge,#zoneBadge,#evacBadge{font-size:9px;padding:1px 5px}
- .hudBtn{height:28px;font-size:11px;border-radius:8px}
- #codexButton{padding:0 7px}
+ .hudBtn{height:26px;font-size:10.5px;border-radius:8px}
+ #codexButton{padding:0 6px}
  #codexBadge{display:none}
- #shopButton{padding:0 8px}
- #pauseButton,#muteButton,#fsButton{width:28px;font-size:12px}
- #radar{
-  top:max(6px,env(safe-area-inset-top));
-  right:max(8px,env(safe-area-inset-right));
-  width:54px;height:54px;
- }
+ #shopButton{padding:0 7px}
+ #pauseButton,#muteButton,#fsButton{width:26px;font-size:11.5px}
+ #radar{width:54px;height:54px}
+ #locBadge{font-size:8.5px;max-width:64px;padding:1px 4px}
  #bottom{bottom:max(8px,env(safe-area-inset-bottom))}
  .control{width:clamp(124px,35vh,158px);height:clamp(124px,35vh,158px)}
  #weaponBar{
@@ -729,9 +903,9 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  #weaponInfo{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 44px);font-size:10.5px}
  #actionBar{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 66px)}
  #interactBtn,#doorBtn,#vehBtn,#quickUseBtn,#nitroBtn,#turretBtn{padding:6px 13px;font-size:11.5px}
- #storyBtn{padding:0 7px}
+ #storyBtn{padding:0 6px}
  #missionBar{font-size:9.5px;padding:2px 6px}
- #bossBanner{top:calc(max(8px,env(safe-area-inset-top)) + 56px);width:min(280px,46vw)}
+ #bossBanner{top:calc(max(8px,env(safe-area-inset-top)) + 64px);width:min(280px,46vw)}
 }
 @media(max-height:430px){
  .emblem,.hazardStrip{display:none}
@@ -747,35 +921,46 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
 <canvas id="game"></canvas>
 
 <div id="ui">
- <div id="top">
-  <div class="stat stat-hp"><span>❤️</span><span id="health">100</span></div>
-  <div class="stat stat-score"><span>🧟</span><span id="score">0</span></div>
-  <button type="button" class="stat stat-loot" id="lootStatBtn" aria-label="Рюкзак с лутом" title="Рюкзак с лутом"><span>🎒</span><span id="lootCount">0/12</span></button>
-  <div class="stat stat-money"><span>🪙</span><span id="money">0</span></div>
- </div>
+ <div id="hudHeader">
+  <div id="hudMain">
+   <div id="top">
+    <div class="stat stat-hp"><span>❤️</span><span id="health">100</span></div>
+    <div class="stat stat-score"><span>🧟</span><span id="score">0</span></div>
+    <button type="button" class="stat stat-loot" id="lootStatBtn" aria-label="Рюкзак с лутом" title="Рюкзак с лутом"><span>🎒</span><span id="lootCount">0/12</span></button>
+    <div class="stat stat-money"><span>🪙</span><span id="money">0</span></div>
+   </div>
 
- <div id="hudRow">
-  <div id="healthWrap">
-   <div id="healthbar">
-    <div id="healthtrail"></div>
-    <div id="healthfill"></div>
-    <div id="healthTicks"></div>
+   <div id="hudRow">
+    <div id="healthWrap">
+     <div id="healthbar">
+      <div id="healthtrail"></div>
+      <div id="healthfill"></div>
+      <div id="healthTicks"></div>
+     </div>
+     <div id="badgeRow">
+      <div id="threatBadge">ВОЛНА 1 · 0/10 🧟</div>
+      <div id="zoneBadge">🛡️ БЕЗОПАСНАЯ ЗОНА</div>
+      <div id="evacBadge">🚁 ЭВАК: 0/2000 🪙</div>
+     </div>
+     <div id="polygonBanner"></div>
+     <div id="activeItems"></div>
+     <div id="squadBar"></div>
+     <div id="missionBar" title="Открыть сюжет и вылазки [Q]"></div>
+    </div>
+    <div id="hudBtns">
+     <button type="button" class="hudBtn" id="storyBtn" aria-label="Сюжет, вылазки и отряд" title="КПК: Сюжет и Вылазки [Q]">📜 КПК</button>
+     <button type="button" class="hudBtn" id="codexButton" aria-label="Индекс зомби">🧟<span id="codexBadge">0/43</span></button>
+     <button type="button" class="hudBtn" id="shopButton">МАГАЗИН<span id="shopBadge"></span></button>
+     <button type="button" class="hudBtn" id="muteButton" aria-label="Звук" title="Включить/выключить звук [M]">🔊</button>
+     <button type="button" class="hudBtn" id="fsButton" aria-label="Горизонтальный полноэкранный режим" title="Полный экран / Горизонтально">⛶</button>
+     <button type="button" class="hudBtn" id="pauseButton" aria-label="Пауза">Ⅱ</button>
+    </div>
    </div>
-   <div id="badgeRow">
-    <div id="threatBadge">ВОЛНА 1 · 0/10 🧟</div>
-    <div id="zoneBadge">🛡️ БЕЗОПАСНАЯ ЗОНА</div>
-    <div id="evacBadge">🚁 ЭВАК: 0/2000 🪙</div>
-   </div>
-   <div id="activeItems"></div>
-   <div id="squadBar"></div>
-   <div id="missionBar" title="Открыть сюжет и вылазки [Q]"></div>
   </div>
-  <button type="button" class="hudBtn" id="storyBtn" aria-label="Сюжет, вылазки и отряд" title="КПК: Сюжет и Вылазки [Q]">📜 КПК</button>
-  <button type="button" class="hudBtn" id="codexButton" aria-label="Индекс зомби">🧟<span id="codexBadge">0/43</span></button>
-  <button type="button" class="hudBtn" id="shopButton">МАГАЗИН<span id="shopBadge"></span></button>
-  <button type="button" class="hudBtn" id="muteButton" aria-label="Звук" title="Включить/выключить звук [M]">🔊</button>
-  <button type="button" class="hudBtn" id="fsButton" aria-label="Горизонтальный полноэкранный режим" title="Полный экран / Горизонтально">⛶</button>
-  <button type="button" class="hudBtn" id="pauseButton" aria-label="Пауза">Ⅱ</button>
+  <div id="radarSlot">
+   <canvas id="radar" width="136" height="136" aria-hidden="true"></canvas>
+   <div id="locBadge">Сектор 1</div>
+  </div>
  </div>
 
  <div id="achToast"></div>
@@ -784,8 +969,6 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   <div id="bossTitle">💀 ВЛАДЫКА КАРАНТИНА</div>
   <div id="bossTrack"><div id="bossFill"></div></div>
  </div>
-
- <canvas id="radar" width="136" height="136" aria-hidden="true"></canvas>
 
  <div id="actionBar">
   <button type="button" id="interactBtn"></button>
@@ -820,7 +1003,11 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    <img class="emblem" src="./icon-192.png" alt="CARANTIN">
    <h1>CARA<span class="titleAccent">NTIN</span></h1>
    <div class="titleSlash"></div>
-   <p>«Протокол Зачистки 3.1»: <b style="color:#ffd878">5-главный сюжет</b>, <b style="color:#8be6ff">машины с Нитро</b>, <b style="color:#7cff9c">отряд наёмников</b>, <b style="color:#7cffc8">авто-турели [T]</b>, вылазки и финальный босс <b style="color:#ff848a">Патриарх-0</b>!</p>
+   <p>«Протокол Зачистки 4.0»: <b style="color:#8be6ff">сюжетная кампания с диалогами</b>, <b style="color:#ffd878">боями на полигонах</b>, <b style="color:#7cff9c">переездами на машинах между локациями</b> и битвой с <b style="color:#ff848a">Патриархом-0</b>!</p>
+   <div id="modeRow" role="group" aria-label="Выбор режима игры">
+    <button type="button" class="modeBtn active" data-mode="campaign"><span>📖 Сюжетная кампания</span><small>4 локации · Диалоги · Полигоны</small></button>
+    <button type="button" class="modeBtn" data-mode="free"><span>♾️ Свободная зачистка</span><small>Открытый город · Вылазки</small></button>
+   </div>
    <div id="diffRow" role="group" aria-label="Выбор сложности">
     <button type="button" class="diffBtn active" data-diff="normal"><span>🟢 Стандарт</span><small>1.0× баланс</small></button>
     <button type="button" class="diffBtn" data-diff="hard"><span>🟠 Выживание+</span><small>1.35× HP · +30% 🪙</small></button>
@@ -828,7 +1015,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    </div>
    <div class="controlsGrid">
     <div class="ctrlCard"><b>📱 Горизонт. сенсор</b>Левый стик — шаг / руль<br>Правый стик — прицел и огонь<br>Кнопки 🚗 / 🔥 Нитро / 🤖 Турель</div>
-    <div class="ctrlCard"><b>⌨️ Клавиатура + Мышь</b>WASD + ЛКМ · Колесо — пушки<br>E Лут · F Дверь · G Авто · Shift Нитро · T Турель · Q КПК</div>
+    <div class="ctrlCard"><b>⌨️ Клавиатура + Мышь</b>WASD + ЛКМ · Колесо — пушки<br>E Диалог/Лут/КПП · G Авто · Shift Нитро · T Турель</div>
    </div>
   </div>
   <div class="boxFooter">
@@ -974,6 +1161,43 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   </div>
   <div class="boxFooter">
    <button type="button" class="mainbtn" id="achClose">ЗАКРЫТЬ</button>
+  </div>
+ </div>
+</div>
+
+<div id="dialogueOverlay" role="dialog" aria-modal="true" aria-label="Диалог">
+ <div class="dlgCard">
+  <div class="dlgPortraitWrap">
+   <canvas id="dlgPortrait" width="84" height="84"></canvas>
+   <div id="dlgRole">КОМАНДИР</div>
+  </div>
+  <div class="dlgMain">
+   <div class="dlgTop">
+    <div id="dlgSpeaker">Командир «Шрам»</div>
+    <div id="dlgStep">1 / 3</div>
+   </div>
+   <div id="dlgText"></div>
+   <div id="dlgChoices"></div>
+   <div class="dlgActions">
+    <button type="button" class="dlgBtn" id="dlgSkip">ПРОПУСТИТЬ ⏭</button>
+    <button type="button" class="dlgBtn primary" id="dlgNext">ДАЛЕЕ ▶</button>
+   </div>
+  </div>
+ </div>
+</div>
+
+<div id="travelOverlay" role="dialog" aria-modal="true" aria-label="Переезд между локациями">
+ <div class="travelBox">
+  <div id="travelRoute">🚗 ПЕРЕЕЗД ПО ШОССЕ: Сектор 1 ──▶ Сектор 2</div>
+  <canvas id="travelCanvas" width="660" height="176"></canvas>
+  <div class="travelProgTrack"><div id="travelProgFill"></div></div>
+  <div class="travelRadio">
+   <div id="travelSpeaker">📻 РАЦИЯ ОТРЯДА</div>
+   <div id="travelSay">Выезжаем на трассу...</div>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end">
+   <button type="button" class="dlgBtn" id="travelRadioNext">💬 СЛЕД. РЕПЛИКА</button>
+   <button type="button" class="dlgBtn primary" id="travelArrive">🚗 ПРИБЫТЬ НА МЕСТО ▶</button>
   </div>
  </div>
 </div>
@@ -1476,6 +1700,7 @@ const glows={
 
 const HELI_PRICE=2000;
 function getHeliPrice(){
+ if(typeof gameMode!=='undefined'&&gameMode==='campaign')return HELI_PRICE;
  return Math.max(0,HELI_PRICE-(heliDiscount||0));
 }
 const HELI_SPOTS=[
@@ -3684,8 +3909,10 @@ function updateUI(){
   $('healthfill').style.background='linear-gradient(90deg,#b8222d,#ff4d58)';
   $('healthfill').style.boxShadow='0 0 14px rgba(255,77,88,0.6)';
  }
- $('threatBadge').textContent=`ВОЛНА ${wave} · ${waveKills}/${waveGoal} 🧟`;
+ $('threatBadge').textContent=(typeof gameMode!=='undefined'&&gameMode==='campaign'&&typeof campaignThreatText==='function')?campaignThreatText():`ВОЛНА ${wave} · ${waveKills}/${waveGoal} 🧟`;
  const eb=$('evacBadge');
+ if(typeof gameMode!=='undefined'&&gameMode==='campaign'){if(eb)eb.style.display='none';}
+ else if(eb)eb.style.display='';
  const heliCost=getHeliPrice();
  if(eb){
   if(evacHeli&&evacHeli.bought){
@@ -4771,7 +4998,7 @@ function spawnStoryBoss(){
 }
 
 function updateStoryProgress(){
- if(!running||storyCompleted)return;
+ if(!running||storyCompleted||(typeof gameMode!=='undefined'&&gameMode==='campaign'))return;
  while(storyStep<STORY_CHAPTERS.length){
   const ch=STORY_CHAPTERS[storyStep];
   if(!ch.check())break;
@@ -4805,6 +5032,7 @@ function updateSquadAndMissionUI(){
   }
  }
  const mb=$('missionBar');
+ if(typeof campaignUpdateHud==='function'&&gameMode==='campaign'){campaignUpdateHud();return;}
  if(mb){
   if(!running){mb.style.display='none';return;}
   mb.style.display='block';
@@ -4831,7 +5059,8 @@ function renderStoryModal(){
  if(!box)return;
  box.innerHTML='';
 
- if(storyTab==='story'){
+ if(storyTab==='story'&&typeof gameMode!=='undefined'&&gameMode==='campaign'){campaignRenderPda(box);
+ }else if(storyTab==='story'){
   for(let i=0;i<STORY_CHAPTERS.length;i++){
    const ch=STORY_CHAPTERS[i];
    const isDone=i<storyStep||storyCompleted;
@@ -4956,6 +5185,7 @@ function closeStoryModal(){
 }
 
 function init(){
+ if(typeof campaignReset==='function')campaignReset();
  player={x:SAFE_ZONE.x,y:SAFE_ZONE.y+115,r:15,speed:195,angle:-Math.PI/2,inv:0,walkPhase:0,recoil:0,muzzleFlash:0,moving:false,regenAcc:0,slowTimer:0,vampKills:0,vampCd:0,stimTimer:0,inVehicle:null,carRegenAcc:0};
  const c=clampCamera(player.x,player.y);
  cam.x=c.x;cam.y=c.y;
@@ -4999,6 +5229,8 @@ function init(){
  if($('nitroBtn'))$('nitroBtn').style.display='none';
  if($('turretBtn'))$('turretBtn').style.display='none';
  if($('quickUseBtn'))$('quickUseBtn').style.display='none';
+ if($('dialogueOverlay'))$('dialogueOverlay').style.display='none';
+ if($('travelOverlay'))$('travelOverlay').style.display='none';
  setDifficulty(currentDifficulty);
  syncMuteUI();
  $('joystickThumb').style.transform='translate(0px,0px)';
@@ -5513,6 +5745,7 @@ function shoot(targetOrAngle,preferredTarget){
      damageExpeditionNest(dmg*2);
     }
    }
+   if(gameMode==='campaign')campaignHitBarrelsSegment(mx,my,ex,ey);
    railBeams.push({x1:mx,y1:my,x2:ex,y2:ey,life:0.24,max:0.24});
   }
   addParticles(mx,my,'#9cfcff',8,145,'spark');
@@ -5589,7 +5822,10 @@ function shoot(targetOrAngle,preferredTarget){
 function openNpcDialog(npc){
  if(!running||waveChoosing||!npc)return;
  if(npc.id==='commander'){
-  openStoryModal('story');
+  if(gameMode==='campaign'){
+   const loc=CAMPAIGN_LOCATIONS[campaignStage];
+   campaignShowDialogue([{who:'ШРАМ',role:'КОМАНДИР',text:campaignState==='ready'?`Полигон «${loc.name}» зачищен. Сядь в машину и проезжай КПП на восточном шоссе.`:`Следующая цель — полигон «${loc.name}». Три этапа атаки, затем босс. Нажми [Q], чтобы открыть карту операции.`}]);
+  }else openStoryModal('story');
   return;
  }
  activeNpc=npc;
@@ -5906,12 +6142,16 @@ function victoryEscape(){
      <div class="sumCard"><div class="k">Волна / Убито</div><div class="v">${wave} · ${kills}</div></div>
      <div class="sumCard"><div class="k">Рекорд</div><div class="v" style="color:#ffe082">${bestScore}</div></div>
     </div>
+    <div id="modeRow" role="group" aria-label="Выбор режима игры">
+     <button type="button" class="modeBtn${gameMode==='campaign'?' active':''}" data-mode="campaign"><span>📖 Сюжетная кампания</span><small>4 локации · Полигоны · КПП</small></button>
+     <button type="button" class="modeBtn${gameMode==='free'?' active':''}" data-mode="free"><span>♾️ Свободная зачистка</span><small>Открытый город · Вылазки</small></button>
+    </div>
     <div id="diffRow" aria-label="Сложность игры">
      <button type="button" class="diffBtn${currentDifficulty==='normal'?' active':''}" data-diff="normal">🟢 СТАНДАРТ</button>
      <button type="button" class="diffBtn${currentDifficulty==='hard'?' active':''}" data-diff="hard">🟠 ХАРДКОР</button>
      <button type="button" class="diffBtn${currentDifficulty==='nightmare'?' active':''}" data-diff="nightmare">🔴 КОШМАР</button>
     </div>
-    <p class="small">Вылазки: <b>${storyStats.expeditionsDone}</b> · Главы: <b>${Math.min(storyStep,5)}/5</b> · Индекс: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
+    <p class="small">${gameMode==='campaign'?`Секторы: <b>${campaignStage+1}/4</b>`:`Вылазки: <b>${storyStats.expeditionsDone}</b> · Главы: <b>${Math.min(storyStep,5)}/5</b>`} · Индекс: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
    </div>
    <div class="boxFooter">
     <button type="button" class="mainbtn" id="restart">ИГРАТЬ СНОВА</button>
@@ -5936,6 +6176,8 @@ function gameOver(){
  if($('nitroBtn'))$('nitroBtn').style.display='none';
  if($('turretBtn'))$('turretBtn').style.display='none';
  if($('quickUseBtn'))$('quickUseBtn').style.display='none';
+ if($('dialogueOverlay'))$('dialogueOverlay').style.display='none';
+ if($('travelOverlay'))$('travelOverlay').style.display='none';
  uiEl.style.transform='';
  if(score>bestScore){
   bestScore=score;
@@ -5952,11 +6194,15 @@ function gameOver(){
    <div class="boxBody">
     <h1 style="color:#ff848a">ПЕРИМЕТР ПАЛ</h1>
     <div class="titleSlash"></div>
-    <p class="small">Заражённые прорвали оборону · Волна ${wave} · <b style="color:${diff.color}">${diff.icon} ${diff.name}</b></p>
+    <p class="small">${gameMode==='campaign'?`Отряд потерян в секторе ${campaignStage+1}/4 · ${CAMPAIGN_LOCATIONS[campaignStage].name}`:`Заражённые прорвали оборону · Волна ${wave}`} · <b style="color:${diff.color}">${diff.icon} ${diff.name}</b></p>
     <div class="statsSummary">
      <div class="sumCard"><div class="k">Очки</div><div class="v">${score}</div></div>
      <div class="sumCard"><div class="k">Убито</div><div class="v">${kills}</div></div>
      <div class="sumCard"><div class="k">Рекорд</div><div class="v" style="color:#ffe082">${bestScore}</div></div>
+    </div>
+    <div id="modeRow" role="group" aria-label="Выбор режима игры">
+     <button type="button" class="modeBtn${gameMode==='campaign'?' active':''}" data-mode="campaign"><span>📖 Сюжетная кампания</span><small>4 локации · Полигоны · КПП</small></button>
+     <button type="button" class="modeBtn${gameMode==='free'?' active':''}" data-mode="free"><span>♾️ Свободная зачистка</span><small>Открытый город · Вылазки</small></button>
     </div>
     <div id="diffRow" aria-label="Сложность игры">
      <button type="button" class="diffBtn${currentDifficulty==='normal'?' active':''}" data-diff="normal">🟢 СТАНДАРТ</button>
@@ -5988,6 +6234,7 @@ function startGame(){
  if($('storyModal'))$('storyModal').style.display='none';
  if($('achModal'))$('achModal').style.display='none';
  running=true;paused=false;last=performance.now();
+ if(gameMode==='campaign')campaignStart();
  updateSquadAndMissionUI();
 }
 
@@ -5998,6 +6245,8 @@ $('overlay').addEventListener('pointerup',e=>{
  startGame();
 });
 $('overlay').addEventListener('click',e=>{
+ const modeBtn=e.target.closest('.modeBtn[data-mode]');
+ if(modeBtn){e.preventDefault();setGameMode(modeBtn.dataset.mode);SFX.buy();return;}
  const diffBtn=e.target.closest('.diffBtn[data-diff]');
  if(diffBtn){
   e.preventDefault();
@@ -6273,10 +6522,10 @@ function update(dt,now){
  }
  nearbyNpc=nearNpc;
 
- nearbyHeli=!!(evacHeli&&!evacHeli.bought&&Math.hypot(player.x-evacHeli.x,player.y-evacHeli.y)<=110);
+ nearbyHeli=gameMode!=='campaign'&&!!(evacHeli&&!evacHeli.bought&&Math.hypot(player.x-evacHeli.x,player.y-evacHeli.y)<=110);
 
  let nearNode=null,nearNodeD=52;
- if(!nearbyNpc&&!nearbyHeli){
+ if(!nearbyNpc&&!nearbyHeli&&!campaignNearbyCheckpoint()){
   for(let i=0;i<lootNodes.length;i++){
    const ln=lootNodes[i];
    if(ln.opened)continue;
@@ -6302,7 +6551,9 @@ function update(dt,now){
  const ib=$('interactBtn');
  const heliCost=getHeliPrice();
  if(ib){
-  if(nearbyNpc){
+  if(typeof gameMode!=='undefined'&&gameMode==='campaign'&&typeof campaignNearbyCheckpoint==='function'&&campaignNearbyCheckpoint()){
+   ib.classList.add('evac');ib.textContent=player.inVehicle?'🚗 КПП: перейти в следующий сектор [E]':'🚗 КПП: сядь в машину, затем [E]';ib.style.display='block';
+  }else if(nearbyNpc){
    ib.classList.remove('evac');
    ib.textContent=(nearbyNpc.id==='trader'&&lootBag.length>0)
     ?`💰 Продать лут (${getLootBagTotalValue()} 🪙) [E]`
@@ -6431,8 +6682,9 @@ function update(dt,now){
  if(Math.abs(cam.x-goal.x)>maxLagX)cam.x=goal.x+Math.sign(cam.x-goal.x)*maxLagX;
  if(Math.abs(cam.y-goal.y)>maxLagY)cam.y=goal.y+Math.sign(cam.y-goal.y)*maxLagY;
 
+ if(gameMode==='campaign')campaignUpdate(dt,now);
  spawnTimer-=dt;
- if(spawnTimer<=0){
+ if(gameMode!=='campaign'&&spawnTimer<=0){
   spawnZombie();
   spawnTimer=zombies.length>=getMaxActiveZombies()?0.45:Math.max(.22,1.12-(wave-1)*0.09-score*0.0003);
  }
@@ -6812,6 +7064,7 @@ function update(dt,now){
  const explosions=[];
  const triggerBulletAoe=(b,isDirectHit)=>{
   const col=b.flame?'#ff862b':b.chill?'#80f4ff':b.rocket?'#ff7832':'#5ef4ff';
+  if(gameMode==='campaign'&&b.aoe>0)campaignDetonateNearbyBarrels(b.x,b.y,b.aoe);
   const falloff=isDirectHit?0.75:0.75;
   for(const zz of zombies){
    const dd=Math.hypot(zz.x-b.x,zz.y-b.y);
@@ -6849,8 +7102,8 @@ function update(dt,now){
   if(b.rocket&&Math.random()<dt*26){
    particles.push({x:b.x,y:b.y,vx:(Math.random()-.5)*24,vy:(Math.random()-.5)*24,life:.22,max:.22,color:'rgba(205,215,220,0.45)',size:4.5,kind:'smoke',rot:0,vrot:0});
   }
-  let hit=false;
-  for(let j=zombies.length-1;j>=0;j--){
+  let hit=gameMode==='campaign'&&campaignHitBarrelsSegment(b.px,b.py,b.x,b.y,b.aoe||0);
+  for(let j=zombies.length-1;!hit&&j>=0;j--){
    let z=zombies[j];
    if(b.hitSet&&b.hitSet.has(z))continue;
    if(Math.hypot(z.x-b.x,z.y-b.y)<z.r+(b.aoe?9:5)){
@@ -6955,6 +7208,7 @@ function update(dt,now){
    }
 
    score+=z.points;kills++;waveKills++;
+   if(gameMode==='campaign')campaignOnKill(z);
    metaStats.totalKills=(metaStats.totalKills||0)+1;
    SFX.kill(heavy);
    registerZombieKill(z.type);
@@ -7019,7 +7273,8 @@ function update(dt,now){
  if(killedAny){
   updateStoryProgress();
   checkAchievements();
-  if(waveKills>=waveGoal&&!waveChoosing){
+  if(gameMode==='campaign'){campaignCheckWave();}
+  if(gameMode!=='campaign'&&waveKills>=waveGoal&&!waveChoosing){
    const cleared=wave;
    wave++;
    waveKills=0;
@@ -8788,6 +9043,7 @@ function renderRadar(now){
   g.beginPath();g.arc(npc.x*sx,npc.y*sy,npc.id==='commander'?3.2:2.8,0,Math.PI*2);g.fill();
  }
 
+ if(gameMode==='campaign')campaignDrawRadar(g,sx,sy,now);
  // Drivable vehicles on radar
  for(const v of vehicles){
   g.fillStyle=v.broken?'rgba(140,120,110,0.45)':(player&&player.inVehicle===v)?'#ffffff':'rgba(120,220,255,0.78)';
@@ -8891,6 +9147,7 @@ function render(now){
  ctx.translate(-viewX,-viewY);
 
  drawGround(viewX,viewY);
+ if(gameMode==='campaign')campaignDrawWorld(now);
  drawPuddles(now,viewX,viewY);
  // Render temporary acid/fire ground hazard zones
  for(const hz of hazardZones){
@@ -9436,7 +9693,8 @@ if($('turretBtn'))$('turretBtn').addEventListener('click',()=>{
 });
 if($('quickUseBtn'))$('quickUseBtn').addEventListener('click',useQuickAid);
 if($('interactBtn'))$('interactBtn').addEventListener('click',()=>{
- if(nearbyNpc)openNpcDialog(nearbyNpc);
+ if(gameMode==='campaign'&&campaignNearbyCheckpoint())campaignStartTravel();
+ else if(nearbyNpc)openNpcDialog(nearbyNpc);
  else if(nearbyHeli)buyHelicopterAndEscape();
  else if(nearbyLootNode)openLootNode(nearbyLootNode);
 });
@@ -9596,8 +9854,10 @@ window.addEventListener('keydown',e=>{
   if(running&&!paused&&e.preventDefault)e.preventDefault();
   keys.add('Space');
  }
+ if($('dialogueOverlay').style.display==='flex'||$('travelOverlay').style.display==='flex')return;
  if((e.code==='KeyE'||e.key==='e'||e.key==='E'||e.key==='у'||e.key==='У')&&running&&!paused){
-  if(nearbyNpc)openNpcDialog(nearbyNpc);
+  if(gameMode==='campaign'&&campaignNearbyCheckpoint())campaignStartTravel();
+  else if(nearbyNpc)openNpcDialog(nearbyNpc);
   else if(nearbyHeli)buyHelicopterAndEscape();
   else if(nearbyLootNode)openLootNode(nearbyLootNode);
   else if(nearbyDoor)toggleBuildingDoor(nearbyDoor);
@@ -9635,6 +9895,8 @@ window.addEventListener('keydown',e=>{
   else openCodex(paused&&running?'pause':running?'game':'overlay');
  }
  if(e.key==='Escape'){
+  if($('dialogueOverlay').style.display==='flex'){campaignSkipDialogue();return;}
+  if($('travelOverlay').style.display==='flex'){campaignArrive();return;}
   if($('achModal')&&$('achModal').style.display==='flex'){closeAchModal();return;}
   if($('storyModal')&&$('storyModal').style.display==='flex'){closeStoryModal();return;}
   if($('bagModal')&&$('bagModal').style.display==='flex'){closeBagModal();return;}
@@ -9679,6 +9941,7 @@ init();
 last=performance.now();
 requestAnimationFrame(loop);
 </script>
+<script src="./campaign.js"></script>
 <script>
 if("serviceWorker" in navigator){
  window.addEventListener("load",()=>{
