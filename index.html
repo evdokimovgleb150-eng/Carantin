@@ -117,6 +117,30 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  box-shadow:0 6px 24px rgba(0,0,0,0.6),0 0 18px rgba(85,220,255,0.38);
  animation:pulseInteract 1.2s infinite ease-in-out;
 }
+#bossBanner{
+ display:none;
+ position:absolute;top:calc(max(8px,env(safe-area-inset-top)) + 98px);left:50%;transform:translateX(-50%);
+ width:min(330px,74vw);
+ background:rgba(28,8,14,0.88);
+ border:1.5px solid rgba(255,86,112,0.65);border-radius:10px;
+ padding:5px 10px 6px;
+ box-shadow:0 6px 20px rgba(0,0,0,0.6),0 0 18px rgba(255,58,82,0.28);
+ text-align:center;
+}
+#bossTitle{
+ font-size:10.5px;font-weight:900;letter-spacing:.7px;text-transform:uppercase;
+ color:#ff96a6;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#bossTrack{
+ height:7px;border-radius:999px;overflow:hidden;
+ background:rgba(8,4,8,0.85);border:1px solid rgba(255,140,160,0.35);
+}
+#bossFill{
+ height:100%;width:100%;
+ background:linear-gradient(90deg,#cc1f3a,#ff5972);
+ box-shadow:0 0 10px rgba(255,75,105,0.6);
+ transition:width .1s ease;
+}
 #interactBtn.show{display:inline-flex;align-items:center;gap:6px}
 @keyframes pulseInteract{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.04)}}
 
@@ -561,6 +585,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  .weapon svg{width:24px;height:12px}
  #weaponInfo{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 44px);font-size:10.5px}
  #interactBtn{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 66px);padding:6px 13px;font-size:11.5px}
+ #bossBanner{top:calc(max(8px,env(safe-area-inset-top)) + 56px);width:min(280px,46vw)}
 }
 @media(max-height:430px){
  .emblem,.hazardStrip{display:none}
@@ -596,10 +621,15 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    </div>
    <div id="activeItems"></div>
   </div>
-  <button type="button" class="hudBtn" id="codexButton" aria-label="Индекс зомби">🧟<span id="codexBadge">0/30</span></button>
+  <button type="button" class="hudBtn" id="codexButton" aria-label="Индекс зомби">🧟<span id="codexBadge">0/31</span></button>
   <button type="button" class="hudBtn" id="shopButton">МАГАЗИН<span id="shopBadge"></span></button>
   <button type="button" class="hudBtn" id="fsButton" aria-label="Горизонтальный полноэкранный режим" title="Полный экран / Горизонтально">⛶</button>
   <button type="button" class="hudBtn" id="pauseButton" aria-label="Пауза">Ⅱ</button>
+ </div>
+
+ <div id="bossBanner">
+  <div id="bossTitle">💀 ВЛАДЫКА КАРАНТИНА</div>
+  <div id="bossTrack"><div id="bossFill"></div></div>
  </div>
 
  <canvas id="radar" width="136" height="136" aria-hidden="true"></canvas>
@@ -638,7 +668,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   </div>
   <div class="boxFooter">
    <button type="button" class="mainbtn" id="start">НАЧАТЬ ИГРУ</button>
-   <button type="button" class="mainbtn secondary" id="startCodex">🧟 ИНДЕКС ЗОМБИ (<span id="startCodexCount">0</span>/30)</button>
+   <button type="button" class="mainbtn secondary" id="startCodex">🧟 ИНДЕКС ЗОМБИ (<span id="startCodexCount">0</span>/31)</button>
   </div>
  </div>
 </div>
@@ -719,10 +749,10 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   <div class="hazardStrip"></div>
   <div class="boxBody">
    <h2>🧟 ИНДЕКС ЗОМБИ</h2>
-   <p class="small" style="margin:2px 0 4px">Открыто разновидностей: <b id="codexProgressText" style="color:#7cff8c">0 / 30</b></p>
+   <p class="small" style="margin:2px 0 4px">Открыто разновидностей: <b id="codexProgressText" style="color:#7cff8c">0 / 31</b></p>
    <div class="codexProgBar"><div class="codexProgFill" id="codexProgFill"></div></div>
    <div class="codexFilters" id="codexFilters">
-    <button type="button" class="codexTab active" data-filter="all">Все (30)</button>
+    <button type="button" class="codexTab active" data-filter="all">Все (31)</button>
     <button type="button" class="codexTab" data-filter="seen">Открыты</button>
     <button type="button" class="codexTab" data-filter="suburb">🏘️ Город</button>
     <button type="button" class="codexTab" data-filter="chem">☣️ Химзона</button>
@@ -890,6 +920,7 @@ let prices={damage:20,speed:20,rate:25};
 const MAX_SPEED_LVL=8;
 const SPEED_STEP=0.12;
 const MAX_SPEED_MULT=1.85;
+const DAMAGE_STEP=0.35;
 function getPlayerSpeedMult(){
  return Math.min(MAX_SPEED_MULT,upgrades.speed+((itemMods.speedMult||1)-1));
 }
@@ -900,33 +931,33 @@ try{bestScore=Number(localStorage.getItem('carantin_best')||0)||0}catch(_){}
 const WEAPON_ORDER=['pistol','shotgun','rifle','minigun','plasma','railgun'];
 const weapons={
  pistol:{
-  name:'Пистолет',short:'ПИСТОЛЕТ',price:0,damage:1,delay:.34,spread:.04,count:1,speed:520,range:440,
+  name:'Пистолет',short:'ПИСТОЛЕТ',price:0,damage:.9,delay:.35,spread:.022,count:1,speed:520,range:440,
   desc:'Надёжный табельный ствол',
   svg:'<svg viewBox="0 0 40 18" fill="none"><rect x="6" y="4" width="24" height="6" rx="1.5" fill="#9fb0ad"/><rect x="26" y="5" width="7" height="4" rx="1" fill="#4f5f63"/><path d="M10 10h7l-2 7H9z" fill="#6b5139"/><rect x="8" y="4" width="19" height="2.2" fill="#d3e0dc"/></svg>'
  },
  shotgun:{
-  name:'Дробовик',short:'ДРОБОВИК',price:25,damage:1.5,delay:.82,spread:.3,count:6,speed:400,range:325,
-  desc:'6 дробин веером вблизи',
+  name:'Дробовик',short:'ДРОБОВИК',price:35,damage:.65,delay:.92,spread:.15,count:6,speed:415,range:335,
+  desc:'6 дробин кучным веером вблизи',
   svg:'<svg viewBox="0 0 44 18" fill="none"><path d="M2 7l9-1v7l-9 1z" fill="#8b623f"/><rect x="10" y="6" width="15" height="6" rx="1" fill="#4f6066"/><rect x="24" y="6.5" width="17" height="2" fill="#9fb0ad"/><rect x="24" y="9.5" width="17" height="2" fill="#708085"/><rect x="19" y="11.5" width="10" height="3" rx="1" fill="#8b623f"/></svg>'
  },
  rifle:{
-  name:'Автомат',short:'АВТОМАТ',price:55,damage:.9,delay:.105,spread:.07,count:1,speed:580,range:485,
-  desc:'Быстрая прицельная очередь',
+  name:'Автомат',short:'АВТОМАТ',price:65,damage:.42,delay:.125,spread:.03,count:1,speed:590,range:485,
+  desc:'Точная прицельная очередь',
   svg:'<svg viewBox="0 0 46 18" fill="none"><path d="M2 7l9-1v6l-9 1z" fill="#6a4e37"/><rect x="10" y="6" width="18" height="5.5" rx="1" fill="#45555b"/><rect x="27" y="7.5" width="17" height="2.5" fill="#93a5a1"/><rect x="16" y="3.2" width="7" height="2.2" rx=".8" fill="#5cff3a"/><path d="M18 11.5h5l1.5 5.5h-4.5z" fill="#2e3b3f"/><rect x="27" y="11" width="5" height="4" rx=".8" fill="#6a4e37"/></svg>'
  },
  minigun:{
-  name:'Пулемёт «Вулкан»',short:'ПУЛЕМЁТ',price:95,damage:.76,delay:.068,spread:.14,count:2,speed:620,range:500,
-  desc:'Шквал из 2 пуль, высокая плотность огня',
+  name:'Пулемёт «Вулкан»',short:'ПУЛЕМЁТ',price:110,damage:.24,delay:.085,spread:.048,count:2,speed:630,range:500,
+  desc:'Шквал из 2 точных пуль с высокой плотностью огня',
   svg:'<svg viewBox="0 0 48 18" fill="none"><rect x="3" y="6" width="17" height="7" rx="2" fill="#3a4a4e"/><rect x="20" y="5" width="24" height="2.2" fill="#9eb0ac"/><rect x="20" y="8.2" width="24" height="2.2" fill="#7d8f8b"/><rect x="20" y="11.4" width="24" height="2.2" fill="#9eb0ac"/><rect x="36" y="4.5" width="3" height="9.5" fill="#d98e32"/><rect x="12" y="12" width="7" height="4" rx="1" fill="#5b6659"/></svg>'
  },
  plasma:{
-  name:'Плазмаган «Ион-7»',short:'ПЛАЗМА',price:135,damage:3.2,delay:.34,spread:.03,count:1,speed:480,range:510,aoe:62,
+  name:'Плазмаган «Ион-7»',short:'ПЛАЗМА',price:150,damage:1.45,delay:.44,spread:.015,count:1,speed:490,range:510,aoe:50,
   desc:'Плазменные заряды со взрывом по площади',
   svg:'<svg viewBox="0 0 46 18" fill="none"><path d="M2 8l10-2v7l-10 1z" fill="#293d45"/><rect x="11" y="5" width="20" height="7" rx="2" fill="#35525c"/><rect x="31" y="6.5" width="12" height="4" rx="1" fill="#46c9e8"/><rect x="15" y="6.8" width="11" height="3.2" rx="1" fill="#8cf6ff"/></svg>'
  },
  railgun:{
-  name:'Рельсотрон «Луч»',short:'РЕЛЬСОТРОН',price:180,damage:5.2,delay:.90,spread:.005,count:1,speed:0,range:560,rail:true,
-  desc:'Мгновенный луч насквозь через толпу зомби',
+  name:'Рельсотрон «Луч»',short:'РЕЛЬСОТРОН',price:200,damage:2.35,delay:1.15,spread:.002,count:1,speed:0,range:560,rail:true,
+  desc:'Пробивной луч насквозь через толпу зомби',
   svg:'<svg viewBox="0 0 48 18" fill="none"><path d="M2 7l11-1v7l-11 1z" fill="#233238"/><rect x="12" y="5.5" width="14" height="7" rx="1.5" fill="#3b4d54"/><rect x="26" y="5.2" width="20" height="2.2" fill="#72f3ff"/><rect x="26" y="10.2" width="20" height="2.2" fill="#72f3ff"/><rect x="17" y="7.5" width="25" height="2.6" fill="#d8ffff"/></svg>'
  }
 };
@@ -966,7 +997,8 @@ const ZOMBIE_TYPES={
  frost:{name:'Крио-зомби',r:16,hp:3.1,speed:50,dmg:12,color:'#72c8e8',coat:'#285469',eye:'#e0fcff',points:30,minWave:2,gear:'frost',glow:'cyan',ability:'chill',home:'hospital',desc:'Замораживающая аура и удары временно замедляют бег.',districts:{suburb:3,chem:4,hospital:11,military:4}},
  pyro:{name:'Огнеходец',r:16,hp:3.3,speed:62,dmg:16,color:'#cc6836',coat:'#4f2414',eye:'#fff266',points:34,minWave:2,gear:'pyro',glow:'amber',trail:'fire',home:'chem',desc:'Пылает заживо, оставляя под ногами огненный след.',districts:{suburb:4,chem:8,hospital:3,military:7}},
  necromancer:{name:'Некро-реаниматор',r:17,hp:4.8,speed:38,dmg:12,color:'#745c96',coat:'#211730',eye:'#d26eff',points:48,minWave:3,gear:'necromancer',glow:'red',ability:'summon',isBossBar:true,home:'hospital',desc:'Призывает новых ползунов прямо посреди схватки.',districts:{suburb:3,chem:4,hospital:5,military:4}},
- alpha:{name:'Альфа-титан',r:27,hp:11.0,speed:33,dmg:26,color:'#9c4658',coat:'#3b1822',eye:'#ffffff',points:80,minWave:3,armor:0.20,gear:'alpha',glow:'red',ability:'spit',range:300,isBossBar:true,home:'military',desc:'Главный босс карантина: огромная броня, мощь и дальний плевок.',districts:{suburb:2,chem:3,hospital:3,military:4}}
+ alpha:{name:'Альфа-титан',r:27,hp:11.0,speed:33,dmg:26,color:'#9c4658',coat:'#3b1822',eye:'#ffffff',points:80,minWave:3,armor:0.20,gear:'alpha',glow:'red',ability:'spit',range:300,isBossBar:true,home:'military',desc:'Главный босс карантина: огромная броня, мощь и дальний плевок.',districts:{suburb:2,chem:3,hospital:3,military:4}},
+ overlord:{name:'Владыка Карантина',r:32,hp:24.0,speed:46,dmg:54,color:'#8c2136',coat:'#210912',eye:'#ff2e4d',points:250,minWave:5,armor:0.35,gear:'overlord',glow:'red',ability:'dash',isBossBar:true,isWaveBoss:true,home:'military',desc:'Колоссальный босс каждые 5 волн: огромный урон, 35% брони и сокрушительные рывки.',districts:{suburb:0,chem:0,hospital:0,military:0}}
 };
 const ZOMBIE_KEYS=Object.keys(ZOMBIE_TYPES);
 
@@ -1072,8 +1104,9 @@ const ITEMS_POOL=[
  },
  {
   id:'vamp',icon:'💉',name:'Стимулятор крови',
-  desc:'Лечит +3 HP за каждые 4 убийства заражённых',
-  apply:()=>{itemMods.vamp+=3}
+  desc:'Лечит +2 HP за 5 убийств (макс. 2 ур., перезарядка 1.8 с)',
+  available:()=>(ownedItems.vamp||0)<2,
+  apply:()=>{itemMods.vamp+=2}
  }
 ];
 
@@ -1193,6 +1226,13 @@ function segmentIntersectsRect(x1,y1,x2,y2,r){
   if(tmin>tmax)return null;
  }
  return tmin;
+}
+
+function hasWallBetween(x1,y1,x2,y2){
+ for(let i=0;i<wallRects.length;i++){
+  if(segmentIntersectsRect(x1,y1,x2,y2,wallRects[i])!==null)return true;
+ }
+ return false;
 }
 
 function addEnterableBuilding(g,cfg){
@@ -2442,6 +2482,23 @@ function updateZoneUI(){
  }
 }
 
+function updateBossBanner(){
+ const banner=$('bossBanner');
+ if(!banner)return;
+ let boss=null;
+ for(let i=0;i<zombies.length;i++){
+  if(zombies[i].isWaveBoss){boss=zombies[i];break}
+ }
+ if(!boss||!running){
+  banner.style.display='none';
+  return;
+ }
+ banner.style.display='block';
+ const pct=Math.max(0,Math.min(100,(boss.hp/Math.max(1,boss.maxHp))*100));
+ if($('bossTitle'))$('bossTitle').textContent=`💀 ${boss.def.name} · ${Math.ceil(boss.hp)} HP · ${boss.dmg}💥`;
+ if($('bossFill'))$('bossFill').style.width=pct+'%';
+}
+
 function updateUI(){
  const hpTxt=maxHealth>100?`${Math.max(0,Math.ceil(health))}/${maxHealth}`:Math.max(0,Math.ceil(health));
  $('health').textContent=shieldHp>0?`${hpTxt} · 🛡️${Math.ceil(shieldHp)}`:hpTxt;
@@ -2455,6 +2512,7 @@ function updateUI(){
   $('lootStatBtn').classList.toggle('hasLoot',lootBag.length>0&&lootBag.length<cap);
   $('lootStatBtn').classList.toggle('full',lootBag.length>=cap);
  }
+ updateBossBanner();
  const hpPct=Math.max(0,Math.min(100,(health/maxHealth)*100));
  $('healthfill').style.width=hpPct+'%';
  $('healthtrail').style.width=hpPct+'%';
@@ -2502,7 +2560,7 @@ function selectWeapon(name){
 }
 
 function init(){
- player={x:SAFE_ZONE.x,y:SAFE_ZONE.y+115,r:15,speed:195,angle:-Math.PI/2,inv:0,walkPhase:0,recoil:0,muzzleFlash:0,moving:false,regenAcc:0,slowTimer:0};
+ player={x:SAFE_ZONE.x,y:SAFE_ZONE.y+115,r:15,speed:195,angle:-Math.PI/2,inv:0,walkPhase:0,recoil:0,muzzleFlash:0,moving:false,regenAcc:0,slowTimer:0,vampKills:0,vampCd:0};
  const c=clampCamera(player.x,player.y);
  cam.x=c.x;cam.y=c.y;
  zombies=[];bullets=[];enemyProjectiles=[];hazardZones=[];particles=[];popups=[];decals=[];lightningBolts=[];railBeams=[];
@@ -2517,7 +2575,7 @@ function init(){
  shake=0;shakeTilt=0;hitKickX=0;hitKickY=0;hurtFlash=0;
  uiEl.style.transform='';
  upgrades={damage:1,speed:1,rate:1};
- prices={damage:20,speed:20,rate:25};
+ prices={damage:25,speed:20,rate:25};
  ownedItems={};
  itemMods={dmgMult:1,rateMult:1,speedMult:1,rangeMult:1,armor:0,crit:0,lootCapacity:0,lootBonus:0,extraShots:0,tesla:0,explosive:0,vamp:0,hasLaser:false};
  initLootState();
@@ -2670,19 +2728,67 @@ function spawnZombie(forceType,sx,sy){
  const type=forceType&&ZOMBIE_TYPES[forceType]?forceType:pickZombieTypeForLocation(x,y);
  const s=ZOMBIE_TYPES[type];
  registerZombieSighting(type);
- const maxHp=Number((s.hp+Math.floor((wave-1)*0.75)*(s.hp>=3?1.25:0.85)).toFixed(2));
+ const waveHpScale=1+(wave-1)*0.24;
+ const maxHp=Number(((s.hp*waveHpScale)+(wave-1)*(s.hp>=3?0.9:0.45)).toFixed(2));
  zombies.push({
   x,y,type,def:s,r:s.r,hp:maxHp,maxHp,
-  speed:s.speed+Math.min((wave-1)*4.2,36),
+  speed:s.speed+Math.min((wave-1)*5.0,42),
   dmg:s.dmg||10,
   armor:s.armor||0,
   color:s.color,points:s.points,
+  isWaveBoss:!!s.isWaveBoss,
   phase:Math.random()*6,hit:0,
   abilityCd:1.2+Math.random()*2.2,
   dashTimer:0,boostTimer:0,trailCd:0.3,
   angle:Math.atan2(player.y-y,player.x-x),
   seed:Math.random()
  });
+}
+
+function spawnWaveBoss(forWave){
+ if(!player)return;
+ const s=ZOMBIE_TYPES.overlord;
+ registerZombieSighting('overlord');
+ const tier=Math.max(1,Math.floor(forWave/5));
+ const viewX=cam.x-W/2,viewY=cam.y-H/2;
+ let bx=player.x+280,by=player.y;
+ for(let attempt=0;attempt<24;attempt++){
+  const ang=(attempt/24)*Math.PI*2+Math.random()*0.4;
+  const dist=Math.max(260,Math.min(W,H)*0.56)+40;
+  let tx=player.x+Math.cos(ang)*dist;
+  let ty=player.y+Math.sin(ang)*dist;
+  tx=Math.max(WALL_PAD+50,Math.min(WORLD_W-WALL_PAD-50,tx));
+  ty=Math.max(WALL_PAD+50,Math.min(WORLD_H-WALL_PAD-50,ty));
+  if(isInSafeZone(tx,ty,95)){
+   const a=Math.atan2(ty-SAFE_ZONE.y,tx-SAFE_ZONE.x)||ang;
+   tx=SAFE_ZONE.x+Math.cos(a)*(SAFE_ZONE.r+105);
+   ty=SAFE_ZONE.y+Math.sin(a)*(SAFE_ZONE.r+105);
+  }
+  if(isNearAnyBuilding(tx,ty,36))continue;
+  let blocked=false;
+  for(let i=0;i<obstacles.length;i++){
+   if(Math.hypot(tx-obstacles[i].x,ty-obstacles[i].y)<obstacles[i].r+s.r+10){blocked=true;break}
+  }
+  if(!blocked){bx=tx;by=ty;break}
+ }
+ bx=Math.max(WALL_PAD+45,Math.min(WORLD_W-WALL_PAD-45,bx));
+ by=Math.max(WALL_PAD+45,Math.min(WORLD_H-WALL_PAD-45,by));
+ const maxHp=Number((s.hp+(tier-1)*22).toFixed(2));
+ const dmg=s.dmg+(tier-1)*14;
+ const speed=s.speed+Math.min(18,(tier-1)*4);
+ zombies.push({
+  x:bx,y:by,type:'overlord',def:s,r:s.r,hp:maxHp,maxHp,
+  speed,dmg,armor:s.armor||0.35,
+  color:s.color,points:s.points+(tier-1)*100,
+  isWaveBoss:true,bossTier:tier,
+  phase:0,hit:0,abilityCd:1.4,dashTimer:0,boostTimer:0,trailCd:0.3,
+  angle:Math.atan2(player.y-by,player.x-bx),seed:Math.random()
+ });
+ particles.push({x:bx,y:by,vx:0,vy:0,life:.45,max:.45,color:'#ff3858',size:95,kind:'ring',rot:0,vrot:0});
+ addParticles(bx,by,'#ff4d6a',18,175,'spark');
+ shake=Math.max(shake,14);
+ addPopup(player.x,player.y-52,`💀 БОСС ${forWave} ВОЛНЫ: ${s.name.toUpperCase()} (${dmg}💥)!`,'#ff5972',15);
+ updateBossBanner();
 }
 
 function applyDamageToZombie(z,rawDmg,hitAngle){
@@ -2827,18 +2933,18 @@ function triggerTeslaArc(sourceZombie){
  let chains=Math.min(3,1+itemMods.tesla);
  let prevX=sourceZombie.x,prevY=sourceZombie.y;
  const hitSet=new Set([sourceZombie]);
- const arcDmg=(1.2+itemMods.tesla*0.9)*upgrades.damage*itemMods.dmgMult;
+ const arcDmg=(0.75+itemMods.tesla*0.55)*upgrades.damage*itemMods.dmgMult;
  for(let c=0;c<chains;c++){
   let nextZ=null,bestD=195;
   for(const z of zombies){
    if(hitSet.has(z)||z.hp<=0)continue;
    const d=Math.hypot(z.x-prevX,z.y-prevY);
-   if(d<bestD){bestD=d;nextZ=z}
+   if(d<bestD&&!hasWallBetween(prevX,prevY,z.x,z.y)){bestD=d;nextZ=z}
   }
   if(!nextZ)break;
   hitSet.add(nextZ);
   lightningBolts.push({x1:prevX,y1:prevY,x2:nextZ.x,y2:nextZ.y,life:0.18,max:0.18});
-  nextZ.hp-=arcDmg;nextZ.hit=.14;
+  applyDamageToZombie(nextZ,arcDmg,Math.atan2(nextZ.y-prevY,nextZ.x-prevX));
   addParticles(nextZ.x,nextZ.y,'#74ebff',5,110,'spark');
   prevX=nextZ.x;prevY=nextZ.y;
  }
@@ -2870,7 +2976,7 @@ function shoot(targetOrAngle,preferredTarget){
  const mx=player.x+Math.cos(base)*barrelLen;
  const my=player.y+Math.sin(base)*barrelLen;
  const totalCount=w.count+(itemMods.extraShots||0);
- const spread=w.count===1&&totalCount>1?Math.max(w.spread,0.10):w.spread;
+ const spread=w.count===1&&totalCount>1?Math.max(w.spread,0.045):w.spread;
 
  if(w.rail){
   const beamLen=getWeaponRange();
@@ -2925,21 +3031,20 @@ function shoot(targetOrAngle,preferredTarget){
  }
 
  if(itemMods.tesla>0&&shotCount%4===0){
-  let teslaTarget=targetObj;
+  let teslaTarget=(targetObj&&!hasWallBetween(player.x,player.y,targetObj.x,targetObj.y)&&!hasWallBetween(mx,my,targetObj.x,targetObj.y))?targetObj:null;
   if(!teslaTarget&&zombies.length){
    const rMax=getWeaponRange();
    let bestScore=Infinity;
    for(const z of zombies){
     const d=Math.hypot(z.x-player.x,z.y-player.y);
-    if(d>rMax)continue;
+    if(d>rMax||hasWallBetween(player.x,player.y,z.x,z.y)||hasWallBetween(mx,my,z.x,z.y))continue;
     let diff=Math.abs(Math.atan2(Math.sin(Math.atan2(z.y-player.y,z.x-player.x)-base),Math.cos(Math.atan2(z.y-player.y,z.x-player.x)-base)));
     if(diff<0.65&&d*(1+diff)<bestScore){bestScore=d*(1+diff);teslaTarget=z}
    }
   }
   if(teslaTarget){
    lightningBolts.push({x1:mx,y1:my,x2:teslaTarget.x,y2:teslaTarget.y,life:0.18,max:0.18});
-   teslaTarget.hp-=(0.9+itemMods.tesla*0.7)*upgrades.damage*itemMods.dmgMult;
-   teslaTarget.hit=.14;
+   applyDamageToZombie(teslaTarget,(0.65+itemMods.tesla*0.45)*upgrades.damage*itemMods.dmgMult,Math.atan2(teslaTarget.y-my,teslaTarget.x-mx));
    triggerTeslaArc(teslaTarget);
   }
  }
@@ -3193,6 +3298,7 @@ function openWaveChoice(clearedWave){
    $('waveModal').style.display='none';
    player.inv=Math.max(player.inv,1.0);
    addPopup(player.x,player.y-36,`ВОЛНА ${wave}`,'#86ff78',15);
+   if(wave%5===0)spawnWaveBoss(wave);
    paused=false;
    last=performance.now();
   });
@@ -3499,6 +3605,7 @@ function update(dt,now){
  }
 
  player.inv=Math.max(0,player.inv-dt);
+ player.vampCd=Math.max(0,(player.vampCd||0)-dt);
  player.recoil=Math.max(0,player.recoil-dt*9);
  player.muzzleFlash=Math.max(0,player.muzzleFlash-dt*20);
  hurtFlash=Math.max(0,hurtFlash-dt*2.4);
@@ -3515,7 +3622,7 @@ function update(dt,now){
  if(Math.abs(cam.y-goal.y)>maxLagY)cam.y=goal.y+Math.sign(cam.y-goal.y)*maxLagY;
 
  spawnTimer-=dt;
- if(spawnTimer<=0){spawnZombie();spawnTimer=Math.max(.26,1.25-(wave-1)*0.09-score*0.0004)}
+ if(spawnTimer<=0){spawnZombie();spawnTimer=Math.max(.22,1.12-(wave-1)*0.09-score*0.0003)}
  fireTimer-=dt;
  if(aim.fire&&fireTimer<=0){
   shoot(aim.angle);
@@ -3779,9 +3886,14 @@ function update(dt,now){
 
    score+=z.points;kills++;waveKills++;
    registerZombieKill(z.type);
-   if(itemMods.vamp>0&&kills%4===0&&health<maxHealth){
-    health=Math.min(maxHealth,health+itemMods.vamp);
-    addPopup(player.x,player.y-28,`+${itemMods.vamp} ❤️`,'#6bff88',12);
+   if(itemMods.vamp>0){
+    player.vampKills=(player.vampKills||0)+1;
+    if(player.vampKills>=5&&(player.vampCd||0)<=0&&health<maxHealth){
+     player.vampKills=0;
+     player.vampCd=1.8;
+     health=Math.min(maxHealth,health+itemMods.vamp);
+     addPopup(player.x,player.y-28,`+${itemMods.vamp} ❤️`,'#6bff88',12);
+    }
    }
    if(allowExplode&&itemMods.explosive>0){
     explosions.push({x:z.x,y:z.y,r:78+itemMods.explosive*14,dmg:(1.6+itemMods.explosive*1.1)*upgrades.damage*itemMods.dmgMult});
@@ -3815,6 +3927,8 @@ function update(dt,now){
    return;
   }
   updateUI();
+ }else{
+  updateBossBanner();
  }
 
  for(let i=lightningBolts.length-1;i>=0;i--){
@@ -4376,7 +4490,20 @@ function drawZombie(z,now,targetCtx){
   c.beginPath();c.arc(-1,0,z.r*0.86,-Math.PI*0.75,-Math.PI*0.15);c.stroke();
 
   // Distinct visual gear & mutations per archetype
-  if(gear==='tank'||gear==='alpha'){
+  if(gear==='overlord'){
+   const pulse=0.6+Math.sin(now*0.01+z.seed*10)*0.4;
+   c.fillStyle=`rgba(255,48,86,${0.82*pulse})`;
+   c.beginPath();c.arc(-7,-9,5.5,0,Math.PI*2);c.arc(-7,9,5.5,0,Math.PI*2);c.arc(-13,0,4.5,0,Math.PI*2);c.fill();
+   c.fillStyle='#380d18';c.strokeStyle='#ff6b86';c.lineWidth=1.8;
+   c.beginPath();c.roundRect(-8,-z.r*0.98,15,9,3);c.roundRect(-8,z.r*0.98-9,15,9,3);c.fill();c.stroke();
+   c.fillStyle='#ff5474';
+   c.beginPath();
+   c.moveTo(4,-18);c.lineTo(19,-26);c.lineTo(10,-10);
+   c.moveTo(4,18);c.lineTo(19,26);c.lineTo(10,10);
+   c.moveTo(-4,-16);c.lineTo(-15,-23);c.lineTo(-9,-9);
+   c.moveTo(-4,16);c.lineTo(-15,23);c.lineTo(-9,9);
+   c.fill();
+  }else if(gear==='tank'||gear==='alpha'){
    const pulse=0.65+Math.sin(now*0.008+z.seed*10)*0.35;
    c.fillStyle=gear==='alpha'?`rgba(255,95,120,${0.72*pulse})`:`rgba(165,255,75,${0.62*pulse})`;
    c.beginPath();c.arc(-6,-7,4.2,0,Math.PI*2);c.arc(-5,8,3.6,0,Math.PI*2);c.arc(-10,1,2.9,0,Math.PI*2);c.fill();
@@ -5005,9 +5132,16 @@ function renderRadar(now){
  // Zombies on radar
  for(const z of zombies){
   const def=z.def||ZOMBIE_TYPES.walker;
-  g.fillStyle=def.isBossBar?'#ff5ee0':z.speed>=80?'#ffd054':def.glow==='cyan'?'#66f0ff':'#ff4d58';
   const zx=Math.max(3,Math.min(rw-3,z.x*sx));
   const zy=Math.max(3,Math.min(rh-3,z.y*sy));
+  if(z.isWaveBoss){
+   g.strokeStyle='rgba(255,62,92,0.78)';g.lineWidth=1.5;
+   g.beginPath();g.arc(zx,zy,6.5+Math.sin((now||0)*0.012)*1.5,0,Math.PI*2);g.stroke();
+   g.fillStyle='#ff2e4d';
+   g.beginPath();g.arc(zx,zy,5.0,0,Math.PI*2);g.fill();
+   continue;
+  }
+  g.fillStyle=def.isBossBar?'#ff5ee0':z.speed>=80?'#ffd054':def.glow==='cyan'?'#66f0ff':'#ff4d58';
   g.beginPath();g.arc(zx,zy,def.isBossBar?4.2:2.8,0,Math.PI*2);g.fill();
  }
 
@@ -5219,7 +5353,7 @@ function render(now){
 function getUpgradeLevel(key){
  if(key==='rate')return Math.round((upgrades.rate-1)/0.25)+1;
  if(key==='speed')return Math.round((upgrades.speed-1)/SPEED_STEP)+1;
- return upgrades[key];
+ return Math.round((upgrades.damage-1)/DAMAGE_STEP)+1;
 }
 
 function renderShop(){
@@ -5232,7 +5366,7 @@ function renderShop(){
  }
  $('shopItems').innerHTML='';
  const items=[
-  ['damage','💥 Урон','Усиливает все виды оружия'],
+  ['damage','💥 Урон','+35% урона ко всем видам оружия'],
   ['speed','👟 Скорость',`+12% к бегу (${Math.round(getPlayerSpeedMult()*100)}% / 185%)`],
   ['rate','⚡ Скорострельность','Меньше задержка выстрела']
  ];
@@ -5266,8 +5400,8 @@ function renderShop(){
    money-=prices[key];
    if(key==='rate')upgrades.rate=Number((upgrades.rate+0.25).toFixed(2));
    else if(key==='speed')upgrades.speed=Number((upgrades.speed+SPEED_STEP).toFixed(2));
-   else upgrades[key]+=1;
-   prices[key]=Math.ceil(prices[key]*1.55);
+   else upgrades.damage=Number((upgrades.damage+DAMAGE_STEP).toFixed(2));
+   prices[key]=Math.ceil(prices[key]*1.6);
    updateUI();renderShop();
   });
 
@@ -5339,6 +5473,7 @@ function renderCodex(){
  const tabs=$('codexFilters')?$('codexFilters').querySelectorAll('.codexTab'):[];
  for(const tab of tabs){
   tab.classList.toggle('active',tab.dataset.filter===codexFilter);
+  if(tab.dataset.filter==='all')tab.textContent=`Все (${total})`;
   if(tab.dataset.filter==='seen')tab.textContent=`Открыты (${seenCount})`;
  }
 
