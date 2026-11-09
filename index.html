@@ -122,7 +122,9 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  transition:transform .08s ease,filter .12s ease;
 }
 .hudBtn:active{transform:scale(0.95)}
-#shopButton{padding:0 12px;color:#ffe4a1;border-color:rgba(255,190,61,0.48)}
+#shopButton{padding:0 10px;color:#ffe4a1;border-color:rgba(255,190,61,0.48)}
+#codexButton{padding:0 9px;color:#a2ffb0;border-color:rgba(104,235,126,0.46);display:inline-flex;align-items:center;gap:4px}
+#codexBadge{font-size:10px;color:#d6ffe0;opacity:.92;font-variant-numeric:tabular-nums}
 #shopBadge{
  display:none;position:absolute;top:-4px;right:-4px;
  width:10px;height:10px;border-radius:50%;
@@ -130,7 +132,12 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  border:1.5px solid #091315;
 }
 #shopBadge.show{display:block;animation:pulseDot 1.1s infinite ease-in-out}
-#pauseButton{width:36px;font-size:13px}
+#pauseButton{width:34px;font-size:13px}
+@media(max-width:420px){
+ #hudRow{gap:5px}
+ #codexBadge{display:none}
+ #shopButton{padding:0 8px;font-size:11px}
+}
 
 #radar{
  position:absolute;
@@ -225,14 +232,60 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  border-radius:6px;padding:1px 5px;
 }
 
-#overlay,#shop,#pauseScreen,#waveModal,#npcModal{
+#overlay,#shop,#pauseScreen,#waveModal,#npcModal,#codexModal{
  position:absolute;inset:0;z-index:1000;
  display:flex;align-items:center;justify-content:center;padding:12px;
  background:radial-gradient(circle at 50% 40%,rgba(11,26,23,0.72),rgba(4,9,10,0.88));
  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
  pointer-events:auto;
 }
-#shop,#pauseScreen,#waveModal,#npcModal{display:none}
+#shop,#pauseScreen,#waveModal,#npcModal,#codexModal{display:none}
+.box.codexBox{width:min(620px,100%)}
+.codexProgBar{
+ height:7px;border-radius:99px;overflow:hidden;margin:6px 0 8px;
+ background:rgba(12,24,24,0.9);border:1px solid rgba(110,175,140,0.35);
+}
+.codexProgFill{
+ height:100%;width:0%;
+ background:linear-gradient(90deg,#2ac75b,#6bff7a);
+ transition:width .25s ease;
+}
+.codexFilters{
+ display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:4px 0 10px;
+}
+.codexTab{
+ padding:4px 9px;border-radius:999px;font-size:11px;font-weight:700;
+ background:rgba(14,28,28,0.86);color:#b0cab9;
+ border:1px solid rgba(114,165,138,0.3);
+}
+.codexTab.active{
+ background:linear-gradient(180deg,#398a50,#245c34);
+ color:#f4fff5;border-color:#72ff88;
+}
+#codexList{display:grid;gap:8px;text-align:left}
+@media(min-width:540px){#codexList{grid-template-columns:1fr 1fr}}
+.codexCard{
+ display:flex;align-items:flex-start;gap:10px;
+ padding:9px 10px;border-radius:12px;
+ background:rgba(9,19,20,0.86);
+ border:1px solid rgba(116,174,142,0.32);
+}
+.codexCard.locked{opacity:.72;border-color:rgba(100,130,124,0.24)}
+.codexCard.boss{border-color:rgba(255,112,135,0.52);background:rgba(26,14,22,0.86)}
+.codexThumb{
+ flex:0 0 54px;width:54px;height:54px;border-radius:10px;
+ background:radial-gradient(circle at 50% 45%,#1a2d2c,#0d1718);
+ border:1px solid rgba(120,175,150,0.28);
+}
+.codexInfo{flex:1;min-width:0}
+.codexHead{display:flex;align-items:center;justify-content:space-between;gap:5px;flex-wrap:wrap}
+.codexName{font-size:13px;font-weight:800;color:#eefaf1}
+.codexKills{font-size:10px;font-weight:700;color:#ffe188;background:rgba(255,190,61,0.14);padding:1px 6px;border-radius:6px}
+.codexBossTag{font-size:9px;font-weight:800;color:#ff8ea0;background:rgba(255,77,88,0.18);padding:1px 5px;border-radius:5px;border:1px solid rgba(255,77,88,0.35)}
+.codexDesc{font-size:11px;color:#b2cabe;margin-top:3px;line-height:1.32}
+.codexStats{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.codexStat{font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:5px;background:rgba(20,38,38,0.9);color:#cde3d6;border:1px solid rgba(110,165,140,0.22)}
+.codexWhere{font-size:10.5px;color:#8bb4ad;margin-top:4px}
 #npcSay{
  font-size:12.5px;color:#bfe0ea;font-style:italic;
  background:rgba(10,26,32,0.75);border:1px solid rgba(100,205,235,0.28);
@@ -415,6 +468,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    </div>
    <div id="activeItems"></div>
   </div>
+  <button type="button" class="hudBtn" id="codexButton" aria-label="Индекс зомби">🧟<span id="codexBadge">0/30</span></button>
   <button type="button" class="hudBtn" id="shopButton">МАГАЗИН<span id="shopBadge"></span></button>
   <button type="button" class="hudBtn" id="pauseButton" aria-label="Пауза">Ⅱ</button>
  </div>
@@ -449,6 +503,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   </div>
   <div class="boxFooter">
    <button type="button" class="mainbtn" id="start">НАЧАТЬ ИГРУ</button>
+   <button type="button" class="mainbtn secondary" id="startCodex">🧟 ИНДЕКС ЗОМБИ (<span id="startCodexCount">0</span>/30)</button>
   </div>
  </div>
 </div>
@@ -503,6 +558,31 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   <div class="boxFooter">
    <button type="button" class="mainbtn" id="resume">ПРОДОЛЖИТЬ</button>
    <button type="button" class="mainbtn secondary" id="pauseShop">МАГАЗИН</button>
+   <button type="button" class="mainbtn secondary" id="pauseCodex">🧟 ИНДЕКС ЗОМБИ</button>
+  </div>
+ </div>
+</div>
+
+<div id="codexModal">
+ <div class="box codexBox">
+  <div class="hazardStrip"></div>
+  <div class="boxBody">
+   <h2>🧟 ИНДЕКС ЗОМБИ</h2>
+   <p class="small" style="margin:2px 0 4px">Открыто разновидностей: <b id="codexProgressText" style="color:#7cff8c">0 / 30</b></p>
+   <div class="codexProgBar"><div class="codexProgFill" id="codexProgFill"></div></div>
+   <div class="codexFilters" id="codexFilters">
+    <button type="button" class="codexTab active" data-filter="all">Все (30)</button>
+    <button type="button" class="codexTab" data-filter="seen">Открыты</button>
+    <button type="button" class="codexTab" data-filter="suburb">🏘️ Город</button>
+    <button type="button" class="codexTab" data-filter="chem">☣️ Химзона</button>
+    <button type="button" class="codexTab" data-filter="hospital">🏥 Медгородок</button>
+    <button type="button" class="codexTab" data-filter="military">🪖 Блокпост</button>
+    <button type="button" class="codexTab" data-filter="boss">💀 Элитные</button>
+   </div>
+   <div id="codexList"></div>
+  </div>
+  <div class="boxFooter">
+   <button type="button" class="mainbtn" id="codexClose">ЗАКРЫТЬ</button>
   </div>
  </div>
 </div>
@@ -671,42 +751,88 @@ const weapons={
 
 // 30 distinct zombie archetypes (10x variety)
 const ZOMBIE_TYPES={
- walker:{name:'Бродяга',r:15,hp:1,speed:50,dmg:10,color:'#6f9857',coat:'#394d3b',eye:'#d4ff4a',points:10,minWave:1,gear:'none',glow:'green',districts:{suburb:18,chem:8,hospital:10,military:6}},
- runner:{name:'Бегун',r:12,hp:1,speed:96,dmg:10,color:'#bd9b4c',coat:'#755a28',eye:'#ffd84a',points:15,minWave:1,gear:'runner',glow:'amber',districts:{suburb:12,chem:14,hospital:10,military:8}},
- crawler:{name:'Ползун',r:11,hp:0.9,speed:74,dmg:9,color:'#668452',coat:'#2f3d2b',eye:'#c4ff58',points:14,minWave:1,gear:'crawler',glow:'green',ability:'dash',districts:{suburb:10,chem:8,hospital:8,military:6}},
- brute:{name:'Громила',r:20,hp:3.6,speed:42,dmg:16,color:'#708764',coat:'#3a312c',eye:'#ff9b52',points:25,minWave:1,gear:'brute',glow:'amber',districts:{suburb:9,chem:6,hospital:5,military:8}},
- screamer:{name:'Крикун',r:14,hp:2.0,speed:56,dmg:10,color:'#b87748',coat:'#a64a22',eye:'#ffec66',points:22,minWave:2,gear:'screamer',glow:'amber',ability:'scream',districts:{suburb:8,chem:5,hospital:6,military:5}},
- stalker:{name:'Ночная тень',r:13,hp:1.6,speed:78,dmg:13,color:'#4c5e69',coat:'#1c252c',eye:'#75f5ff',points:20,minWave:2,gear:'stalker',glow:'cyan',alpha:0.48,ability:'cloak',districts:{suburb:8,chem:6,hospital:6,military:6}},
+ walker:{name:'Бродяга',r:15,hp:1,speed:50,dmg:10,color:'#6f9857',coat:'#394d3b',eye:'#d4ff4a',points:10,minWave:1,gear:'none',glow:'green',home:'suburb',desc:'Обычный заражённый горожанин. Опасен большими стаями.',districts:{suburb:18,chem:8,hospital:10,military:6}},
+ runner:{name:'Бегун',r:12,hp:1,speed:96,dmg:10,color:'#bd9b4c',coat:'#755a28',eye:'#ffd84a',points:15,minWave:1,gear:'runner',glow:'amber',home:'suburb',desc:'Быстрый спринтер — стремительно сокращает дистанцию.',districts:{suburb:12,chem:14,hospital:10,military:8}},
+ crawler:{name:'Ползун',r:11,hp:0.9,speed:74,dmg:9,color:'#668452',coat:'#2f3d2b',eye:'#c4ff58',points:14,minWave:1,gear:'crawler',glow:'green',ability:'dash',home:'suburb',desc:'Низкий силуэт и внезапные рывки вперёд.',districts:{suburb:10,chem:8,hospital:8,military:6}},
+ brute:{name:'Громила',r:20,hp:3.6,speed:42,dmg:16,color:'#708764',coat:'#3a312c',eye:'#ff9b52',points:25,minWave:1,gear:'brute',glow:'amber',home:'suburb',desc:'Крупный и живучий боец с тяжёлым ударом.',districts:{suburb:9,chem:6,hospital:5,military:8}},
+ screamer:{name:'Крикун',r:14,hp:2.0,speed:56,dmg:10,color:'#b87748',coat:'#a64a22',eye:'#ffec66',points:22,minWave:2,gear:'screamer',glow:'amber',ability:'scream',home:'suburb',desc:'Издаёт вопль, ускоряя соседних зомби вокруг себя.',districts:{suburb:8,chem:5,hospital:6,military:5}},
+ stalker:{name:'Ночная тень',r:13,hp:1.6,speed:78,dmg:13,color:'#4c5e69',coat:'#1c252c',eye:'#75f5ff',points:20,minWave:2,gear:'stalker',glow:'cyan',alpha:0.48,ability:'cloak',home:'suburb',desc:'Полупрозрачный хищник с короткими выпадами из темноты.',districts:{suburb:8,chem:6,hospital:6,military:6}},
 
- cop:{name:'Коп-зомби',r:16,hp:2.6,speed:52,dmg:12,color:'#6e9061',coat:'#22395c',eye:'#8ad2ff',points:22,minWave:1,armor:0.20,gear:'cop',glow:'blue',districts:{suburb:12,chem:5,hospital:7,military:8}},
- riot:{name:'ОМОН-щитовик',r:18,hp:4.4,speed:40,dmg:15,color:'#637e5b',coat:'#1a2433',eye:'#6ec0ff',points:34,minWave:2,armor:0.35,gear:'riot',glow:'blue',isBossBar:true,districts:{suburb:6,chem:4,hospital:5,military:10}},
- firefighter:{name:'Пожарный',r:17,hp:3.6,speed:46,dmg:15,color:'#7f8c58',coat:'#7d2922',eye:'#ffc44a',points:28,minWave:1,armor:0.15,gear:'firefighter',glow:'amber',districts:{suburb:10,chem:7,hospital:6,military:5}},
- medic:{name:'Заражённый медик',r:15,hp:2.2,speed:50,dmg:10,color:'#7ca168',coat:'#cad8d6',eye:'#6eff9a',points:24,minWave:1,gear:'medic',glow:'green',ability:'heal',districts:{suburb:5,chem:4,hospital:16,military:4}},
- nurse:{name:'Бешеная медсестра',r:13,hp:1.7,speed:88,dmg:12,color:'#8ca87a',coat:'#4da4a6',eye:'#ff7a8a',points:20,minWave:1,gear:'nurse',glow:'cyan',districts:{suburb:5,chem:3,hospital:16,military:3}},
- surgeon:{name:'Мясник-хирург',r:16,hp:3.0,speed:62,dmg:18,color:'#889c78',coat:'#a8bab8',eye:'#ff4c5c',points:28,minWave:2,gear:'surgeon',glow:'red',districts:{suburb:3,chem:3,hospital:13,military:3}},
+ cop:{name:'Коп-зомби',r:16,hp:2.6,speed:52,dmg:12,color:'#6e9061',coat:'#22395c',eye:'#8ad2ff',points:22,minWave:1,armor:0.20,gear:'cop',glow:'blue',home:'suburb',desc:'Патрульный в бронежилете: поглощает 20% урона от пуль.',districts:{suburb:12,chem:5,hospital:7,military:8}},
+ riot:{name:'ОМОН-щитовик',r:18,hp:4.4,speed:40,dmg:15,color:'#637e5b',coat:'#1a2433',eye:'#6ec0ff',points:34,minWave:2,armor:0.35,gear:'riot',glow:'blue',isBossBar:true,home:'military',desc:'35% брони и тяжёлый щит, дополнительно гасящий лобовой огонь.',districts:{suburb:6,chem:4,hospital:5,military:10}},
+ firefighter:{name:'Пожарный',r:17,hp:3.6,speed:46,dmg:15,color:'#7f8c58',coat:'#7d2922',eye:'#ffc44a',points:28,minWave:1,armor:0.15,gear:'firefighter',glow:'amber',home:'suburb',desc:'Усиленная форма спасателя даёт 15% брони и высокий запас сил.',districts:{suburb:10,chem:7,hospital:6,military:5}},
+ medic:{name:'Заражённый медик',r:15,hp:2.2,speed:50,dmg:10,color:'#7ca168',coat:'#cad8d6',eye:'#6eff9a',points:24,minWave:1,gear:'medic',glow:'green',ability:'heal',home:'hospital',desc:'Регулярно лечит раненых зомби в радиусе вокруг себя.',districts:{suburb:5,chem:4,hospital:16,military:4}},
+ nurse:{name:'Бешеная медсестра',r:13,hp:1.7,speed:88,dmg:12,color:'#8ca87a',coat:'#4da4a6',eye:'#ff7a8a',points:20,minWave:1,gear:'nurse',glow:'cyan',home:'hospital',desc:'Проворный медик из приёмного покоя с быстрыми атаками.',districts:{suburb:5,chem:3,hospital:16,military:3}},
+ surgeon:{name:'Мясник-хирург',r:16,hp:3.0,speed:62,dmg:18,color:'#889c78',coat:'#a8bab8',eye:'#ff4c5c',points:28,minWave:2,gear:'surgeon',glow:'red',home:'hospital',desc:'Вооружён хирургическим клинком и наносит глубокие раны.',districts:{suburb:3,chem:3,hospital:13,military:3}},
 
- hazmat:{name:'Химзащитник',r:16,hp:2.6,speed:50,dmg:11,color:'#89a648',coat:'#c4a428',eye:'#b6ff44',points:25,minWave:1,gear:'hazmat',glow:'green',onDeath:'acidPool',districts:{suburb:4,chem:16,hospital:5,military:4}},
- spitter:{name:'Плеватель',r:14,hp:2.0,speed:48,dmg:11,color:'#84d438',coat:'#355220',eye:'#d2ff42',points:26,minWave:2,gear:'spitter',glow:'green',ability:'spit',range:285,districts:{suburb:4,chem:14,hospital:5,military:5}},
- boomer:{name:'Толстяк-пузырь',r:22,hp:3.5,speed:34,dmg:18,color:'#6bb84e',coat:'#344f2d',eye:'#dfff66',points:32,minWave:2,gear:'boomer',glow:'green',onDeath:'explode',isBossBar:true,districts:{suburb:6,chem:11,hospital:7,military:5}},
- acidic:{name:'Кислотник',r:15,hp:2.4,speed:60,dmg:12,color:'#76f048',coat:'#294f22',eye:'#e4ff7a',points:26,minWave:2,gear:'acidic',glow:'green',trail:'acid',districts:{suburb:3,chem:13,hospital:4,military:4}},
- glowing:{name:'Радиоактивный светляк',r:17,hp:4.2,speed:46,dmg:14,color:'#9eff4a',coat:'#39611c',eye:'#ffffff',points:36,minWave:3,gear:'glowing',glow:'green',regen:0.45,isBossBar:true,districts:{suburb:2,chem:11,hospital:3,military:4}},
- spore:{name:'Споровик',r:16,hp:3.0,speed:48,dmg:12,color:'#8673a8',coat:'#3d2f52',eye:'#96ff5e',points:28,minWave:3,gear:'spore',glow:'green',onDeath:'spores',districts:{suburb:4,chem:11,hospital:4,military:3}},
+ hazmat:{name:'Химзащитник',r:16,hp:2.6,speed:50,dmg:11,color:'#89a648',coat:'#c4a428',eye:'#b6ff44',points:25,minWave:1,gear:'hazmat',glow:'green',onDeath:'acidPool',home:'chem',desc:'После гибели разливает едкую кислотную лужу.',districts:{suburb:4,chem:16,hospital:5,military:4}},
+ spitter:{name:'Плеватель',r:14,hp:2.0,speed:48,dmg:11,color:'#84d438',coat:'#355220',eye:'#d2ff42',points:26,minWave:2,gear:'spitter',glow:'green',ability:'spit',range:285,home:'chem',desc:'Атакует издалека сгустками едкой токсичной слизи.',districts:{suburb:4,chem:14,hospital:5,military:5}},
+ boomer:{name:'Толстяк-пузырь',r:22,hp:3.5,speed:34,dmg:18,color:'#6bb84e',coat:'#344f2d',eye:'#dfff66',points:32,minWave:2,gear:'boomer',glow:'green',onDeath:'explode',isBossBar:true,home:'chem',desc:'Взрывается при гибели, поражая всё вокруг и оставляя кислоту.',districts:{suburb:6,chem:11,hospital:7,military:5}},
+ acidic:{name:'Кислотник',r:15,hp:2.4,speed:60,dmg:12,color:'#76f048',coat:'#294f22',eye:'#e4ff7a',points:26,minWave:2,gear:'acidic',glow:'green',trail:'acid',home:'chem',desc:'Оставляет за собой горящие капли токсичной кислоты.',districts:{suburb:3,chem:13,hospital:4,military:4}},
+ glowing:{name:'Радиоактивный светляк',r:17,hp:4.2,speed:46,dmg:14,color:'#9eff4a',coat:'#39611c',eye:'#ffffff',points:36,minWave:3,gear:'glowing',glow:'green',regen:0.45,isBossBar:true,home:'chem',desc:'Светится в темноте и сам регенерирует здоровье.',districts:{suburb:2,chem:11,hospital:3,military:4}},
+ spore:{name:'Споровик',r:16,hp:3.0,speed:48,dmg:12,color:'#8673a8',coat:'#3d2f52',eye:'#96ff5e',points:28,minWave:3,gear:'spore',glow:'green',onDeath:'spores',home:'chem',desc:'После смерти выпускает ядовитое споровое облако.',districts:{suburb:4,chem:11,hospital:4,military:3}},
 
- soldier:{name:'Солдат',r:16,hp:3.0,speed:64,dmg:14,color:'#698758',coat:'#3a4a31',eye:'#ffe252',points:26,minWave:1,armor:0.18,gear:'soldier',glow:'amber',districts:{suburb:5,chem:5,hospital:5,military:16}},
- commando:{name:'Штурмовик',r:16,hp:3.8,speed:74,dmg:16,color:'#586d57',coat:'#1c2226',eye:'#ff5a52',points:34,minWave:2,armor:0.25,gear:'commando',glow:'red',ability:'dash',districts:{suburb:3,chem:4,hospital:4,military:14}},
- grenadier:{name:'Подрывник',r:17,hp:3.5,speed:50,dmg:15,color:'#74845a',coat:'#4a422b',eye:'#ff8836',points:35,minWave:2,gear:'grenadier',glow:'amber',onDeath:'fireBomb',districts:{suburb:4,chem:4,hospital:4,military:12}},
- tank:{name:'Танк-мутант',r:23,hp:5.5,speed:28,dmg:20,color:'#7b648f',coat:'#4a375c',eye:'#ff6b8b',points:38,minWave:1,gear:'tank',glow:'red',isBossBar:true,coins:5,districts:{suburb:5,chem:6,hospital:5,military:11}},
- juggernaut:{name:'Джаггернаут',r:25,hp:8.2,speed:24,dmg:24,color:'#68727d',coat:'#29323a',eye:'#ff4c58',points:55,minWave:3,armor:0.35,gear:'juggernaut',glow:'red',isBossBar:true,coins:6,districts:{suburb:2,chem:3,hospital:3,military:10}},
- cyborg:{name:'Киборг-одержимый',r:17,hp:4.5,speed:58,dmg:14,color:'#6d7d82',coat:'#232d33',eye:'#ff3b4f',points:40,minWave:3,armor:0.20,gear:'cyborg',glow:'cyan',ability:'zap',range:235,isBossBar:true,coins:4,districts:{suburb:2,chem:4,hospital:4,military:10}},
+ soldier:{name:'Солдат',r:16,hp:3.0,speed:64,dmg:14,color:'#698758',coat:'#3a4a31',eye:'#ffe252',points:26,minWave:1,armor:0.18,gear:'soldier',glow:'amber',home:'military',desc:'Бывший боец гарнизона: быстр и защищён бронёй (18%).',districts:{suburb:5,chem:5,hospital:5,military:16}},
+ commando:{name:'Штурмовик',r:16,hp:3.8,speed:74,dmg:16,color:'#586d57',coat:'#1c2226',eye:'#ff5a52',points:34,minWave:2,armor:0.25,gear:'commando',glow:'red',ability:'dash',home:'military',desc:'Тактические рывки, мощный удар и 25% брони.',districts:{suburb:3,chem:4,hospital:4,military:14}},
+ grenadier:{name:'Подрывник',r:17,hp:3.5,speed:50,dmg:15,color:'#74845a',coat:'#4a422b',eye:'#ff8836',points:35,minWave:2,gear:'grenadier',glow:'amber',onDeath:'fireBomb',home:'military',desc:'При смерти детонирует боезапас мощным огненным взрывом.',districts:{suburb:4,chem:4,hospital:4,military:12}},
+ tank:{name:'Танк-мутант',r:23,hp:5.5,speed:28,dmg:20,color:'#7b648f',coat:'#4a375c',eye:'#ff6b8b',points:38,minWave:1,gear:'tank',glow:'red',isBossBar:true,coins:5,home:'military',desc:'Огромный мутант с толстой шкурой и богатой наградой.',districts:{suburb:5,chem:6,hospital:5,military:11}},
+ juggernaut:{name:'Джаггернаут',r:25,hp:8.2,speed:24,dmg:24,color:'#68727d',coat:'#29323a',eye:'#ff4c58',points:55,minWave:3,armor:0.35,gear:'juggernaut',glow:'red',isBossBar:true,coins:6,home:'military',desc:'Бронированный титан (35% брони) сокрушительной массы.',districts:{suburb:2,chem:3,hospital:3,military:10}},
+ cyborg:{name:'Киборг-одержимый',r:17,hp:4.5,speed:58,dmg:14,color:'#6d7d82',coat:'#232d33',eye:'#ff3b4f',points:40,minWave:3,armor:0.20,gear:'cyborg',glow:'cyan',ability:'zap',range:235,isBossBar:true,coins:4,home:'military',desc:'Стреляет плазменными зарядами из импланта; 20% брони.',districts:{suburb:2,chem:4,hospital:4,military:10}},
 
- hound:{name:'Зомби-пёс',r:12,hp:1.3,speed:118,dmg:10,color:'#9e5d48',coat:'#573329',eye:'#ff6248',points:22,minWave:1,gear:'hound',glow:'red',shape:'hound',districts:{suburb:10,chem:8,hospital:6,military:10}},
- leaper:{name:'Прыгун',r:14,hp:2.2,speed:76,dmg:14,color:'#a88954',coat:'#4c3c24',eye:'#ffea52',points:28,minWave:2,gear:'leaper',glow:'amber',ability:'leap',districts:{suburb:7,chem:7,hospital:6,military:8}},
- frost:{name:'Крио-зомби',r:16,hp:3.1,speed:50,dmg:12,color:'#72c8e8',coat:'#285469',eye:'#e0fcff',points:30,minWave:2,gear:'frost',glow:'cyan',ability:'chill',districts:{suburb:3,chem:4,hospital:11,military:4}},
- pyro:{name:'Огнеходец',r:16,hp:3.3,speed:62,dmg:16,color:'#cc6836',coat:'#4f2414',eye:'#fff266',points:34,minWave:2,gear:'pyro',glow:'amber',trail:'fire',districts:{suburb:4,chem:8,hospital:3,military:7}},
- necromancer:{name:'Некро-реаниматор',r:17,hp:4.8,speed:38,dmg:12,color:'#745c96',coat:'#211730',eye:'#d26eff',points:48,minWave:3,gear:'necromancer',glow:'red',ability:'summon',isBossBar:true,coins:5,districts:{suburb:3,chem:4,hospital:5,military:4}},
- alpha:{name:'Альфа-титан',r:27,hp:11.0,speed:33,dmg:26,color:'#9c4658',coat:'#3b1822',eye:'#ffffff',points:80,minWave:3,armor:0.20,gear:'alpha',glow:'red',ability:'spit',range:300,isBossBar:true,coins:8,districts:{suburb:2,chem:3,hospital:3,military:4}}
+ hound:{name:'Зомби-пёс',r:12,hp:1.3,speed:118,dmg:10,color:'#9e5d48',coat:'#573329',eye:'#ff6248',points:22,minWave:1,gear:'hound',glow:'red',shape:'hound',home:'suburb',desc:'Самый быстрый мутант в зоне — настигает бегом.',districts:{suburb:10,chem:8,hospital:6,military:10}},
+ leaper:{name:'Прыгун',r:14,hp:2.2,speed:76,dmg:14,color:'#a88954',coat:'#4c3c24',eye:'#ffea52',points:28,minWave:2,gear:'leaper',glow:'amber',ability:'leap',home:'military',desc:'Совершает резкие длинные прыжки прямо к цели.',districts:{suburb:7,chem:7,hospital:6,military:8}},
+ frost:{name:'Крио-зомби',r:16,hp:3.1,speed:50,dmg:12,color:'#72c8e8',coat:'#285469',eye:'#e0fcff',points:30,minWave:2,gear:'frost',glow:'cyan',ability:'chill',home:'hospital',desc:'Замораживающая аура и удары временно замедляют бег.',districts:{suburb:3,chem:4,hospital:11,military:4}},
+ pyro:{name:'Огнеходец',r:16,hp:3.3,speed:62,dmg:16,color:'#cc6836',coat:'#4f2414',eye:'#fff266',points:34,minWave:2,gear:'pyro',glow:'amber',trail:'fire',home:'chem',desc:'Пылает заживо, оставляя под ногами огненный след.',districts:{suburb:4,chem:8,hospital:3,military:7}},
+ necromancer:{name:'Некро-реаниматор',r:17,hp:4.8,speed:38,dmg:12,color:'#745c96',coat:'#211730',eye:'#d26eff',points:48,minWave:3,gear:'necromancer',glow:'red',ability:'summon',isBossBar:true,coins:5,home:'hospital',desc:'Призывает новых ползунов прямо посреди схватки.',districts:{suburb:3,chem:4,hospital:5,military:4}},
+ alpha:{name:'Альфа-титан',r:27,hp:11.0,speed:33,dmg:26,color:'#9c4658',coat:'#3b1822',eye:'#ffffff',points:80,minWave:3,armor:0.20,gear:'alpha',glow:'red',ability:'spit',range:300,isBossBar:true,coins:8,home:'military',desc:'Главный босс карантина: огромная броня, мощь и дальний плевок.',districts:{suburb:2,chem:3,hospital:3,military:4}}
 };
 const ZOMBIE_KEYS=Object.keys(ZOMBIE_TYPES);
+
+const CODEX_KEY='carantin_codex_v1';
+let codexData={seen:{},kills:{}};
+let codexFilter='all';
+let codexReturnTo='game';
+
+function loadCodex(){
+ try{
+  const raw=localStorage.getItem(CODEX_KEY);
+  if(raw){
+   const parsed=JSON.parse(raw);
+   if(parsed&&typeof parsed==='object'){
+    codexData={
+     seen:(parsed.seen&&typeof parsed.seen==='object')?parsed.seen:{},
+     kills:(parsed.kills&&typeof parsed.kills==='object')?parsed.kills:{}
+    };
+   }
+  }
+ }catch(_){codexData={seen:{},kills:{}}}
+}
+function saveCodex(){
+ try{localStorage.setItem(CODEX_KEY,JSON.stringify(codexData))}catch(_){}
+}
+function updateCodexBadge(){
+ const count=ZOMBIE_KEYS.filter(k=>codexData.seen[k]).length;
+ if($('codexBadge'))$('codexBadge').textContent=`${count}/${ZOMBIE_KEYS.length}`;
+ if($('startCodexCount'))$('startCodexCount').textContent=String(count);
+}
+function registerZombieSighting(type){
+ if(!ZOMBIE_TYPES[type])return;
+ seenZombieTypes.add(type);
+ if(!codexData.seen[type]){
+  codexData.seen[type]=true;
+  saveCodex();
+  updateCodexBadge();
+ }
+}
+function registerZombieKill(type){
+ if(!ZOMBIE_TYPES[type])return;
+ codexData.seen[type]=true;
+ codexData.kills[type]=(codexData.kills[type]||0)+1;
+ saveCodex();
+ updateCodexBadge();
+}
+loadCodex();
+updateCodexBadge();
 
 const ITEMS_POOL=[
  {
@@ -1899,7 +2025,7 @@ function spawnZombie(forceType,sx,sy){
 
  const type=forceType&&ZOMBIE_TYPES[forceType]?forceType:pickZombieTypeForLocation(x,y);
  const s=ZOMBIE_TYPES[type];
- seenZombieTypes.add(type);
+ registerZombieSighting(type);
  const maxHp=Number((s.hp+Math.floor((wave-1)*0.75)*(s.hp>=3?1.25:0.85)).toFixed(2));
  zombies.push({
   x,y,type,def:s,r:s.r,hp:maxHp,maxHp,
@@ -2318,10 +2444,11 @@ function gameOver(){
      <div class="sumCard"><div class="k">Убито</div><div class="v">${kills}</div></div>
      <div class="sumCard"><div class="k">Рекорд</div><div class="v" style="color:#ffe082">${bestScore}</div></div>
     </div>
-    <p class="small">Собрано монет: <b style="color:#ffe082">${money}</b> 🪙 · Видов зомби: <b style="color:#72ff9f">${seenZombieTypes.size}/${ZOMBIE_KEYS.length}</b></p>
+    <p class="small">Собрано монет: <b style="color:#ffe082">${money}</b> 🪙 · Забег: <b style="color:#72ff9f">${seenZombieTypes.size}/${ZOMBIE_KEYS.length}</b> видов · Всего в индексе: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
    </div>
    <div class="boxFooter">
     <button type="button" class="mainbtn" id="restart">ИГРАТЬ СНОВА</button>
+    <button type="button" class="mainbtn secondary" id="overCodex">🧟 ИНДЕКС ЗОМБИ (${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length})</button>
    </div>
   </div>`;
  $('overlay').style.display='flex';
@@ -2333,6 +2460,7 @@ function startGame(){
  $('overlay').style.display='none';
  $('shop').style.display='none';
  $('pauseScreen').style.display='none';
+ $('codexModal').style.display='none';
  running=true;paused=false;last=performance.now();
 }
 
@@ -2343,6 +2471,12 @@ $('overlay').addEventListener('pointerup',e=>{
  startGame();
 });
 $('overlay').addEventListener('click',e=>{
+ const codexBtn=e.target.closest('#startCodex,#overCodex');
+ if(codexBtn){
+  e.preventDefault();
+  openCodex('overlay');
+  return;
+ }
  const button=e.target.closest('#start,#restart');
  if(!button)return;
  e.preventDefault();
@@ -2761,6 +2895,7 @@ function update(dt,now){
    const baseCoin=def.coins||(z.r>=20?5:2);
    const gainCoins=baseCoin+(itemMods.coinBonus||0)+(zDist.coinBonus||0);
    score+=z.points;money+=gainCoins;kills++;waveKills++;
+   registerZombieKill(z.type);
    if(itemMods.vamp>0&&kills%4===0&&health<maxHealth){
     health=Math.min(maxHealth,health+itemMods.vamp);
     addPopup(player.x,player.y-28,`+${itemMods.vamp} ❤️`,'#6bff88',12);
@@ -3188,193 +3323,194 @@ function drawPlayer(now){
  ctx.restore();
 }
 
-function drawZombie(z,now){
+function drawZombie(z,now,targetCtx){
+ const c=targetCtx||ctx;
  const def=z.def||ZOMBIE_TYPES.walker;
  const gear=def.gear||'none';
  const hit=z.hit>0;
- ctx.save();
- const bob=Math.sin(z.phase)*(def.shape==='hound'?2.0:1.6);
- ctx.translate(z.x,z.y+bob);
- if(def.alpha)ctx.globalAlpha=def.alpha;
+ c.save();
+ const bob=z.preview?0:Math.sin(z.phase)*(def.shape==='hound'?2.0:1.6);
+ c.translate(z.x,z.y+bob);
+ if(def.alpha&&!z.preview)c.globalAlpha=def.alpha;
 
  // Directional SE cast shadow + contact shadow
- ctx.fillStyle='rgba(0,0,0,0.30)';
- ctx.beginPath();ctx.ellipse(6,z.r*0.58,z.r+4,z.r*0.76,0.2,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='rgba(0,0,0,0.48)';
- ctx.beginPath();ctx.ellipse(2,z.r*0.36,z.r+1,z.r*0.66,0,0,Math.PI*2);ctx.fill();
+ c.fillStyle='rgba(0,0,0,0.30)';
+ c.beginPath();c.ellipse(6,z.r*0.58,z.r+4,z.r*0.76,0.2,0,Math.PI*2);c.fill();
+ c.fillStyle='rgba(0,0,0,0.48)';
+ c.beginPath();c.ellipse(2,z.r*0.36,z.r+1,z.r*0.66,0,0,Math.PI*2);c.fill();
 
  // Speed motion trail for fast / dashing zombies
- if((z.speed>=85||z.dashTimer>0||z.boostTimer>0)&&!hit){
-  ctx.save();
-  ctx.rotate(z.angle);
-  ctx.globalAlpha=0.20;
-  ctx.fillStyle=def.color;
-  ctx.beginPath();ctx.ellipse(-12,0,z.r*0.95,z.r*0.65,0,0,Math.PI*2);ctx.fill();
-  ctx.restore();
+ if((z.speed>=85||z.dashTimer>0||z.boostTimer>0)&&!hit&&!z.preview){
+  c.save();
+  c.rotate(z.angle);
+  c.globalAlpha=0.20;
+  c.fillStyle=def.color;
+  c.beginPath();c.ellipse(-12,0,z.r*0.95,z.r*0.65,0,0,Math.PI*2);c.fill();
+  c.restore();
  }
 
- ctx.save();
- ctx.rotate(z.angle+Math.sin(z.phase*0.5)*0.08);
+ c.save();
+ c.rotate(z.angle+(z.preview?0:Math.sin(z.phase*0.5)*0.08));
 
  if(def.shape==='hound'){
   // Quadruped mutant hound body
   const leg=Math.sin(z.phase)*4;
-  ctx.strokeStyle=hit?'#ffffff':'#4a2820';ctx.lineWidth=3.2;ctx.lineCap='round';
-  ctx.beginPath();
-  ctx.moveTo(4,-6);ctx.lineTo(10+leg,-8);ctx.moveTo(4,6);ctx.lineTo(10-leg,8);
-  ctx.moveTo(-6,-5);ctx.lineTo(-10-leg,-7);ctx.moveTo(-6,5);ctx.lineTo(-10+leg,7);
-  ctx.stroke();
-  ctx.fillStyle=hit?'#f6f8d4':def.coat;
-  ctx.beginPath();ctx.ellipse(-1,0,z.r*1.25,z.r*0.68,0,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='#1b0f0c';ctx.lineWidth=1.4;ctx.stroke();
-  ctx.fillStyle=hit?'#ffffff':def.color;
-  ctx.beginPath();ctx.ellipse(9,0,6.5,5,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle=def.eye;
-  ctx.beginPath();ctx.arc(11,-2.2,1.8,0,Math.PI*2);ctx.arc(11,2.2,1.8,0,Math.PI*2);ctx.fill();
-  ctx.restore();
+  c.strokeStyle=hit?'#ffffff':'#4a2820';c.lineWidth=3.2;c.lineCap='round';
+  c.beginPath();
+  c.moveTo(4,-6);c.lineTo(10+leg,-8);c.moveTo(4,6);c.lineTo(10-leg,8);
+  c.moveTo(-6,-5);c.lineTo(-10-leg,-7);c.moveTo(-6,5);c.lineTo(-10+leg,7);
+  c.stroke();
+  c.fillStyle=hit?'#f6f8d4':def.coat;
+  c.beginPath();c.ellipse(-1,0,z.r*1.25,z.r*0.68,0,0,Math.PI*2);c.fill();
+  c.strokeStyle='#1b0f0c';c.lineWidth=1.4;c.stroke();
+  c.fillStyle=hit?'#ffffff':def.color;
+  c.beginPath();c.ellipse(9,0,6.5,5,0,0,Math.PI*2);c.fill();
+  c.fillStyle=def.eye;
+  c.beginPath();c.arc(11,-2.2,1.8,0,Math.PI*2);c.arc(11,2.2,1.8,0,Math.PI*2);c.fill();
+  c.restore();
  }else{
   const reachL=Math.sin(z.phase)*4.4;
   const reachR=Math.cos(z.phase)*4.4;
   const armLen=z.r+(gear==='leaper'?12:8.5);
   const armW=z.r>=20?7.8:z.r<=12?4.2:5.2;
 
-  ctx.lineCap='round';
-  ctx.strokeStyle=hit?'#eef8c4':def.coat;
-  ctx.lineWidth=armW;
-  ctx.beginPath();
-  ctx.moveTo(2,-z.r*0.65);ctx.lineTo(armLen+reachL,-z.r*0.52);
-  ctx.moveTo(2,z.r*0.65);ctx.lineTo(armLen+reachR,z.r*0.52);
-  ctx.stroke();
+  c.lineCap='round';
+  c.strokeStyle=hit?'#eef8c4':def.coat;
+  c.lineWidth=armW;
+  c.beginPath();
+  c.moveTo(2,-z.r*0.65);c.lineTo(armLen+reachL,-z.r*0.52);
+  c.moveTo(2,z.r*0.65);c.lineTo(armLen+reachR,z.r*0.52);
+  c.stroke();
 
   // Hand / blade / cybernetic arm tips
-  ctx.fillStyle=hit?'#ffffff':gear==='cyborg'?'#9cb0b8':def.color;
-  ctx.beginPath();
-  ctx.arc(armLen+reachL,-z.r*0.52,z.r>=20?3.6:2.4,0,Math.PI*2);
-  ctx.arc(armLen+reachR,z.r*0.52,z.r>=20?3.6:2.4,0,Math.PI*2);
-  ctx.fill();
+  c.fillStyle=hit?'#ffffff':gear==='cyborg'?'#9cb0b8':def.color;
+  c.beginPath();
+  c.arc(armLen+reachL,-z.r*0.52,z.r>=20?3.6:2.4,0,Math.PI*2);
+  c.arc(armLen+reachR,z.r*0.52,z.r>=20?3.6:2.4,0,Math.PI*2);
+  c.fill();
   if(gear==='surgeon'){
    // Gleaming scalpel on right arm
-   ctx.strokeStyle='#e2f2f5';ctx.lineWidth=2.2;
-   ctx.beginPath();ctx.moveTo(armLen+reachR,z.r*0.52);ctx.lineTo(armLen+reachR+9,z.r*0.32);ctx.stroke();
+   c.strokeStyle='#e2f2f5';c.lineWidth=2.2;
+   c.beginPath();c.moveTo(armLen+reachR,z.r*0.52);c.lineTo(armLen+reachR+9,z.r*0.32);c.stroke();
   }
 
   // Torso
   const coatCol=hit?'#f0fac8':(gear==='none'?(z.seed>.66?'#394d3b':z.seed>.33?'#3b444f':'#4a3e38'):def.coat);
-  ctx.fillStyle=coatCol;
-  ctx.beginPath();
-  ctx.ellipse(-1,0,z.r*(gear==='boomer'?1.05:0.86),z.r*(gear==='boomer'?1.12:1.06),0,0,Math.PI*2);
-  ctx.fill();
-  ctx.strokeStyle='rgba(8,14,10,0.75)';ctx.lineWidth=1.7;ctx.stroke();
-  ctx.strokeStyle='rgba(190,235,195,0.16)';ctx.lineWidth=1.2;
-  ctx.beginPath();ctx.arc(-1,0,z.r*0.86,-Math.PI*0.75,-Math.PI*0.15);ctx.stroke();
+  c.fillStyle=coatCol;
+  c.beginPath();
+  c.ellipse(-1,0,z.r*(gear==='boomer'?1.05:0.86),z.r*(gear==='boomer'?1.12:1.06),0,0,Math.PI*2);
+  c.fill();
+  c.strokeStyle='rgba(8,14,10,0.75)';c.lineWidth=1.7;c.stroke();
+  c.strokeStyle='rgba(190,235,195,0.16)';c.lineWidth=1.2;
+  c.beginPath();c.arc(-1,0,z.r*0.86,-Math.PI*0.75,-Math.PI*0.15);c.stroke();
 
   // Distinct visual gear & mutations per archetype
   if(gear==='tank'||gear==='alpha'){
    const pulse=0.65+Math.sin(now*0.008+z.seed*10)*0.35;
-   ctx.fillStyle=gear==='alpha'?`rgba(255,95,120,${0.72*pulse})`:`rgba(165,255,75,${0.62*pulse})`;
-   ctx.beginPath();ctx.arc(-6,-7,4.2,0,Math.PI*2);ctx.arc(-5,8,3.6,0,Math.PI*2);ctx.arc(-10,1,2.9,0,Math.PI*2);ctx.fill();
-   ctx.fillStyle=gear==='alpha'?'#451822':'#323b42';
-   ctx.beginPath();ctx.roundRect(-5,-z.r*0.95,9,6,2);ctx.roundRect(-5,z.r*0.95-6,9,6,2);ctx.fill();
+   c.fillStyle=gear==='alpha'?`rgba(255,95,120,${0.72*pulse})`:`rgba(165,255,75,${0.62*pulse})`;
+   c.beginPath();c.arc(-6,-7,4.2,0,Math.PI*2);c.arc(-5,8,3.6,0,Math.PI*2);c.arc(-10,1,2.9,0,Math.PI*2);c.fill();
+   c.fillStyle=gear==='alpha'?'#451822':'#323b42';
+   c.beginPath();c.roundRect(-5,-z.r*0.95,9,6,2);c.roundRect(-5,z.r*0.95-6,9,6,2);c.fill();
    if(gear==='alpha'){
-    ctx.fillStyle='#ff8fa3';
-    ctx.beginPath();
-    ctx.moveTo(4,-14);ctx.lineTo(15,-20);ctx.lineTo(9,-8);
-    ctx.moveTo(4,14);ctx.lineTo(15,20);ctx.lineTo(9,8);
-    ctx.fill();
+    c.fillStyle='#ff8fa3';
+    c.beginPath();
+    c.moveTo(4,-14);c.lineTo(15,-20);c.lineTo(9,-8);
+    c.moveTo(4,14);c.lineTo(15,20);c.lineTo(9,8);
+    c.fill();
    }
   }else if(gear==='juggernaut'){
-   ctx.fillStyle='#48545e';ctx.strokeStyle='#9cb0ba';ctx.lineWidth=1.4;
-   ctx.beginPath();ctx.roundRect(-10,-z.r*0.98,18,7,2);ctx.roundRect(-10,z.r*0.98-7,18,7,2);ctx.fill();ctx.stroke();
+   c.fillStyle='#48545e';c.strokeStyle='#9cb0ba';c.lineWidth=1.4;
+   c.beginPath();c.roundRect(-10,-z.r*0.98,18,7,2);c.roundRect(-10,z.r*0.98-7,18,7,2);c.fill();c.stroke();
   }else if(gear==='riot'){
    // Heavy ballistic shield held in front
-   ctx.fillStyle='#1f2c38';ctx.strokeStyle='#6db3eb';ctx.lineWidth=1.8;
-   ctx.beginPath();ctx.roundRect(z.r*0.55,-z.r*0.9,7,z.r*1.8,3);ctx.fill();ctx.stroke();
-   ctx.fillStyle='#8fd1ff';ctx.fillRect(z.r*0.62,-5,3,10);
+   c.fillStyle='#1f2c38';c.strokeStyle='#6db3eb';c.lineWidth=1.8;
+   c.beginPath();c.roundRect(z.r*0.55,-z.r*0.9,7,z.r*1.8,3);c.fill();c.stroke();
+   c.fillStyle='#8fd1ff';c.fillRect(z.r*0.62,-5,3,10);
   }else if(gear==='cop'){
-   ctx.fillStyle='#e5c24a';ctx.fillRect(-1,-9,4,4);
+   c.fillStyle='#e5c24a';c.fillRect(-1,-9,4,4);
   }else if(gear==='firefighter'){
-   ctx.fillStyle='#e8a92c';ctx.fillRect(-5,-z.r*0.85,8,3);ctx.fillRect(-5,z.r*0.85-3,8,3);
+   c.fillStyle='#e8a92c';c.fillRect(-5,-z.r*0.85,8,3);c.fillRect(-5,z.r*0.85-3,8,3);
   }else if(gear==='medic'||gear==='nurse'){
-   ctx.fillStyle='#d13b40';ctx.fillRect(-5,-2,8,4);ctx.fillRect(-3,-4,4,8);
+   c.fillStyle='#d13b40';c.fillRect(-5,-2,8,4);c.fillRect(-3,-4,4,8);
   }else if(gear==='surgeon'){
-   ctx.fillStyle='rgba(195,28,36,0.72)';ctx.fillRect(0,-7,8,14);
+   c.fillStyle='rgba(195,28,36,0.72)';c.fillRect(0,-7,8,14);
   }else if(gear==='hazmat'){
-   ctx.fillStyle='#2a3022';ctx.beginPath();ctx.roundRect(-12,-8,6,16,2);ctx.fill();
+   c.fillStyle='#2a3022';c.beginPath();c.roundRect(-12,-8,6,16,2);c.fill();
   }else if(gear==='boomer'||gear==='glowing'||gear==='spore'){
    const pulse=0.65+Math.sin(now*0.007+z.seed*6)*0.35;
-   ctx.fillStyle=gear==='spore'?`rgba(180,105,255,${0.7*pulse})`:`rgba(155,255,70,${0.75*pulse})`;
-   ctx.beginPath();ctx.arc(-3,-6,5,0,Math.PI*2);ctx.arc(-4,7,4.5,0,Math.PI*2);ctx.arc(3,1,4,0,Math.PI*2);ctx.fill();
+   c.fillStyle=gear==='spore'?`rgba(180,105,255,${0.7*pulse})`:`rgba(155,255,70,${0.75*pulse})`;
+   c.beginPath();c.arc(-3,-6,5,0,Math.PI*2);c.arc(-4,7,4.5,0,Math.PI*2);c.arc(3,1,4,0,Math.PI*2);c.fill();
   }else if(gear==='grenadier'){
-   ctx.fillStyle='#d93d3d';ctx.beginPath();ctx.arc(1,-8,3,0,Math.PI*2);ctx.arc(1,8,3,0,Math.PI*2);ctx.fill();
+   c.fillStyle='#d93d3d';c.beginPath();c.arc(1,-8,3,0,Math.PI*2);c.arc(1,8,3,0,Math.PI*2);c.fill();
   }else if(gear==='frost'){
-   ctx.fillStyle='#b8f7ff';
-   ctx.beginPath();ctx.moveTo(-4,-11);ctx.lineTo(-10,-16);ctx.lineTo(1,-9);ctx.moveTo(-4,11);ctx.lineTo(-10,16);ctx.lineTo(1,9);ctx.fill();
+   c.fillStyle='#b8f7ff';
+   c.beginPath();c.moveTo(-4,-11);c.lineTo(-10,-16);c.lineTo(1,-9);c.moveTo(-4,11);c.lineTo(-10,16);c.lineTo(1,9);c.fill();
   }else if(gear==='pyro'){
    const fl=0.65+Math.sin(now*0.018+z.seed*8)*0.35;
-   ctx.fillStyle=`rgba(255,155,40,${fl.toFixed(2)})`;
-   ctx.beginPath();ctx.arc(-5,0,z.r*0.7,0,Math.PI*2);ctx.fill();
+   c.fillStyle=`rgba(255,155,40,${fl.toFixed(2)})`;
+   c.beginPath();c.arc(-5,0,z.r*0.7,0,Math.PI*2);c.fill();
   }else if(gear==='necromancer'){
-   ctx.strokeStyle='#c96bff';ctx.lineWidth=1.6;
-   ctx.beginPath();ctx.arc(0,0,z.r*0.85,0,Math.PI*2);ctx.stroke();
+   c.strokeStyle='#c96bff';c.lineWidth=1.6;
+   c.beginPath();c.arc(0,0,z.r*0.85,0,Math.PI*2);c.stroke();
   }else if(gear==='cyborg'){
-   ctx.fillStyle='#788d94';ctx.fillRect(-4,3,13,6);
+   c.fillStyle='#788d94';c.fillRect(-4,3,13,6);
   }else if(gear==='runner'){
-   ctx.fillStyle='rgba(245,190,60,0.58)';ctx.fillRect(-5,-8,6,4);ctx.fillRect(-5,4,6,4);
+   c.fillStyle='rgba(245,190,60,0.58)';c.fillRect(-5,-8,6,4);c.fillRect(-5,4,6,4);
   }else if(gear==='none'){
-   ctx.fillStyle='rgba(135,35,35,0.52)';ctx.beginPath();ctx.arc(-4,z.seed>.5?4:-4,4.5,0,Math.PI*2);ctx.fill();
+   c.fillStyle='rgba(135,35,35,0.52)';c.beginPath();c.arc(-4,z.seed>.5?4:-4,4.5,0,Math.PI*2);c.fill();
   }
 
   // Head & Helmet/Hood overlays
   const hr=z.r>=20?z.r*0.56:z.r*0.64;
-  ctx.fillStyle=hit?'#fcffde':z.color;
-  ctx.beginPath();ctx.arc(3.8,0,hr,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='rgba(10,16,10,0.7)';ctx.lineWidth=1.5;ctx.stroke();
+  c.fillStyle=hit?'#fcffde':z.color;
+  c.beginPath();c.arc(3.8,0,hr,0,Math.PI*2);c.fill();
+  c.strokeStyle='rgba(10,16,10,0.7)';c.lineWidth=1.5;c.stroke();
 
   if(gear==='cop'||gear==='soldier'||gear==='commando'||gear==='firefighter'||gear==='juggernaut'){
-   ctx.fillStyle=gear==='cop'?'#1a2d4a':gear==='firefighter'?'#c9382b':gear==='commando'?'#171c20':'#34422c';
-   ctx.beginPath();ctx.arc(3.2,0,hr*0.95,-Math.PI*0.75,Math.PI*0.75,true);ctx.fill();
+   c.fillStyle=gear==='cop'?'#1a2d4a':gear==='firefighter'?'#c9382b':gear==='commando'?'#171c20':'#34422c';
+   c.beginPath();c.arc(3.2,0,hr*0.95,-Math.PI*0.75,Math.PI*0.75,true);c.fill();
   }else if(gear==='hazmat'||gear==='necromancer'){
-   ctx.fillStyle=gear==='hazmat'?'#d6b329':'#28183b';
-   ctx.beginPath();ctx.arc(2.5,0,hr*1.06,0,Math.PI*2);ctx.fill();
+   c.fillStyle=gear==='hazmat'?'#d6b329':'#28183b';
+   c.beginPath();c.arc(2.5,0,hr*1.06,0,Math.PI*2);c.fill();
   }else{
-   ctx.fillStyle='rgba(20,30,20,0.5)';
-   ctx.beginPath();ctx.arc(1.5,z.seed>.5?-2.5:2.5,hr*0.48,0,Math.PI*2);ctx.fill();
+   c.fillStyle='rgba(20,30,20,0.5)';
+   c.beginPath();c.arc(1.5,z.seed>.5?-2.5:2.5,hr*0.48,0,Math.PI*2);c.fill();
   }
 
   // Glowing eyes (cyborg gets asymmetric cyber red laser eye)
   const eyeX=3.8+hr*0.48;
   const eyeY=hr*0.42;
-  ctx.fillStyle=def.eye||'#d4ff4a';
-  ctx.beginPath();
-  ctx.arc(eyeX,-eyeY,z.r>=20?3.0:2.2,0,Math.PI*2);
-  ctx.fill();
-  ctx.fillStyle=gear==='cyborg'?'#ff223a':(def.eye||'#d4ff4a');
-  ctx.beginPath();
-  ctx.arc(eyeX,eyeY,gear==='cyborg'?2.9:(z.r>=20?3.0:2.2),0,Math.PI*2);
-  ctx.fill();
+  c.fillStyle=def.eye||'#d4ff4a';
+  c.beginPath();
+  c.arc(eyeX,-eyeY,z.r>=20?3.0:2.2,0,Math.PI*2);
+  c.fill();
+  c.fillStyle=gear==='cyborg'?'#ff223a':(def.eye||'#d4ff4a');
+  c.beginPath();
+  c.arc(eyeX,eyeY,gear==='cyborg'?2.9:(z.r>=20?3.0:2.2),0,Math.PI*2);
+  c.fill();
 
-  ctx.restore();
+  c.restore();
  }
 
  // Health bar + archetype label for heavy / elite / damaged multi-HP zombies
- if(def.isBossBar||(z.maxHp>=3&&z.hp<z.maxHp)){
+ if(!z.preview&&(def.isBossBar||(z.maxHp>=3&&z.hp<z.maxHp))){
   const bw=Math.max(38,z.r*2.2);
   const pct=Math.max(0,Math.min(1,z.hp/(z.maxHp||5)));
-  ctx.fillStyle='rgba(10,14,15,0.9)';
-  ctx.beginPath();ctx.roundRect(-bw/2,-z.r-15,bw,6.5,3);ctx.fill();
-  ctx.fillStyle=z.type==='alpha'?'#ff4468':z.type==='juggernaut'?'#a8c4d4':z.type==='necromancer'?'#c96bff':'#ff6b82';
-  ctx.beginPath();ctx.roundRect(-bw/2+1,-z.r-14,(bw-2)*pct,4.5,2);ctx.fill();
-  ctx.strokeStyle='rgba(255,190,205,0.45)';ctx.lineWidth=1;
-  ctx.beginPath();ctx.roundRect(-bw/2,-z.r-15,bw,6.5,3);ctx.stroke();
+  c.fillStyle='rgba(10,14,15,0.9)';
+  c.beginPath();c.roundRect(-bw/2,-z.r-15,bw,6.5,3);c.fill();
+  c.fillStyle=z.type==='alpha'?'#ff4468':z.type==='juggernaut'?'#a8c4d4':z.type==='necromancer'?'#c96bff':'#ff6b82';
+  c.beginPath();c.roundRect(-bw/2+1,-z.r-14,(bw-2)*pct,4.5,2);c.fill();
+  c.strokeStyle='rgba(255,190,205,0.45)';c.lineWidth=1;
+  c.beginPath();c.roundRect(-bw/2,-z.r-15,bw,6.5,3);c.stroke();
   if(def.isBossBar){
-   ctx.textAlign='center';
-   ctx.font='700 9px system-ui,sans-serif';
-   ctx.fillStyle='rgba(255,235,235,0.88)';
-   ctx.fillText(def.name,0,-z.r-19);
+   c.textAlign='center';
+   c.font='700 9px system-ui,sans-serif';
+   c.fillStyle='rgba(255,235,235,0.88)';
+   c.fillText(def.name,0,-z.r-19);
   }
  }
 
- ctx.restore();
+ c.restore();
 }
 
 function drawTargetReticle(now){
@@ -4041,11 +4177,166 @@ function closeShop(){$('shop').style.display='none';paused=false;last=performanc
 function pauseGame(){if(!running||waveChoosing||activeNpc)return;paused=true;$('pauseScreen').style.display='flex'}
 function resumeGame(){paused=false;$('pauseScreen').style.display='none';last=performance.now()}
 
+const HOME_LABELS={
+ suburb:'🏘️ Жилой квартал',
+ chem:'☣️ Химзона',
+ hospital:'🏥 Медгородок',
+ military:'🪖 Блокпост'
+};
+
+function drawZombieThumb(canvasEl,type,unlocked){
+ if(!canvasEl)return;
+ const tc=canvasEl.getContext('2d');
+ const w=canvasEl.width,h=canvasEl.height;
+ tc.clearRect(0,0,w,h);
+ const def=ZOMBIE_TYPES[type];
+ if(!def)return;
+ const sc=def.r>=23?0.68:def.r>=19?0.78:0.92;
+ tc.save();
+ tc.translate(w/2,h/2);
+ tc.scale(sc,sc);
+ drawZombie({
+  x:0,y:0,type,def,r:def.r,hp:def.hp,maxHp:def.hp,
+  speed:def.speed,color:def.color,phase:0.65,hit:0,
+  angle:-0.42,seed:0.4,preview:true
+ },performance.now(),tc);
+ tc.restore();
+ if(!unlocked){
+  tc.save();
+  tc.globalCompositeOperation='source-atop';
+  tc.fillStyle='rgba(8,14,14,0.88)';
+  tc.fillRect(0,0,w,h);
+  tc.restore();
+  tc.fillStyle='rgba(170,210,185,0.75)';
+  tc.font='800 18px system-ui,sans-serif';
+  tc.textAlign='center';
+  tc.textBaseline='middle';
+  tc.fillText('?',w/2,h/2+1);
+ }
+}
+
+function getFilteredCodexKeys(filter){
+ return ZOMBIE_KEYS.filter(k=>{
+  const def=ZOMBIE_TYPES[k];
+  if(filter==='seen')return !!codexData.seen[k];
+  if(filter==='boss')return !!def.isBossBar;
+  if(filter==='suburb'||filter==='chem'||filter==='hospital'||filter==='military')return def.home===filter;
+  return true;
+ });
+}
+
+function renderCodex(){
+ const seenCount=ZOMBIE_KEYS.filter(k=>codexData.seen[k]).length;
+ const total=ZOMBIE_KEYS.length;
+ if($('codexProgressText'))$('codexProgressText').textContent=`${seenCount} / ${total}`;
+ if($('codexProgFill'))$('codexProgFill').style.width=`${Math.round((seenCount/total)*100)}%`;
+
+ const tabs=$('codexFilters')?$('codexFilters').querySelectorAll('.codexTab'):[];
+ for(const tab of tabs){
+  tab.classList.toggle('active',tab.dataset.filter===codexFilter);
+  if(tab.dataset.filter==='seen')tab.textContent=`Открыты (${seenCount})`;
+ }
+
+ const list=$('codexList');
+ if(!list)return;
+ list.innerHTML='';
+ const keysList=getFilteredCodexKeys(codexFilter);
+ if(!keysList.length){
+  list.innerHTML='<p class="small" style="grid-column:1/-1;text-align:center;padding:18px 8px">В этом разделе пока нет открытых разновидностей. Исследуйте город и отбивайте волны!</p>';
+  return;
+ }
+
+ for(const k of keysList){
+  const def=ZOMBIE_TYPES[k];
+  const unlocked=!!codexData.seen[k];
+  const killCnt=codexData.kills[k]||0;
+
+  const card=document.createElement('div');
+  card.className='codexCard'+(unlocked?'':' locked')+(def.isBossBar&&unlocked?' boss':'');
+
+  const thumb=document.createElement('canvas');
+  thumb.className='codexThumb';
+  thumb.width=54;thumb.height=54;
+  drawZombieThumb(thumb,k,unlocked);
+
+  const info=document.createElement('div');
+  info.className='codexInfo';
+
+  if(unlocked){
+   const armorPct=def.armor?Math.round(def.armor*100):0;
+   const bossTag=def.isBossBar?'<span class="codexBossTag">ЭЛИТА</span>':'';
+   info.innerHTML=`
+    <div class="codexHead">
+     <span class="codexName">${def.name} ${bossTag}</span>
+     <span class="codexKills">💀 ${killCnt}</span>
+    </div>
+    <div class="codexDesc">${def.desc||''}</div>
+    <div class="codexStats">
+     <span class="codexStat">❤️ ${def.hp}</span>
+     <span class="codexStat">⚡ ${def.speed}</span>
+     <span class="codexStat">💥 ${def.dmg}</span>
+     ${armorPct?`<span class="codexStat">🛡️ ${armorPct}%</span>`:''}
+     <span class="codexStat">🪙 ${def.coins||(def.r>=20?5:2)}+</span>
+    </div>
+    <div class="codexWhere">Район: ${HOME_LABELS[def.home]||HOME_LABELS.suburb} · с ${def.minWave} волны</div>
+   `;
+  }else{
+   info.innerHTML=`
+    <div class="codexHead">
+     <span class="codexName" style="color:#96ada2">Неизвестный образец</span>
+     <span class="codexKills" style="color:#89a39b;background:rgba(120,160,150,0.12)">Не встречен</span>
+    </div>
+    <div class="codexDesc">Встретьте этого мутанта в бою, чтобы расшифровать его биологический профиль.</div>
+    <div class="codexWhere">Искать: ${HOME_LABELS[def.home]||HOME_LABELS.suburb} · с ${def.minWave} волны</div>
+   `;
+  }
+
+  card.appendChild(thumb);
+  card.appendChild(info);
+  list.appendChild(card);
+ }
+}
+
+function openCodex(from){
+ if(waveChoosing||activeNpc||$('shop').style.display==='flex')return;
+ if(from==='pause'){
+  codexReturnTo='pause';
+  $('pauseScreen').style.display='none';
+ }else if(from==='overlay'||!running){
+  codexReturnTo='overlay';
+ }else{
+  if(paused)return;
+  codexReturnTo='game';
+  paused=true;
+ }
+ stopJoy();keys.clear();
+ renderCodex();
+ $('codexModal').style.display='flex';
+}
+
+function closeCodex(){
+ $('codexModal').style.display='none';
+ if(codexReturnTo==='pause'&&running){
+  $('pauseScreen').style.display='flex';
+ }else if(codexReturnTo==='game'&&running){
+  paused=false;last=performance.now();
+ }
+}
+
 $('shopButton').addEventListener('click',openShop);
 $('shopClose').addEventListener('click',closeShop);
 $('pauseButton').addEventListener('click',pauseGame);
 $('resume').addEventListener('click',resumeGame);
 $('pauseShop').addEventListener('click',()=>{$('pauseScreen').style.display='none';$('shop').style.display='flex';renderShop()});
+if($('codexButton'))$('codexButton').addEventListener('click',()=>openCodex('game'));
+if($('pauseCodex'))$('pauseCodex').addEventListener('click',()=>openCodex('pause'));
+if($('codexClose'))$('codexClose').addEventListener('click',closeCodex);
+if($('codexFilters'))$('codexFilters').addEventListener('click',e=>{
+ const tab=e.target.closest('.codexTab');
+ if(!tab)return;
+ codexFilter=tab.dataset.filter||'all';
+ renderCodex();
+});
 if($('interactBtn'))$('interactBtn').addEventListener('click',()=>{if(nearbyNpc)openNpcDialog(nearbyNpc)});
 if($('npcClose'))$('npcClose').addEventListener('click',closeNpcDialog);
 canvas.addEventListener('pointerdown',e=>{
@@ -4110,11 +4401,18 @@ window.addEventListener('keydown',e=>{
   const idx=Number(e.key)-1;
   if(unlocked[idx])selectWeapon(unlocked[idx]);
  }
- if(e.key==='Escape'&&running&&!waveChoosing){
-  if(activeNpc)closeNpcDialog();
-  else if($('shop').style.display==='flex')closeShop();
-  else if(paused)resumeGame();
-  else pauseGame();
+ if((e.code==='KeyI'||e.code==='KeyB')&&!waveChoosing&&!activeNpc&&$('shop').style.display!=='flex'){
+  if($('codexModal').style.display==='flex')closeCodex();
+  else openCodex(paused&&running?'pause':running?'game':'overlay');
+ }
+ if(e.key==='Escape'){
+  if($('codexModal').style.display==='flex'){closeCodex();return;}
+  if(running&&!waveChoosing){
+   if(activeNpc)closeNpcDialog();
+   else if($('shop').style.display==='flex')closeShop();
+   else if(paused)resumeGame();
+   else pauseGame();
+  }
  }
 });
 window.addEventListener('keyup',e=>{
