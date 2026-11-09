@@ -622,7 +622,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    </div>
    <div id="activeItems"></div>
   </div>
-  <button type="button" class="hudBtn" id="codexButton" aria-label="Индекс зомби">🧟<span id="codexBadge">0/31</span></button>
+  <button type="button" class="hudBtn" id="codexButton" aria-label="Индекс зомби">🧟<span id="codexBadge">0/42</span></button>
   <button type="button" class="hudBtn" id="shopButton">МАГАЗИН<span id="shopBadge"></span></button>
   <button type="button" class="hudBtn" id="fsButton" aria-label="Горизонтальный полноэкранный режим" title="Полный экран / Горизонтально">⛶</button>
   <button type="button" class="hudBtn" id="pauseButton" aria-label="Пауза">Ⅱ</button>
@@ -664,12 +664,12 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    <p>Огромный город с 4 районами и Безопасной зоной в центре. Заходи в разные здания, собирай лут, продавай его скупщику — накопи <b style="color:#ffe082">2000 🪙</b>, найди эвакуационный <b style="color:#7cff8c">вертолёт 🚁</b> на окраине карты и улети в убежище!</p>
    <div class="controlsGrid">
     <div class="ctrlCard"><b>📱 Горизонт. сенсор</b>Левый стик — движение<br>Правый стик — прицел и огонь<br>Кнопка ⛶ — полный экран</div>
-    <div class="ctrlCard"><b>⌨️ Клавиатура + Мышь</b>WASD — шаг · Мышь/ЛКМ — огонь<br>1–6 — оружие · E — Лут/NPC · I — Индекс</div>
+    <div class="ctrlCard"><b>⌨️ Клавиатура + Мышь</b>WASD — шаг · Мышь/ЛКМ — огонь<br>1–9, 0 — оружие · E — Лут/NPC · I — Индекс</div>
    </div>
   </div>
   <div class="boxFooter">
    <button type="button" class="mainbtn" id="start">НАЧАТЬ ИГРУ</button>
-   <button type="button" class="mainbtn secondary" id="startCodex">🧟 ИНДЕКС ЗОМБИ (<span id="startCodexCount">0</span>/31)</button>
+   <button type="button" class="mainbtn secondary" id="startCodex">🧟 ИНДЕКС ЗОМБИ (<span id="startCodexCount">0</span>/42)</button>
   </div>
  </div>
 </div>
@@ -750,10 +750,10 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   <div class="hazardStrip"></div>
   <div class="boxBody">
    <h2>🧟 ИНДЕКС ЗОМБИ</h2>
-   <p class="small" style="margin:2px 0 4px">Открыто разновидностей: <b id="codexProgressText" style="color:#7cff8c">0 / 31</b></p>
+   <p class="small" style="margin:2px 0 4px">Открыто разновидностей: <b id="codexProgressText" style="color:#7cff8c">0 / 42</b></p>
    <div class="codexProgBar"><div class="codexProgFill" id="codexProgFill"></div></div>
    <div class="codexFilters" id="codexFilters">
-    <button type="button" class="codexTab active" data-filter="all">Все (31)</button>
+    <button type="button" class="codexTab active" data-filter="all">Все (42)</button>
     <button type="button" class="codexTab" data-filter="seen">Открыты</button>
     <button type="button" class="codexTab" data-filter="suburb">🏘️ Город</button>
     <button type="button" class="codexTab" data-filter="chem">☣️ Химзона</button>
@@ -944,32 +944,57 @@ let ownedItems={},itemMods={};
 let bestScore=0;
 try{bestScore=Number(localStorage.getItem('carantin_best')||0)||0}catch(_){}
 
-const WEAPON_ORDER=['pistol','shotgun','rifle','minigun','plasma','railgun'];
+const WEAPON_ORDER=['pistol','smg','shotgun','crossbow','rifle','flamer','minigun','cryo','plasma','launcher','railgun'];
 const weapons={
  pistol:{
   name:'Пистолет',short:'ПИСТОЛЕТ',price:0,damage:.9,delay:.35,spread:.022,count:1,speed:520,range:440,
   desc:'Надёжный табельный ствол',
   svg:'<svg viewBox="0 0 42 18" fill="none"><path d="M8 10h8l-2.5 7H7.2z" fill="#4f3b2b"/><rect x="9" y="3.5" width="24" height="5.5" rx="1.4" fill="#a7b9b5"/><rect x="12" y="3.5" width="16" height="2" fill="#dce8e4"/><rect x="15" y="5.8" width="4" height="2" fill="#324044"/><rect x="23" y="9" width="7" height="2.6" rx="1" fill="#2b3a3e"/><rect x="29" y="4.5" width="7" height="3.6" rx="1" fill="#445559"/><rect x="30" y="3" width="2" height="1.5" fill="#5cff3a"/></svg>'
  },
+ smg:{
+  name:'ПП «Скорпион»',short:'ПП',price:25,damage:.28,delay:.085,spread:.085,count:1,speed:550,range:390,
+  desc:'Лёгкий скорострельный пистолет-пулемёт',
+  svg:'<svg viewBox="0 0 44 18" fill="none"><path d="M2 7h7v2H2z" fill="#637478"/><rect x="9" y="5" width="16" height="6" rx="1.4" fill="#3d4d52"/><rect x="25" y="6.2" width="14" height="3.6" rx="1" fill="#293538"/><rect x="11" y="11" width="4.5" height="6" rx=".8" fill="#4f3b2b"/><rect x="19" y="11" width="4" height="6.2" rx=".8" fill="#243034"/><rect x="13" y="3.2" width="6" height="1.8" fill="#7c8f8b"/></svg>'
+ },
  shotgun:{
   name:'Дробовик',short:'ДРОБОВИК',price:35,damage:.65,delay:.92,spread:.15,count:6,speed:415,range:335,
   desc:'6 дробин кучным веером вблизи',
   svg:'<svg viewBox="0 0 46 18" fill="none"><path d="M2 7l10-1.2v7.2l-10 1.2z" fill="#7c5434"/><rect x="11" y="5.5" width="15" height="6.2" rx="1.2" fill="#44545a"/><rect x="13" y="7" width="3" height="3.2" fill="#c93e3e"/><rect x="17" y="7" width="3" height="3.2" fill="#c93e3e"/><rect x="26" y="5.5" width="18" height="2.4" fill="#b4c4c0"/><rect x="26" y="9" width="16" height="2.2" fill="#6f8084"/><rect x="22" y="10.8" width="10" height="3.2" rx="1" fill="#8b623f"/></svg>'
+ },
+ crossbow:{
+  name:'Арбалет «Ястреб»',short:'АРБАЛЕТ',price:50,damage:1.95,delay:.72,spread:.008,count:1,speed:740,range:530,pierce:2,
+  desc:'Бесшумный болт — пробивает до 2 зомби насквозь',
+  svg:'<svg viewBox="0 0 48 18" fill="none"><path d="M2 8l11-1.5v4.5l-11 1z" fill="#4a5c44"/><rect x="12" y="7" width="24" height="3.4" rx="1" fill="#2c3832"/><path d="M31 1.5c5 3.5 5 11.5 0 15" stroke="#8aa37c" stroke-width="2.4" stroke-linecap="round"/><line x1="31" y1="2" x2="21" y2="8.7" stroke="#d4e6d8" stroke-width="1.1"/><line x1="31" y1="16" x2="21" y2="8.7" stroke="#d4e6d8" stroke-width="1.1"/><rect x="21" y="8" width="23" height="1.6" fill="#c8d8dc"/><polygon points="44,8.8 40,7 40,10.6" fill="#7cff8c"/></svg>'
  },
  rifle:{
   name:'Автомат',short:'АВТОМАТ',price:65,damage:.42,delay:.125,spread:.03,count:1,speed:590,range:485,
   desc:'Точная прицельная очередь',
   svg:'<svg viewBox="0 0 48 18" fill="none"><path d="M2 6.8l9.5-1v6.2l-9.5 1z" fill="#5c422f"/><rect x="11" y="5.6" width="18" height="5.6" rx="1.2" fill="#3d4c52"/><rect x="29" y="7" width="15" height="2.6" fill="#9eb0ac"/><rect x="43" y="6.3" width="3.5" height="4" rx=".6" fill="#697a7e"/><rect x="16" y="2.8" width="8" height="2.6" rx=".8" fill="#232f33"/><circle cx="20" cy="4.1" r="1" fill="#5cff3a"/><path d="M19 11.2h5.5l2.5 5.6H22z" fill="#2b383c"/><rect x="28" y="10.4" width="9" height="3.2" rx=".8" fill="#506266"/></svg>'
  },
+ flamer:{
+  name:'Огнемёт «Дракон»',short:'ОГНЕМЁТ',price:90,damage:.16,delay:.06,spread:.22,count:2,speed:330,range:245,aoe:28,burn:2.4,flame:true,
+  desc:'Струя напалма с поджогом толпы вблизи',
+  svg:'<svg viewBox="0 0 48 18" fill="none"><rect x="3" y="4.5" width="13" height="9" rx="3" fill="#c43b2b"/><rect x="15" y="6" width="15" height="5.5" rx="1.2" fill="#3b484c"/><rect x="30" y="6.8" width="11" height="3.8" fill="#6b7a7d"/><path d="M40 7.2c3-2 6 0 7 1.5-1 1.5-4 3.5-7 1.5z" fill="#ff8e2b"/><circle cx="43" cy="8.7" r="1.4" fill="#ffe678"/></svg>'
+ },
  minigun:{
   name:'Пулемёт «Вулкан»',short:'ПУЛЕМЁТ',price:110,damage:.24,delay:.085,spread:.048,count:2,speed:630,range:500,
   desc:'Шквал из 2 точных пуль с высокой плотностью огня',
   svg:'<svg viewBox="0 0 50 18" fill="none"><rect x="3" y="5.2" width="17" height="8" rx="2.2" fill="#334347"/><rect x="5" y="2.8" width="11" height="2.5" rx="1" fill="#59696d"/><rect x="20" y="4.5" width="26" height="2" fill="#b4c4c0"/><rect x="20" y="7.9" width="26" height="2" fill="#7c8e8a"/><rect x="20" y="11.3" width="26" height="2" fill="#b4c4c0"/><rect x="29" y="4" width="3" height="9.8" fill="#d98e32"/><rect x="40" y="4" width="3" height="9.8" fill="#d98e32"/><rect x="10" y="13.2" width="8" height="3.8" rx="1" fill="#c99b3b"/></svg>'
  },
+ cryo:{
+  name:'Крио-пушка «Мороз»',short:'КРИОГЕН',price:130,damage:.85,delay:.36,spread:.025,count:1,speed:470,range:460,aoe:42,chill:3.0,
+  desc:'Морозные заряды замедляют зомби на 52%',
+  svg:'<svg viewBox="0 0 48 18" fill="none"><path d="M2 7.5l10-1.5v6.5l-10 1z" fill="#344e5c"/><rect x="11" y="4.8" width="21" height="8" rx="2" fill="#b5dce8"/><rect x="14" y="6.2" width="13" height="5" rx="1.4" fill="#5ce1ff"/><rect x="32" y="6" width="12" height="5.5" rx="1.4" fill="#466978"/><circle cx="42" cy="8.7" r="2.3" fill="#d8fbff"/></svg>'
+ },
  plasma:{
   name:'Плазмаган «Ион-7»',short:'ПЛАЗМА',price:150,damage:1.45,delay:.44,spread:.015,count:1,speed:490,range:510,aoe:50,
   desc:'Плазменные заряды со взрывом по площади',
   svg:'<svg viewBox="0 0 48 18" fill="none"><path d="M2 7.8l10-2v7.2l-10 1z" fill="#22353d"/><rect x="11" y="4.5" width="22" height="8" rx="2.2" fill="#314e59"/><rect x="14" y="6.4" width="14" height="4.2" rx="1.5" fill="#46d6f5"/><rect x="33" y="5.5" width="11" height="6" rx="1.4" fill="#1e3138"/><circle cx="38" cy="8.5" r="2.2" fill="#9cfaff"/><rect x="20" y="2.8" width="9" height="1.8" rx=".8" fill="#6deeff"/></svg>'
+ },
+ launcher:{
+  name:'Гранатомёт «Шмель»',short:'ГРАНАТОМЁТ',price:175,damage:2.85,delay:1.05,spread:.02,count:1,speed:410,range:480,aoe:92,rocket:true,
+  desc:'Реактивные фугасы с огромным радиусом взрыва',
+  svg:'<svg viewBox="0 0 48 18" fill="none"><path d="M2 7.5l9-1v6.2l-9 1z" fill="#4a402e"/><circle cx="17" cy="9" r="5.5" fill="#4d5c46"/><circle cx="17" cy="9" r="2.4" fill="#d97a2b"/><rect x="22" y="5.2" width="21" height="7.4" rx="1.4" fill="#374538"/><rect x="40" y="4.4" width="5" height="9" rx="1" fill="#d98e32"/></svg>'
  },
  railgun:{
   name:'Рельсотрон «Луч»',short:'РЕЛЬСОТРОН',price:200,damage:2.35,delay:1.15,spread:.002,count:1,speed:0,range:560,rail:true,
@@ -978,7 +1003,7 @@ const weapons={
  }
 };
 
-// 30 distinct zombie archetypes (10x variety)
+// 42 distinct zombie archetypes across all 4 districts & boss encounters
 const ZOMBIE_TYPES={
  walker:{name:'Бродяга',r:15,hp:1,speed:50,dmg:10,color:'#6f9857',coat:'#394d3b',eye:'#d4ff4a',points:10,minWave:1,gear:'none',glow:'green',home:'suburb',desc:'Обычный заражённый горожанин. Опасен большими стаями.',districts:{suburb:18,chem:8,hospital:10,military:6}},
  runner:{name:'Бегун',r:12,hp:1,speed:96,dmg:10,color:'#bd9b4c',coat:'#755a28',eye:'#ffd84a',points:15,minWave:1,gear:'runner',glow:'amber',home:'suburb',desc:'Быстрый спринтер — стремительно сокращает дистанцию.',districts:{suburb:12,chem:14,hospital:10,military:8}},
@@ -1014,6 +1039,17 @@ const ZOMBIE_TYPES={
  pyro:{name:'Огнеходец',r:16,hp:3.3,speed:62,dmg:16,color:'#cc6836',coat:'#4f2414',eye:'#fff266',points:34,minWave:2,gear:'pyro',glow:'amber',trail:'fire',home:'chem',desc:'Пылает заживо, оставляя под ногами огненный след.',districts:{suburb:4,chem:8,hospital:3,military:7}},
  necromancer:{name:'Некро-реаниматор',r:17,hp:4.8,speed:38,dmg:12,color:'#745c96',coat:'#211730',eye:'#d26eff',points:48,minWave:3,gear:'necromancer',glow:'red',ability:'summon',isBossBar:true,home:'hospital',desc:'Призывает новых ползунов прямо посреди схватки.',districts:{suburb:3,chem:4,hospital:5,military:4}},
  alpha:{name:'Альфа-титан',r:27,hp:11.0,speed:33,dmg:26,color:'#9c4658',coat:'#3b1822',eye:'#ffffff',points:80,minWave:3,armor:0.20,gear:'alpha',glow:'red',ability:'spit',range:300,isBossBar:true,home:'military',desc:'Главный босс карантина: огромная броня, мощь и дальний плевок.',districts:{suburb:2,chem:3,hospital:3,military:4}},
+ swat:{name:'Спецназ СВАТ',r:16,hp:3.4,speed:68,dmg:14,color:'#58746a',coat:'#172436',eye:'#64ff8c',points:32,minWave:2,armor:0.30,gear:'swat',glow:'cyan',ability:'dash',home:'suburb',desc:'Тяжёлая броня (30%), прибор ночного видения и резкие тактические рывки.',districts:{suburb:9,chem:4,hospital:4,military:11}},
+ butcher:{name:'Мясник-потрошитель',r:20,hp:5.0,speed:46,dmg:22,color:'#8f6258',coat:'#692124',eye:'#ff5e5e',points:38,minWave:2,gear:'butcher',glow:'red',home:'suburb',desc:'Огромный громила с тесаком и пропитанным кровью фартуком.',districts:{suburb:8,chem:5,hospital:7,military:5}},
+ chemist:{name:'Безумный химик',r:15,hp:2.4,speed:48,dmg:11,color:'#7aa352',coat:'#c8d6cc',eye:'#b6ff4a',points:30,minWave:2,gear:'chemist',glow:'green',ability:'acidBomb',range:260,home:'chem',desc:'Швыряет колбы с едкой кислотой, оставляющие обжигающие лужи.',districts:{suburb:3,chem:14,hospital:6,military:4}},
+ mutant_spider:{name:'Паук-мутант',r:14,hp:2.0,speed:94,dmg:13,color:'#536e47',coat:'#263322',eye:'#b6ff38',points:28,minWave:2,gear:'spider',shape:'spider',glow:'green',ability:'leap',home:'chem',desc:'Шестилапый мутант с молниеносными прыжками на добычу.',districts:{suburb:5,chem:13,hospital:4,military:5}},
+ electro:{name:'Электро-мутант',r:16,hp:3.6,speed:60,dmg:15,color:'#588fa8',coat:'#20374a',eye:'#7bf2ff',points:38,minWave:3,gear:'electro',glow:'cyan',ability:'zap',range:250,onDeath:'shockNova',isBossBar:true,home:'chem',desc:'Бьёт электрическими разрядами издали и взрывается током при гибели.',districts:{suburb:3,chem:10,hospital:4,military:8}},
+ plague:{name:'Чумной доктор',r:16,hp:3.4,speed:54,dmg:13,color:'#637564',coat:'#1c1b24',eye:'#82ff96',points:36,minWave:2,gear:'plague',glow:'green',ability:'spit',range:275,onDeath:'spores',home:'hospital',desc:'Мрачный медик в клювастой маске: плюётся токсином и выпускает споры.',districts:{suburb:4,chem:6,hospital:13,military:3}},
+ patient:{name:'Буйный пациент',r:13,hp:1.5,speed:98,dmg:12,color:'#94a87e',coat:'#b9c4be',eye:'#ff5454',points:22,minWave:1,gear:'patient',glow:'amber',ability:'dash',home:'hospital',desc:'Сорвавшийся из изолятора больной: непредсказуемые спринтерские рывки.',districts:{suburb:6,chem:3,hospital:15,military:3}},
+ vampire:{name:'Кровавый упырь',r:14,hp:2.9,speed:84,dmg:15,color:'#9c5666',coat:'#331420',eye:'#ff2a48',points:34,minWave:3,gear:'vampire',glow:'red',ability:'lifesteal',home:'hospital',desc:'Хищник с когтями и клыками — лечится при каждом ударе по выжившему.',districts:{suburb:6,chem:4,hospital:10,military:4}},
+ sniper:{name:'Мёртвый стрелок',r:15,hp:2.8,speed:46,dmg:14,color:'#647558',coat:'#2c3825',eye:'#ff7436',points:36,minWave:3,armor:0.15,gear:'sniper',glow:'amber',ability:'snipe',range:370,home:'military',desc:'Держит дистанцию и стреляет быстрыми прицельными трассерами.',districts:{suburb:3,chem:4,hospital:3,military:12}},
+ behemoth:{name:'Бегемот-мутант',r:26,hp:10.5,speed:30,dmg:25,color:'#66735b',coat:'#2d3328',eye:'#ffe252',points:72,minWave:4,armor:0.30,gear:'behemoth',glow:'amber',ability:'scream',isBossBar:true,home:'military',desc:'Костяно-панцирный исполин с 30% брони и боевым рёвом, ускоряющим стаю.',districts:{suburb:2,chem:6,hospital:3,military:9}},
+ phantom:{name:'Фантом карантина',r:14,hp:3.2,speed:72,dmg:16,color:'#5e5285',coat:'#1c162e',eye:'#e18aff',points:42,minWave:4,gear:'phantom',glow:'cyan',alpha:0.42,ability:'blink',isBossBar:true,home:'chem',desc:'Призрачный мутант: телепортируется короткими скачками сквозь тьму.',districts:{suburb:5,chem:7,hospital:6,military:6}},
  overlord:{name:'Владыка Карантина',r:32,hp:24.0,speed:46,dmg:54,color:'#8c2136',coat:'#210912',eye:'#ff2e4d',points:250,minWave:5,armor:0.35,gear:'overlord',glow:'red',ability:'dash',isBossBar:true,isWaveBoss:true,home:'military',desc:'Колоссальный босс каждые 5 волн: огромный урон, 35% брони и сокрушительные рывки.',districts:{suburb:0,chem:0,hospital:0,military:0}}
 };
 const ZOMBIE_KEYS=Object.keys(ZOMBIE_TYPES);
@@ -2787,7 +2823,8 @@ function renderWeaponBar(){
   btn.type='button';
   btn.className='weapon'+(weapon===id?' active':'');
   btn.dataset.weapon=id;
-  btn.innerHTML=`<span class="wNum">${slotNum}</span>${w.svg}<span class="wLbl">${w.short}</span>`;
+  const keyLbl=slotNum<=9?String(slotNum):slotNum===10?'0':'-';
+  btn.innerHTML=`<span class="wNum">${keyLbl}</span>${w.svg}<span class="wLbl">${w.short}</span>`;
   btn.addEventListener('click',()=>selectWeapon(id));
   bar.appendChild(btn);
   slotNum++;
@@ -3107,7 +3144,11 @@ function getWeaponRange(){
 }
 
 function getBarrelLen(){
- return weapon==='pistol'?24:weapon==='shotgun'?30:weapon==='minigun'?36:weapon==='railgun'?38:32;
+ if(weapon==='pistol'||weapon==='smg')return 24;
+ if(weapon==='shotgun'||weapon==='flamer'||weapon==='cryo')return 30;
+ if(weapon==='minigun'||weapon==='launcher')return 36;
+ if(weapon==='railgun'||weapon==='crossbow')return 38;
+ return 32;
 }
 
 function getAimState(inSafe){
@@ -3271,13 +3312,18 @@ function shoot(targetOrAngle,preferredTarget){
   let a=base+(Math.random()-.5)*spread;
   const isCrit=itemMods.crit>0&&Math.random()<itemMods.crit;
   const dmg=w.damage*upgrades.damage*itemMods.dmgMult*(isCrit?2:1);
+  const bCol=w.flame?'#ff8629':w.chill?'#7ef4ff':w.rocket?'#ff6e36':w.pierce?'#8dff9c':weapon==='plasma'?'#5ff2ff':isCrit?'#74ff68':weapon==='shotgun'?'#ffae52':weapon==='minigun'?'#ffd466':weapon==='smg'?'#ffdf8a':weapon==='rifle'?'#fff39c':'#ffe47a';
   bullets.push({
    x:mx,y:my,px:mx,py:my,sx:mx,sy:my,
    vx:Math.cos(a)*w.speed,vy:Math.sin(a)*w.speed,
    angle:a,damage:dmg,crit:isCrit,aoe:w.aoe||0,
+   pierce:w.pierce||0,hitSet:w.pierce?new Set():null,
+   burn:w.burn||0,burnDps:(0.48*upgrades.damage*itemMods.dmgMult),
+   chill:w.chill||0,
+   flame:!!w.flame,rocket:!!w.rocket,bolt:!!w.pierce,
    kind:weapon,
-   life:1.30*(itemMods.rangeMult||1),
-   color:weapon==='plasma'?'#5ff2ff':isCrit?'#74ff68':weapon==='shotgun'?'#ffae52':weapon==='minigun'?'#ffd466':weapon==='rifle'?'#fff39c':'#ffe47a'
+   life:(w.range/Math.max(120,w.speed))*1.05*(itemMods.rangeMult||1),
+   color:bCol
   });
  }
 
@@ -3300,15 +3346,18 @@ function shoot(targetOrAngle,preferredTarget){
   }
  }
 
- const muzzleCol=weapon==='plasma'?'#6ef4ff':'#ffd87a';
- for(let i=0;i<4;i++){
-  const a=base+(Math.random()-.5)*0.55;
-  const sp=85+Math.random()*135;
-  particles.push({x:mx,y:my,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.14+Math.random()*.1,max:.24,color:muzzleCol,size:1.8+Math.random()*2,kind:'spark',rot:0,vrot:0});
+ const muzzleCol=weapon==='plasma'||weapon==='cryo'?'#6ef4ff':w.flame?'#ff862b':'#ffd87a';
+ if(!w.pierce){
+  const pCnt=w.flame?5:4;
+  for(let i=0;i<pCnt;i++){
+   const a=base+(Math.random()-.5)*(w.flame?0.85:0.55);
+   const sp=(w.flame?140:85)+Math.random()*135;
+   particles.push({x:mx,y:my,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.14+Math.random()*.1,max:.24,color:muzzleCol,size:w.flame?2.6:1.8+Math.random()*2,kind:'spark',rot:0,vrot:0});
+  }
+  particles.push({x:mx+Math.cos(base)*6,y:my+Math.sin(base)*6,vx:Math.cos(base)*30,vy:Math.sin(base)*30,life:.32,max:.32,color:'rgba(205,220,215,0.45)',size:5,kind:'smoke',rot:0,vrot:0});
  }
- particles.push({x:mx+Math.cos(base)*6,y:my+Math.sin(base)*6,vx:Math.cos(base)*30,vy:Math.sin(base)*30,life:.32,max:.32,color:'rgba(205,220,215,0.45)',size:5,kind:'smoke',rot:0,vrot:0});
 
- if(weapon!=='plasma'){
+ if(weapon!=='plasma'&&weapon!=='cryo'&&!w.flame&&!w.pierce&&!w.rocket){
   const ejectAngle=base+Math.PI/2+(Math.random()-.5)*0.45;
   const ejectSpd=48+Math.random()*42;
   particles.push({
@@ -3319,10 +3368,10 @@ function shoot(targetOrAngle,preferredTarget){
   });
  }
 
- if(weapon==='shotgun'){
-  particles.push({x:mx,y:my,vx:0,vy:0,life:.18,max:.18,color:'#ffbb66',size:10,kind:'ring',rot:0,vrot:0});
+ if(weapon==='shotgun'||w.rocket){
+  particles.push({x:mx,y:my,vx:0,vy:0,life:.18,max:.18,color:w.rocket?'#ff9842':'#ffbb66',size:w.rocket?13:10,kind:'ring',rot:0,vrot:0});
  }
- shake=Math.max(shake,weapon==='shotgun'?6:weapon==='minigun'?2.2:weapon==='plasma'?3.5:weapon==='rifle'?1.6:2);
+ shake=Math.max(shake,w.rocket?7.5:weapon==='shotgun'?6:weapon==='minigun'?2.2:weapon==='plasma'?3.5:w.flame?1.2:weapon==='smg'||weapon==='rifle'?1.6:2);
 }
 
 function openNpcDialog(npc){
@@ -3400,7 +3449,7 @@ function renderNpcOffers(){
  }
 
  if(activeNpc.id==='armorer'){
-  for(const wid of ['shotgun','rifle','minigun','plasma','railgun']){
+  for(const wid of WEAPON_ORDER.filter(id=>id!=='pistol')){
    const w=weapons[wid];
    const owned=unlockedWeapons.has(wid);
    const equipped=weapon===wid;
@@ -3999,11 +4048,18 @@ function update(dt,now){
   let dx=player.x-z.x,dy=player.y-z.y,d=Math.hypot(dx,dy)||1;
   let spd=z.speed;
 
-  // Special passive & active zombie behaviors across the 30 archetypes
+  // Special passive & active zombie behaviors across all 42 archetypes
   z.boostTimer=Math.max(0,(z.boostTimer||0)-dt);
   if(z.boostTimer>0)spd*=1.45;
   z.dashTimer=Math.max(0,(z.dashTimer||0)-dt);
   if(z.dashTimer>0)spd*=2.35;
+  z.chillTimer=Math.max(0,(z.chillTimer||0)-dt);
+  if(z.chillTimer>0)spd*=0.48;
+  if(z.burnTimer>0){
+   z.burnTimer=Math.max(0,z.burnTimer-dt);
+   z.hp-=(z.burnDps||0.45)*dt;
+   if(Math.random()<dt*7)addParticles(z.x+(Math.random()-.5)*8,z.y+(Math.random()-.5)*8,'#ff8c32',1,35,'spark');
+  }
   if(def.ability==='cloak'&&d<230)spd*=1.28;
   if(def.regen&&z.hp<z.maxHp){z.hp=Math.min(z.maxHp,z.hp+def.regen*dt)}
 
@@ -4016,19 +4072,25 @@ function update(dt,now){
    }
   }
 
-  // Cooldown abilities (spit, zap, scream, heal, dash, leap, summon)
+  // Cooldown abilities (spit, zap, snipe, acidBomb, scream, heal, dash, leap, summon, blink)
   z.abilityCd=(z.abilityCd!==undefined?z.abilityCd:1.5)-dt;
   if(def.ability&&z.abilityCd<=0){
-   if(def.ability==='spit'||def.ability==='zap'){
+   if(def.ability==='spit'||def.ability==='zap'||def.ability==='snipe'||def.ability==='acidBomb'){
     const maxR=def.range||270;
     if(d<=maxR&&!inSafe){
      const ang=Math.atan2(dy,dx);
      const isZap=def.ability==='zap';
+     const isSnipe=def.ability==='snipe';
+     const isFlask=def.ability==='acidBomb';
+     const pSpd=isSnipe?430:isZap?320:isFlask?220:235;
      enemyProjectiles.push({
       x:z.x+Math.cos(ang)*z.r,y:z.y+Math.sin(ang)*z.r,
-      vx:Math.cos(ang)*(isZap?320:235),vy:Math.sin(ang)*(isZap?320:235),
-      r:isZap?4.5:6,dmg:isZap?9:8,life:1.5,kind:isZap?'zap':'acid',
-      color:isZap?'#ff526a':'#98ff42'
+      vx:Math.cos(ang)*pSpd,vy:Math.sin(ang)*pSpd,
+      r:isSnipe?3.6:isZap?4.5:isFlask?7:6,
+      dmg:isSnipe?13:isZap?9:8,
+      life:isSnipe?1.15:isFlask?1.25:1.5,
+      kind:isSnipe?'snipe':isZap?'zap':isFlask?'acidBomb':'acid',
+      color:isSnipe?'#ff8838':isZap?'#ff526a':isFlask?'#a8ff44':'#98ff42'
      });
      if(z.type==='alpha'){
       for(const off of [-0.18,0.18]){
@@ -4039,9 +4101,25 @@ function update(dt,now){
        });
       }
      }
-     z.abilityCd=z.type==='alpha'?2.6:2.8;
+     z.abilityCd=z.type==='alpha'?2.6:isSnipe?3.1:2.8;
     }else{
      z.abilityCd=0.5;
+    }
+   }else if(def.ability==='blink'){
+    if(d<310&&d>95&&!inSafe){
+     const ang=Math.atan2(dy,dx)+(Math.random()-.5)*0.55;
+     const distBlink=Math.min(110,d-55);
+     const tx=Math.max(WALL_PAD+24,Math.min(WORLD_W-WALL_PAD-24,z.x+Math.cos(ang)*distBlink));
+     const ty=Math.max(WALL_PAD+24,Math.min(WORLD_H-WALL_PAD-24,z.y+Math.sin(ang)*distBlink));
+     if(!isInSafeZone(tx,ty,22)&&!hasWallBetween(z.x,z.y,tx,ty)){
+      particles.push({x:z.x,y:z.y,vx:0,vy:0,life:.26,max:.26,color:'#d47eff',size:24,kind:'ring',rot:0,vrot:0});
+      z.x=tx;z.y=ty;
+      particles.push({x:z.x,y:z.y,vx:0,vy:0,life:.26,max:.26,color:'#e2a8ff',size:26,kind:'ring',rot:0,vrot:0});
+      addParticles(z.x,z.y,'#d47eff',6,95,'spark');
+     }
+     z.abilityCd=3.3;
+    }else{
+     z.abilityCd=0.6;
     }
    }else if(def.ability==='dash'||def.ability==='leap'){
     if(d<235&&d>55){
@@ -4087,8 +4165,8 @@ function update(dt,now){
    }
   }
 
-  // Ranged spitters pause slightly when in optimal range
-  const stopRange=(def.ability==='spit'||def.ability==='zap')&&!inSafe?(def.range||260)*0.68:0;
+  // Ranged attackers pause slightly when in optimal range
+  const stopRange=(def.ability==='spit'||def.ability==='zap'||def.ability==='snipe'||def.ability==='acidBomb')&&!inSafe?(def.range||260)*0.68:0;
   if(d>stopRange){
    z.x+=dx/d*spd*dt;z.y+=dy/d*spd*dt;
   }
@@ -4102,6 +4180,9 @@ function update(dt,now){
    if(!wasInv&&def.ability==='chill'){
     player.slowTimer=1.5;
     addPopup(player.x,player.y-38,'❄️ ЗАМЕДЛЕН','#7be8ff',12);
+   }else if(!wasInv&&def.ability==='lifesteal'){
+    z.hp=Math.min(z.maxHp,z.hp+0.8);
+    addParticles(z.x,z.y,'#ff4a68',5,75,'blood');
    }
   }
  }
@@ -4132,7 +4213,13 @@ function update(dt,now){
     if(Math.hypot(ep.x-ob.x,ep.y-ob.y)<ob.r){dead=true;break}
    }
   }
-  if(dead)enemyProjectiles.splice(i,1);
+  if(dead){
+   if(ep.kind==='acidBomb'&&!isInSafeZone(ep.x,ep.y,18)){
+    hazardZones.push({x:ep.x,y:ep.y,r:34,kind:'acid',life:4.2,max:4.2,tick:0});
+    particles.push({x:ep.x,y:ep.y,vx:0,vy:0,life:.26,max:.26,color:'#98ff42',size:32,kind:'ring',rot:0,vrot:0});
+   }
+   enemyProjectiles.splice(i,1);
+  }
  }
 
  // Ground hazard zones (acid / fire trails & pools)
@@ -4147,49 +4234,74 @@ function update(dt,now){
  }
 
  const explosions=[];
+ const triggerBulletAoe=(b,isDirectHit)=>{
+  const col=b.flame?'#ff862b':b.chill?'#80f4ff':b.rocket?'#ff7832':'#5ef4ff';
+  const falloff=isDirectHit?0.75:0.75;
+  for(const zz of zombies){
+   const dd=Math.hypot(zz.x-b.x,zz.y-b.y);
+   if(dd<=b.aoe+zz.r){
+    applyDamageToZombie(zz,b.damage*(dd<24&&isDirectHit?1:falloff),b.angle);
+    if(b.burn>0){
+     zz.burnTimer=Math.max(zz.burnTimer||0,b.burn);
+     zz.burnDps=Math.max(zz.burnDps||0,b.burnDps||0.45);
+    }
+    if(b.chill>0){
+     zz.chillTimer=Math.max(zz.chillTimer||0,b.chill);
+    }
+   }
+  }
+  particles.push({x:b.x,y:b.y,vx:0,vy:0,life:b.rocket?.34:.24,max:b.rocket?.34:.24,color:col,size:b.aoe*(b.rocket?0.72:0.56),kind:'ring',rot:0,vrot:0});
+  addParticles(b.x,b.y,col,b.rocket?18:b.flame?5:11,b.rocket?210:145,'spark');
+  if(b.rocket){
+   addParticles(b.x,b.y,'rgba(170,175,180,0.55)',6,85,'smoke');
+   shake=Math.max(shake,11);
+  }else if(b.aoe>=45){
+   shake=Math.max(shake,4.5);
+  }
+ };
+
  for(let i=bullets.length-1;i>=0;i--){
   let b=bullets[i];
   b.px=b.x;b.py=b.y;
   b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;
+  if(b.rocket&&Math.random()<dt*26){
+   particles.push({x:b.x,y:b.y,vx:(Math.random()-.5)*24,vy:(Math.random()-.5)*24,life:.22,max:.22,color:'rgba(205,215,220,0.45)',size:4.5,kind:'smoke',rot:0,vrot:0});
+  }
   let hit=false;
   for(let j=zombies.length-1;j>=0;j--){
    let z=zombies[j];
+   if(b.hitSet&&b.hitSet.has(z))continue;
    if(Math.hypot(z.x-b.x,z.y-b.y)<z.r+(b.aoe?9:5)){
     if(b.aoe>0){
-     for(const zz of zombies){
-      const dd=Math.hypot(zz.x-b.x,zz.y-b.y);
-      if(dd<=b.aoe+zz.r){
-       applyDamageToZombie(zz,b.damage*(dd<24?1:0.75),b.angle);
-      }
-     }
-     particles.push({x:b.x,y:b.y,vx:0,vy:0,life:.24,max:.24,color:'#5ef4ff',size:b.aoe*0.56,kind:'ring',rot:0,vrot:0});
-     addParticles(b.x,b.y,'#7ef9ff',12,150,'spark');
-     shake=Math.max(shake,4.5);
+     triggerBulletAoe(b,true);
     }else{
      applyDamageToZombie(z,b.damage,b.angle);
+     if(b.burn>0){
+      z.burnTimer=Math.max(z.burnTimer||0,b.burn);
+      z.burnDps=Math.max(z.burnDps||0,b.burnDps||0.45);
+     }
+     if(b.chill>0)z.chillTimer=Math.max(z.chillTimer||0,b.chill);
     }
     const hitCol=z.color||'#589948';
     addDirectionalBlood(b.x,b.y,b.angle,hitCol,4,135);
-    addParticles(b.x,b.y,b.crit?'#78ff68':(b.aoe?'#7ef9ff':'#fff3a8'),2,85,'spark');
+    addParticles(b.x,b.y,b.crit?'#78ff68':(b.flame?'#ff9838':b.chill?'#9cfcff':b.aoe?'#7ef9ff':'#fff3a8'),2,85,'spark');
     if(b.crit)addPopup(b.x,b.y-10,'КРИТ!','#86ff78',11);
     if(z.hp>0)addDecalSplat(b.x,b.y,'#1e331c',7,2);
-    hit=true;
-    break;
+    if(b.pierce>0&&b.hitSet){
+     b.hitSet.add(z);
+     b.damage*=0.85;
+     if(b.hitSet.size>b.pierce){hit=true;break;}
+    }else{
+     hit=true;
+     break;
+    }
    }
   }
   if(!hit){
    for(let wi=0;wi<wallRects.length;wi++){
     if(segmentIntersectsRect(b.px,b.py,b.x,b.y,wallRects[wi])!==null){
-     if(b.aoe>0){
-      for(const zz of zombies){
-       const dd=Math.hypot(zz.x-b.x,zz.y-b.y);
-       if(dd<=b.aoe+zz.r)applyDamageToZombie(zz,b.damage*0.75,b.angle);
-      }
-      particles.push({x:b.x,y:b.y,vx:0,vy:0,life:.24,max:.24,color:'#5ef4ff',size:b.aoe*0.56,kind:'ring',rot:0,vrot:0});
-      addParticles(b.x,b.y,'#7ef9ff',10,140,'spark');
-     }else{
-      addParticles(b.x,b.y,'#ffd580',3,75,'spark');
-     }
+     if(b.aoe>0)triggerBulletAoe(b,false);
+     else addParticles(b.x,b.y,'#ffd580',3,75,'spark');
      hit=true;break;
     }
    }
@@ -4197,21 +4309,16 @@ function update(dt,now){
   if(!hit){
    for(const ob of obstacles){
     if(Math.hypot(b.x-ob.x,b.y-ob.y)<ob.r){
-     if(b.aoe>0){
-      for(const zz of zombies){
-       const dd=Math.hypot(zz.x-b.x,zz.y-b.y);
-       if(dd<=b.aoe+zz.r)applyDamageToZombie(zz,b.damage*0.75,b.angle);
-      }
-      particles.push({x:b.x,y:b.y,vx:0,vy:0,life:.24,max:.24,color:'#5ef4ff',size:b.aoe*0.56,kind:'ring',rot:0,vrot:0});
-      addParticles(b.x,b.y,'#7ef9ff',10,140,'spark');
-     }else{
-      addParticles(b.x,b.y,'#ffd580',3,75,'spark');
-     }
+     if(b.aoe>0)triggerBulletAoe(b,false);
+     else addParticles(b.x,b.y,'#ffd580',3,75,'spark');
      hit=true;break;
     }
    }
   }
-  if(hit||b.life<=0||b.x<WALL_PAD||b.x>WORLD_W-WALL_PAD||b.y<WALL_PAD||b.y>WORLD_H-WALL_PAD)bullets.splice(i,1);
+  if(hit||b.life<=0||b.x<WALL_PAD||b.x>WORLD_W-WALL_PAD||b.y<WALL_PAD||b.y>WORLD_H-WALL_PAD){
+   if(!hit&&b.rocket)triggerBulletAoe(b,false);
+   bullets.splice(i,1);
+  }
  }
 
  // Collect dead zombies cleanly (including Tesla / explosive / onDeath effects)
@@ -4246,6 +4353,13 @@ function update(dt,now){
    }else if(def.onDeath==='acidPool'||def.onDeath==='spores'){
     if(!isInSafeZone(z.x,z.y,20)){
      hazardZones.push({x:z.x,y:z.y,r:34,kind:'acid',life:4.2,max:4.2,tick:0});
+    }
+   }else if(def.onDeath==='shockNova'){
+    const sr=72;
+    particles.push({x:z.x,y:z.y,vx:0,vy:0,life:.28,max:.28,color:'#6cf0ff',size:sr,kind:'ring',rot:0,vrot:0});
+    addParticles(z.x,z.y,'#96faff',12,170,'spark');
+    if(player&&!inSafe&&Math.hypot(player.x-z.x,player.y-z.y)<=sr+player.r){
+     damagePlayer(14,z.x,z.y);
     }
    }
 
@@ -4491,6 +4605,86 @@ function drawWeaponModel(type,now){
   ctx.fillStyle='#59e6ff';ctx.fillRect(32,-3.6,3,7.2);
   ctx.fillStyle='#9cfaff';ctx.beginPath();ctx.arc(39.5,0,2.7,0,Math.PI*2);ctx.fill();
   if(itemMods.hasLaser){ctx.fillStyle='#35ff5a';ctx.fillRect(27,3.8,7,2)}
+ }else if(type==='smg'){
+  ctx.fillStyle='#213740';
+  ctx.beginPath();ctx.roundRect(0,-13,12,6,3);ctx.fill();
+  ctx.beginPath();ctx.roundRect(3,6,15,5.5,3);ctx.fill();
+  ctx.fillStyle='#171e21';
+  ctx.beginPath();ctx.arc(12,-6,3.2,0,Math.PI*2);ctx.arc(18,5,3.2,0,Math.PI*2);ctx.fill();
+  // Wire folding stock
+  ctx.strokeStyle='#637478';ctx.lineWidth=1.8;
+  ctx.strokeRect(-2,-2.8,10,5.6);
+  // Compact SMG body + forward stick mag + suppressor shroud
+  ctx.fillStyle='#2d3b3f';ctx.beginPath();ctx.roundRect(8,-4.2,17,8.4,1.8);ctx.fill();
+  ctx.fillStyle='#7e8f8b';ctx.fillRect(10,-2.6,12,2.4);
+  ctx.fillStyle='#192225';ctx.fillRect(25,-2.5,11,5);
+  ctx.fillStyle='#46565a';ctx.fillRect(27,-2,7,1.4);
+  ctx.fillStyle='#202a2e';ctx.fillRect(18,3.6,4.5,7);
+  ctx.fillStyle='#5cff3a';ctx.fillRect(13,-1,2.5,2);
+  if(itemMods.hasLaser){ctx.fillStyle='#35ff5a';ctx.fillRect(22,3,6,2)}
+ }else if(type==='crossbow'){
+  ctx.fillStyle='#213740';
+  ctx.beginPath();ctx.roundRect(0,-13,12,6,3);ctx.fill();
+  ctx.beginPath();ctx.roundRect(4,6,17,5.5,3);ctx.fill();
+  // Tactical olive stock & rail
+  ctx.fillStyle='#3b4a36';ctx.beginPath();ctx.roundRect(-3,-3.6,14,7.2,2);ctx.fill();
+  ctx.fillStyle='#232e27';ctx.beginPath();ctx.roundRect(10,-2.8,27,5.6,1.2);ctx.fill();
+  // Wide curved carbon prod limbs + bowstring
+  ctx.strokeStyle='#7a946c';ctx.lineWidth=3.2;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(27,-17);ctx.quadraticCurveTo(35,0,27,17);ctx.stroke();
+  ctx.strokeStyle='rgba(220,240,225,0.85)';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.moveTo(27,-17);ctx.lineTo(15,0);ctx.lineTo(27,17);ctx.stroke();
+  // Loaded steel bolt with glowing green fletching
+  ctx.fillStyle='#d0e0e4';ctx.fillRect(16,-1.1,26,2.2);
+  ctx.fillStyle='#7cff8c';ctx.fillRect(16,-2.4,5,4.8);
+  ctx.fillStyle='#e8ffff';ctx.beginPath();ctx.moveTo(45,0);ctx.lineTo(39,-2.8);ctx.lineTo(39,2.8);ctx.closePath();ctx.fill();
+  if(itemMods.hasLaser){ctx.fillStyle='#35ff5a';ctx.fillRect(26,3,6,2)}
+ }else if(type==='flamer'){
+  ctx.fillStyle='#213740';
+  ctx.beginPath();ctx.roundRect(0,-13,12,6,3);ctx.fill();
+  ctx.beginPath();ctx.roundRect(4,6,18,5.5,3);ctx.fill();
+  // Red pressurized fuel canister + side pipes
+  ctx.fillStyle='#b83225';ctx.beginPath();ctx.roundRect(-2,-6.5,14,13,3.5);ctx.fill();
+  ctx.strokeStyle='#1d1514';ctx.lineWidth=1.2;ctx.stroke();
+  ctx.fillStyle='#e88d3a';ctx.fillRect(1,-4.5,8,2.2);
+  // Heavy heat shield & thick nozzle
+  ctx.fillStyle='#313d40';ctx.beginPath();ctx.roundRect(11,-4.2,17,8.4,1.6);ctx.fill();
+  ctx.fillStyle='#637375';ctx.fillRect(28,-3.2,11,6.4);
+  ctx.fillStyle='#1f2628';ctx.fillRect(36,-3.8,4,7.6);
+  // Pilot ignition flame tip
+  const fl=0.72+Math.sin(t*0.02)*0.28;
+  ctx.fillStyle=`rgba(255,148,42,${fl.toFixed(2)})`;
+  ctx.beginPath();ctx.arc(41.5,0,2.8,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff4b8';ctx.beginPath();ctx.arc(41.5,0,1.4,0,Math.PI*2);ctx.fill();
+ }else if(type==='cryo'){
+  ctx.fillStyle='#213740';
+  ctx.beginPath();ctx.roundRect(0,-13,12,6,3);ctx.fill();
+  ctx.beginPath();ctx.roundRect(4,6,18,5.5,3);ctx.fill();
+  // White-silver insulated chassis + dual nitrogen tanks
+  ctx.fillStyle='#9fc3cf';ctx.beginPath();ctx.roundRect(2,-4.6,23,9.2,2.4);ctx.fill();
+  ctx.fillStyle='#4a6d7c';ctx.fillRect(7,-3.6,15,7.2);
+  const cp=0.68+Math.sin(t*0.011)*0.32;
+  ctx.fillStyle=`rgba(95,232,255,${cp.toFixed(2)})`;
+  ctx.fillRect(9,-5.8,11,2.2);ctx.fillRect(9,3.6,11,2.2);
+  ctx.fillStyle='#34525e';ctx.beginPath();ctx.roundRect(25,-3.6,13,7.2,1.6);ctx.fill();
+  ctx.fillStyle='#ccf9ff';ctx.beginPath();ctx.arc(38.5,0,2.8,0,Math.PI*2);ctx.fill();
+  if(itemMods.hasLaser){ctx.fillStyle='#35ff5a';ctx.fillRect(26,3.8,6,2)}
+ }else if(type==='launcher'){
+  ctx.fillStyle='#213740';
+  ctx.beginPath();ctx.roundRect(0,-13,12,6,3);ctx.fill();
+  ctx.beginPath();ctx.roundRect(4,6,18,5.5,3);ctx.fill();
+  // Heavy rotary grenade drum + wide launcher barrel
+  ctx.fillStyle='#433928';ctx.beginPath();ctx.roundRect(-2,-3.8,12,7.6,1.8);ctx.fill();
+  ctx.fillStyle='#43523d';ctx.beginPath();ctx.arc(16,0,7.2,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#1d241c';ctx.lineWidth=1.4;ctx.stroke();
+  ctx.fillStyle='#e07d2b';
+  for(let a=0;a<6;a++){
+   const ang=a*(Math.PI/3);
+   ctx.beginPath();ctx.arc(16+Math.cos(ang)*4,Math.sin(ang)*4,1.6,0,Math.PI*2);ctx.fill();
+  }
+  ctx.fillStyle='#2d3b2e';ctx.beginPath();ctx.roundRect(22,-4.5,18,9,1.6);ctx.fill();
+  ctx.fillStyle='#d98e32';ctx.fillRect(37,-5,4.2,10);
+  if(itemMods.hasLaser){ctx.fillStyle='#35ff5a';ctx.fillRect(28,4.6,6,2)}
  }else if(type==='railgun'){
   ctx.fillStyle='#213740';
   ctx.beginPath();ctx.roundRect(0,-13,12,6,3);ctx.fill();
@@ -4965,18 +5159,18 @@ function drawPlayer(now){
  ctx.fillRect(-2,8.1,2.4,3.4);
  ctx.restore();
 
- const kick=player.recoil*(weapon==='shotgun'||weapon==='railgun'?6.5:3.5);
+ const kick=player.recoil*(weapon==='shotgun'||weapon==='railgun'||weapon==='launcher'?6.5:3.5);
  ctx.save();
  ctx.translate(-kick,0);
  drawWeaponModel(weapon,now);
 
- if(player.muzzleFlash>0&&weapon!=='railgun'){
-  const tipX=weapon==='pistol'?34:weapon==='shotgun'?40:weapon==='minigun'?42:weapon==='plasma'?41:43;
-  const fScale=(weapon==='shotgun'?1.55:1.1)*player.muzzleFlash;
+ if(player.muzzleFlash>0&&weapon!=='railgun'&&weapon!=='crossbow'){
+  const tipX=(weapon==='pistol'||weapon==='smg')?34:(weapon==='shotgun'||weapon==='flamer'||weapon==='cryo')?40:(weapon==='minigun'||weapon==='launcher')?42:weapon==='plasma'?41:43;
+  const fScale=(weapon==='shotgun'||weapon==='launcher'?1.55:weapon==='flamer'?1.35:1.1)*player.muzzleFlash;
   ctx.save();
   ctx.translate(tipX,0);
   ctx.scale(fScale,fScale);
-  ctx.fillStyle=weapon==='plasma'?'#52eeff':'#ff9f2e';
+  ctx.fillStyle=weapon==='plasma'||weapon==='cryo'?'#52eeff':weapon==='flamer'||weapon==='launcher'?'#ff7828':'#ff9f2e';
   ctx.beginPath();
   ctx.moveTo(0,0);ctx.lineTo(15,-7.5);ctx.lineTo(10,-2);ctx.lineTo(22,0);
   ctx.lineTo(10,2);ctx.lineTo(15,7.5);ctx.closePath();ctx.fill();
@@ -5060,6 +5254,27 @@ function drawZombie(z,now,targetCtx){
   c.fillStyle=def.eye;
   c.beginPath();c.arc(11,-2.2,1.8,0,Math.PI*2);c.arc(11,2.2,1.8,0,Math.PI*2);c.fill();
   c.restore();
+ }else if(def.shape==='spider'){
+  // Six-legged arachnid mutant
+  const scuttle=Math.sin(z.phase)*4.2;
+  c.strokeStyle=hit?'#ffffff':'#354d2a';c.lineWidth=2.6;c.lineCap='round';
+  for(const side of [-1,1]){
+   for(let li=-1;li<=1;li++){
+    const bx=li*5,by=side*4;
+    const kx=li*9+(li%2===0?scuttle:-scuttle)*0.6,ky=side*(z.r+7);
+    c.beginPath();c.moveTo(bx,by);c.lineTo(kx,ky*0.72);c.lineTo(kx+li*2,ky);c.stroke();
+   }
+  }
+  c.fillStyle=hit?'#fcffde':def.coat;
+  c.beginPath();c.ellipse(-5,0,z.r*0.72,z.r*0.62,0,0,Math.PI*2);c.fill();
+  c.strokeStyle='#141f12';c.lineWidth=1.4;c.stroke();
+  c.fillStyle=hit?'#ffffff':def.color;
+  c.beginPath();c.ellipse(5,0,z.r*0.58,z.r*0.52,0,0,Math.PI*2);c.fill();
+  c.fillStyle=def.eye||'#b6ff38';
+  for(const ey of [-3.6,-1.4,1.4,3.6]){
+   c.beginPath();c.arc(9,ey,1.4,0,Math.PI*2);c.fill();
+  }
+  c.restore();
  }else{
   const reachL=Math.sin(z.phase)*4.4;
   const reachR=Math.cos(z.phase)*4.4;
@@ -5080,10 +5295,25 @@ function drawZombie(z,now,targetCtx){
   c.arc(armLen+reachL,-z.r*0.52,z.r>=20?3.6:2.4,0,Math.PI*2);
   c.arc(armLen+reachR,z.r*0.52,z.r>=20?3.6:2.4,0,Math.PI*2);
   c.fill();
-  if(gear==='surgeon'){
-   // Gleaming scalpel on right arm
-   c.strokeStyle='#e2f2f5';c.lineWidth=2.2;
-   c.beginPath();c.moveTo(armLen+reachR,z.r*0.52);c.lineTo(armLen+reachR+9,z.r*0.32);c.stroke();
+  if(gear==='surgeon'||gear==='butcher'){
+   // Gleaming scalpel or heavy bloody cleaver on right arm
+   c.strokeStyle=gear==='butcher'?'#dce8ea':'#e2f2f5';c.lineWidth=gear==='butcher'?3.8:2.2;
+   c.beginPath();c.moveTo(armLen+reachR,z.r*0.52);c.lineTo(armLen+reachR+(gear==='butcher'?12:9),z.r*(gear==='butcher'?0.18:0.32));c.stroke();
+   if(gear==='butcher'){
+    c.fillStyle='#c4262c';c.fillRect(armLen+reachR+3,z.r*0.24,5,3);
+   }
+  }else if(gear==='sniper'){
+   // Camouflaged sniper rifle held forward
+   c.strokeStyle='#394732';c.lineWidth=3.2;
+   c.beginPath();c.moveTo(4,3);c.lineTo(z.r+17,3);c.stroke();
+   c.fillStyle='#ff7632';c.fillRect(z.r+8,1.5,4,3);
+  }else if(gear==='vampire'){
+   // Long crimson claws
+   c.strokeStyle='#d4364a';c.lineWidth=1.8;
+   c.beginPath();
+   c.moveTo(armLen+reachL,-z.r*0.52);c.lineTo(armLen+reachL+7,-z.r*0.55);
+   c.moveTo(armLen+reachR,z.r*0.52);c.lineTo(armLen+reachR+7,z.r*0.55);
+   c.stroke();
   }
 
   // Torso
@@ -5159,6 +5389,36 @@ function drawZombie(z,now,targetCtx){
    c.beginPath();c.arc(0,0,z.r*0.85,0,Math.PI*2);c.stroke();
   }else if(gear==='cyborg'){
    c.fillStyle='#788d94';c.fillRect(-4,3,13,6);
+  }else if(gear==='swat'){
+   c.fillStyle='#243854';c.strokeStyle='#72c4ff';c.lineWidth=1.2;
+   c.beginPath();c.roundRect(-8,-z.r*0.92,14,10,2);c.roundRect(-8,z.r*0.92-10,14,10,2);c.fill();c.stroke();
+  }else if(gear==='butcher'){
+   c.fillStyle='#d9d4cc';c.fillRect(-6,-z.r*0.75,14,z.r*1.5);
+   c.fillStyle='rgba(195,28,36,0.75)';c.fillRect(-2,-6,9,11);
+  }else if(gear==='chemist'){
+   c.fillStyle='#5cff3a';c.beginPath();c.arc(-7,-6,4,0,Math.PI*2);c.arc(-7,6,4,0,Math.PI*2);c.fill();
+  }else if(gear==='electro'){
+   const ep=0.55+Math.sin(now*0.025+z.seed*9)*0.45;
+   c.strokeStyle=`rgba(105,244,255,${ep.toFixed(2)})`;c.lineWidth=1.8;
+   c.beginPath();c.arc(0,0,z.r*0.92,0,Math.PI*2);c.stroke();
+  }else if(gear==='plague'){
+   c.fillStyle='#2b2736';c.beginPath();c.roundRect(-10,-z.r*0.96,16,z.r*1.92,4);c.fill();
+   c.fillStyle='#78ff8c';c.beginPath();c.arc(-4,0,3.6,0,Math.PI*2);c.fill();
+  }else if(gear==='patient'){
+   c.strokeStyle='#7b857e';c.lineWidth=2.5;
+   c.beginPath();c.moveTo(-6,-z.r*0.8);c.lineTo(5,z.r*0.8);c.moveTo(-6,z.r*0.8);c.lineTo(5,-z.r*0.8);c.stroke();
+  }else if(gear==='vampire'){
+   c.fillStyle='#541524';c.beginPath();c.moveTo(-11,-z.r*0.95);c.lineTo(-16,0);c.lineTo(-11,z.r*0.95);c.closePath();c.fill();
+  }else if(gear==='sniper'){
+   c.fillStyle='#3b4a32';c.fillRect(-9,-z.r*0.9,14,z.r*1.8);
+  }else if(gear==='behemoth'){
+   c.fillStyle='#464f3e';c.strokeStyle='#b8c298';c.lineWidth=1.8;
+   c.beginPath();c.roundRect(-9,-z.r*0.98,17,8,3);c.roundRect(-9,z.r*0.98-8,17,8,3);c.fill();c.stroke();
+   c.fillStyle='#d9d4a6';
+   c.beginPath();c.moveTo(2,-17);c.lineTo(13,-23);c.lineTo(8,-9);c.moveTo(2,17);c.lineTo(13,23);c.lineTo(8,9);c.fill();
+  }else if(gear==='phantom'){
+   c.strokeStyle='#d484ff';c.lineWidth=1.5;
+   c.beginPath();c.arc(0,0,z.r*0.96,0,Math.PI*2);c.stroke();
   }else if(gear==='runner'){
    c.fillStyle='rgba(245,190,60,0.58)';c.fillRect(-5,-8,6,4);c.fillRect(-5,4,6,4);
   }else if(gear==='none'){
@@ -5171,30 +5431,51 @@ function drawZombie(z,now,targetCtx){
   c.beginPath();c.arc(3.8,0,hr,0,Math.PI*2);c.fill();
   c.strokeStyle='rgba(10,16,10,0.7)';c.lineWidth=1.5;c.stroke();
 
-  if(gear==='cop'||gear==='soldier'||gear==='commando'||gear==='firefighter'||gear==='juggernaut'){
-   c.fillStyle=gear==='cop'?'#1a2d4a':gear==='firefighter'?'#c9382b':gear==='commando'?'#171c20':'#34422c';
+  if(gear==='cop'||gear==='soldier'||gear==='commando'||gear==='firefighter'||gear==='juggernaut'||gear==='swat'||gear==='sniper'){
+   c.fillStyle=gear==='cop'?'#1a2d4a':gear==='swat'?'#132033':gear==='firefighter'?'#c9382b':gear==='commando'?'#171c20':gear==='sniper'?'#2c3824':'#34422c';
    c.beginPath();c.arc(3.2,0,hr*0.95,-Math.PI*0.75,Math.PI*0.75,true);c.fill();
-  }else if(gear==='hazmat'||gear==='necromancer'){
-   c.fillStyle=gear==='hazmat'?'#d6b329':'#28183b';
+  }else if(gear==='hazmat'||gear==='necromancer'||gear==='plague'){
+   c.fillStyle=gear==='hazmat'?'#d6b329':gear==='plague'?'#1a1922':'#28183b';
    c.beginPath();c.arc(2.5,0,hr*1.06,0,Math.PI*2);c.fill();
+   if(gear==='plague'){
+    // Pointed plague doctor beak mask
+    c.fillStyle='#d4cbb8';
+    c.beginPath();c.moveTo(3.8+hr*0.6,-3.2);c.lineTo(3.8+hr+8,0);c.lineTo(3.8+hr*0.6,3.2);c.closePath();c.fill();
+   }
   }else{
    c.fillStyle='rgba(20,30,20,0.5)';
    c.beginPath();c.arc(1.5,z.seed>.5?-2.5:2.5,hr*0.48,0,Math.PI*2);c.fill();
   }
 
-  // Glowing eyes (cyborg gets asymmetric cyber red laser eye)
+  // Glowing eyes (cyborg laser eye, swat 3-lens NVG)
   const eyeX=3.8+hr*0.48;
   const eyeY=hr*0.42;
-  c.fillStyle=def.eye||'#d4ff4a';
-  c.beginPath();
-  c.arc(eyeX,-eyeY,z.r>=20?3.0:2.2,0,Math.PI*2);
-  c.fill();
-  c.fillStyle=gear==='cyborg'?'#ff223a':(def.eye||'#d4ff4a');
-  c.beginPath();
-  c.arc(eyeX,eyeY,gear==='cyborg'?2.9:(z.r>=20?3.0:2.2),0,Math.PI*2);
-  c.fill();
+  if(gear==='swat'){
+   c.fillStyle='#64ff8c';
+   c.beginPath();c.arc(eyeX,-eyeY,2.1,0,Math.PI*2);c.arc(eyeX+1,0,2.1,0,Math.PI*2);c.arc(eyeX,eyeY,2.1,0,Math.PI*2);c.fill();
+  }else{
+   c.fillStyle=def.eye||'#d4ff4a';
+   c.beginPath();
+   c.arc(eyeX,-eyeY,z.r>=20?3.0:2.2,0,Math.PI*2);
+   c.fill();
+   c.fillStyle=gear==='cyborg'?'#ff223a':(def.eye||'#d4ff4a');
+   c.beginPath();
+   c.arc(eyeX,eyeY,gear==='cyborg'?2.9:(z.r>=20?3.0:2.2),0,Math.PI*2);
+   c.fill();
+  }
 
   c.restore();
+ }
+
+ // Status overlays: Burning & Cryo-Chilled
+ if(!z.preview&&z.burnTimer>0){
+  const fp=0.55+Math.sin(now*0.025+z.seed*12)*0.35;
+  c.strokeStyle=`rgba(255,136,42,${fp.toFixed(2)})`;c.lineWidth=2.5;
+  c.beginPath();c.arc(0,0,z.r+3,0,Math.PI*2);c.stroke();
+ }
+ if(!z.preview&&z.chillTimer>0){
+  c.strokeStyle='rgba(128,242,255,0.8)';c.lineWidth=2.2;
+  c.setLineDash([4,4]);c.beginPath();c.arc(0,0,z.r+4,0,Math.PI*2);c.stroke();c.setLineDash([]);
  }
 
  // Health bar + archetype label for heavy / elite / damaged multi-HP zombies
@@ -5242,7 +5523,7 @@ function drawAimTrajectory(now){
  const mx=player.x+Math.cos(ang)*barrelLen;
  const my=player.y+Math.sin(ang)*barrelLen;
  const maxRange=getWeaponRange();
- const ray=traceAimRay(mx,my,ang,maxRange,!!w.rail);
+ const ray=traceAimRay(mx,my,ang,maxRange,!!(w.rail||w.pierce));
  const ex=mx+Math.cos(ang)*ray.endT;
  const ey=my+Math.sin(ang)*ray.endT;
 
@@ -5271,6 +5552,12 @@ function drawAimTrajectory(now){
  }else if(w.rail){
   coreCol='rgba(130,248,255,0.88)';
   glowCol='rgba(75,230,255,0.28)';
+ }else if(w.flame||w.rocket){
+  coreCol='rgba(255,152,66,0.86)';
+  glowCol='rgba(255,112,38,0.26)';
+ }else if(w.pierce){
+  coreCol='rgba(130,255,148,0.86)';
+  glowCol='rgba(92,255,118,0.24)';
  }else if(w.aoe){
   coreCol='rgba(110,246,255,0.84)';
   glowCol='rgba(80,225,255,0.26)';
@@ -5303,16 +5590,19 @@ function drawAimTrajectory(now){
  ctx.setLineDash([]);
 
  if(!inSafe&&w.aoe>0){
-  ctx.strokeStyle='rgba(95,242,255,0.48)';
-  ctx.fillStyle='rgba(95,242,255,0.09)';
+  const aoeCol=w.flame||w.rocket?'rgba(255,142,56,0.52)':'rgba(95,242,255,0.48)';
+  const aoeFill=w.flame||w.rocket?'rgba(255,135,52,0.10)':'rgba(95,242,255,0.09)';
+  ctx.strokeStyle=aoeCol;
+  ctx.fillStyle=aoeFill;
   ctx.lineWidth=1.4;
   ctx.beginPath();ctx.arc(ex,ey,w.aoe,0,Math.PI*2);ctx.fill();ctx.stroke();
  }
 
- if(w.rail&&ray.pierced.length){
-  for(const item of ray.pierced){
+ if((w.rail||w.pierce)&&ray.pierced.length){
+  const list=w.pierce?ray.pierced.slice().sort((a,b)=>a.t-b.t).slice(0,w.pierce):ray.pierced;
+  for(const item of list){
    const pz=item.z;
-   ctx.strokeStyle='rgba(125,248,255,0.92)';
+   ctx.strokeStyle=w.pierce?'rgba(130,255,148,0.92)':'rgba(125,248,255,0.92)';
    ctx.lineWidth=2;
    ctx.beginPath();ctx.arc(pz.x,pz.y,pz.r+6,0,Math.PI*2);ctx.stroke();
   }
@@ -5625,7 +5915,8 @@ function drawWorldLights(now,viewX,viewY){
 
  for(const b of bullets){
   ctx.globalAlpha=b.aoe?0.85:(b.crit?0.78:0.62);
-  ctx.drawImage(b.aoe?glows.cyan:(b.crit?glows.green:glows.amber),b.x-(b.aoe?30:18),b.y-(b.aoe?30:18),b.aoe?60:36,b.aoe?60:36);
+  const bGlow=b.flame||b.rocket?glows.amber:b.chill?glows.cyan:b.aoe?glows.cyan:(b.crit||b.bolt?glows.green:glows.amber);
+  ctx.drawImage(bGlow,b.x-(b.aoe?30:18),b.y-(b.aoe?30:18),b.aoe?60:36,b.aoe?60:36);
  }
 
  for(const rb of railBeams){
@@ -5879,8 +6170,15 @@ function render(now){
  }
  drawPlayer(now);
 
- // Enemy ranged projectiles (spitter acid / cyborg shock)
+ // Enemy ranged projectiles (spitter acid / cyborg shock / sniper tracer / chemist flask)
  for(const ep of enemyProjectiles){
+  if(ep.kind==='snipe'){
+   const sp=Math.hypot(ep.vx,ep.vy)||1;
+   ctx.strokeStyle='#ff8e3c';ctx.lineWidth=3.2;
+   ctx.beginPath();ctx.moveTo(ep.x-(ep.vx/sp)*20,ep.y-(ep.vy/sp)*20);ctx.lineTo(ep.x,ep.y);ctx.stroke();
+   ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(ep.x,ep.y,2.5,0,Math.PI*2);ctx.fill();
+   continue;
+  }
   ctx.fillStyle=ep.color;
   ctx.beginPath();ctx.arc(ep.x,ep.y,ep.r+1.5,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#ffffff';
@@ -5889,8 +6187,36 @@ function render(now){
 
  ctx.lineCap='round';
  for(const b of bullets){
+  if(b.flame){
+   const r=7.5+(1-Math.min(1,b.life*2))*7;
+   ctx.fillStyle='rgba(255,112,28,0.52)';
+   ctx.beginPath();ctx.arc(b.x,b.y,r,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#ffe680';
+   ctx.beginPath();ctx.arc(b.x,b.y,r*0.48,0,Math.PI*2);ctx.fill();
+   continue;
+  }
+  if(b.rocket){
+   ctx.save();
+   ctx.translate(b.x,b.y);ctx.rotate(b.angle);
+   ctx.fillStyle='#3b4a3c';ctx.beginPath();ctx.roundRect(-8,-3.5,14,7,2);ctx.fill();
+   ctx.fillStyle='#ff7a2e';ctx.beginPath();ctx.moveTo(9,0);ctx.lineTo(3,-3.5);ctx.lineTo(3,3.5);ctx.closePath();ctx.fill();
+   ctx.fillStyle='#ffe878';ctx.beginPath();ctx.arc(-9,0,3.2,0,Math.PI*2);ctx.fill();
+   ctx.restore();
+   continue;
+  }
+  if(b.bolt){
+   ctx.save();
+   ctx.translate(b.x,b.y);ctx.rotate(b.angle);
+   ctx.strokeStyle='#7cff8c';ctx.lineWidth=3.4;
+   ctx.beginPath();ctx.moveTo(-16,0);ctx.lineTo(-9,0);ctx.stroke();
+   ctx.strokeStyle='#e4f6ff';ctx.lineWidth=2.2;
+   ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(9,0);ctx.stroke();
+   ctx.fillStyle='#ffffff';ctx.beginPath();ctx.moveTo(12,0);ctx.lineTo(6,-2.5);ctx.lineTo(6,2.5);ctx.closePath();ctx.fill();
+   ctx.restore();
+   continue;
+  }
   if(b.aoe){
-   ctx.fillStyle='rgba(82,240,255,0.45)';
+   ctx.fillStyle=b.chill?'rgba(120,244,255,0.52)':'rgba(82,240,255,0.45)';
    ctx.beginPath();ctx.arc(b.x,b.y,8.5,0,Math.PI*2);ctx.fill();
    ctx.fillStyle='#ffffff';
    ctx.beginPath();ctx.arc(b.x,b.y,4.2,0,Math.PI*2);ctx.fill();
@@ -6406,10 +6732,10 @@ window.addEventListener('keydown',e=>{
   else if(nearbyHeli)buyHelicopterAndEscape();
   else if(nearbyLootNode)openLootNode(nearbyLootNode);
  }
- if(['1','2','3','4','5','6'].includes(e.key)){
+ const slotKeyIdx=['1','2','3','4','5','6','7','8','9','0','-'].indexOf(e.key);
+ if(slotKeyIdx!==-1){
   const unlocked=WEAPON_ORDER.filter(id=>unlockedWeapons.has(id));
-  const idx=Number(e.key)-1;
-  if(unlocked[idx])selectWeapon(unlocked[idx]);
+  if(unlocked[slotKeyIdx])selectWeapon(unlocked[slotKeyIdx]);
  }
  if((e.code==='KeyI'||e.code==='KeyB')&&!waveChoosing&&!activeNpc&&$('shop').style.display!=='flex'&&(!$('bagModal')||$('bagModal').style.display!=='flex')){
   if($('codexModal').style.display==='flex')closeCodex();
