@@ -1,4 +1,4 @@
-const CACHE_NAME = "carantin-v7";
+const CACHE_NAME = "carantin-v8";
 
 const FILES = [
   "./",
