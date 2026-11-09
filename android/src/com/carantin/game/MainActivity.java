@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
+import android.webkit.ServiceWorkerClient;
+import android.webkit.ServiceWorkerController;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -18,6 +20,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -42,6 +45,18 @@ public class MainActivity extends Activity {
             getWindow().setAttributes(lp);
         }
 
+        if (Build.VERSION.SDK_INT >= 24) {
+            try {
+                ServiceWorkerController.getInstance().setServiceWorkerClient(new ServiceWorkerClient() {
+                    @Override
+                    public WebResourceResponse shouldInterceptRequest(WebResourceRequest request) {
+                        return serveLocalAsset(request.getUrl());
+                    }
+                });
+            } catch (Throwable ignored) {
+            }
+        }
+
         webView = new WebView(this);
         webView.setBackgroundColor(Color.parseColor("#081012"));
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
@@ -62,30 +77,14 @@ public class MainActivity extends Activity {
         ws.setDisplayZoomControls(false);
         ws.setMediaPlaybackRequiresUserGesture(false);
         ws.setAllowFileAccess(true);
+        ws.setCacheMode(WebSettings.LOAD_NO_CACHE);
 
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                Uri url = request.getUrl();
-                if (url != null && ASSET_HOST.equals(url.getHost())) {
-                    String path = url.getPath();
-                    if (path == null || path.isEmpty() || "/".equals(path)) {
-                        path = "index.html";
-                    } else if (path.startsWith("/")) {
-                        path = path.substring(1);
-                    }
-                    try {
-                        InputStream is = getAssets().open("www/" + path);
-                        String mime = guessMime(path);
-                        Map<String, String> headers = new HashMap<>();
-                        headers.put("Access-Control-Allow-Origin", "*");
-                        return new WebResourceResponse(mime, "UTF-8", 200, "OK", headers, is);
-                    } catch (IOException ignored) {
-                        return null;
-                    }
-                }
-                return super.shouldInterceptRequest(view, request);
+                WebResourceResponse res = serveLocalAsset(request.getUrl());
+                return res != null ? res : super.shouldInterceptRequest(view, request);
             }
         });
 
@@ -96,6 +95,38 @@ public class MainActivity extends Activity {
             webView.restoreState(savedInstanceState);
         } else {
             webView.loadUrl("https://" + ASSET_HOST + "/index.html");
+        }
+    }
+
+    private WebResourceResponse serveLocalAsset(Uri url) {
+        if (url == null || !ASSET_HOST.equals(url.getHost())) {
+            return null;
+        }
+        String path = url.getPath();
+        if (path == null || path.isEmpty() || "/".equals(path)) {
+            path = "index.html";
+        } else if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        if ("favicon.ico".equals(path)) {
+            path = "icon-192.png";
+        }
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Cache-Control", "no-store");
+        if (path.contains("..")) {
+            return new WebResourceResponse(
+                "text/plain", "UTF-8", 404, "Not Found", headers, new ByteArrayInputStream(new byte[0])
+            );
+        }
+        try {
+            InputStream is = getAssets().open("www/" + path);
+            String mime = guessMime(path);
+            return new WebResourceResponse(mime, "UTF-8", 200, "OK", headers, is);
+        } catch (IOException ignored) {
+            return new WebResourceResponse(
+                "text/plain", "UTF-8", 404, "Not Found", headers, new ByteArrayInputStream(new byte[0])
+            );
         }
     }
 

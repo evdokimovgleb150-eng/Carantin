@@ -29,9 +29,12 @@ echo "Using platform: $PLATFORM_DIR"
 echo "Using build-tools: $BUILD_TOOLS_DIR"
 
 rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR"/{gen,obj,dex,res/values,res/mipmap-xxhdpi,res/mipmap-xxxhdpi,assets/www}
+mkdir -p "$BUILD_DIR"/{gen,obj,dex,res/values,res/mipmap-mdpi,res/mipmap-hdpi,res/mipmap-xhdpi,res/mipmap-xxhdpi,res/mipmap-xxxhdpi,assets/www}
 
 cp "$ANDROID_DIR/res/values/"*.xml "$BUILD_DIR/res/values/"
+cp "$ROOT_DIR/icon-192.png" "$BUILD_DIR/res/mipmap-mdpi/ic_launcher.png"
+cp "$ROOT_DIR/icon-192.png" "$BUILD_DIR/res/mipmap-hdpi/ic_launcher.png"
+cp "$ROOT_DIR/icon-192.png" "$BUILD_DIR/res/mipmap-xhdpi/ic_launcher.png"
 cp "$ROOT_DIR/icon-192.png" "$BUILD_DIR/res/mipmap-xxhdpi/ic_launcher.png"
 cp "$ROOT_DIR/icon-512.png" "$BUILD_DIR/res/mipmap-xxxhdpi/ic_launcher.png"
 
