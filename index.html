@@ -79,13 +79,38 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  position:absolute;inset:0;pointer-events:none;
  background:repeating-linear-gradient(90deg,transparent,transparent calc(20% - 1px),rgba(0,0,0,0.35) calc(20% - 1px),rgba(0,0,0,0.35) 20%);
 }
-#threatBadge{
+#badgeRow{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+#threatBadge,#zoneBadge{
  align-self:flex-start;
  font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
- color:#a9d1b6;background:rgba(10,20,21,0.75);
+ color:#a9d1b6;background:rgba(10,20,21,0.78);
  border:1px solid rgba(110,158,132,0.28);border-radius:6px;
  padding:2px 7px;
 }
+#zoneBadge.safe{
+ color:#88f7ff;border-color:rgba(90,225,255,0.52);
+ background:rgba(10,32,42,0.84);
+}
+#zoneBadge.hazard{
+ color:#c9ff76;border-color:rgba(128,255,70,0.45);
+}
+#zoneBadge.mil{
+ color:#ffd17a;border-color:rgba(255,176,68,0.45);
+}
+
+#interactBtn{
+ display:none;pointer-events:auto;
+ position:absolute;bottom:210px;left:50%;transform:translateX(-50%);
+ z-index:20;
+ padding:9px 18px;border-radius:999px;
+ background:linear-gradient(180deg,#2d88b8,#195273);
+ border:1.5px solid #8be6ff;color:#f3fbff;
+ font-size:13px;font-weight:800;letter-spacing:.4px;white-space:nowrap;
+ box-shadow:0 6px 24px rgba(0,0,0,0.6),0 0 18px rgba(85,220,255,0.38);
+ animation:pulseInteract 1.2s infinite ease-in-out;
+}
+#interactBtn.show{display:inline-flex;align-items:center;gap:6px}
+@keyframes pulseInteract{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.04)}}
 
 .hudBtn{
  pointer-events:auto;position:relative;
@@ -127,16 +152,19 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
 }
 #weaponBar{
  position:absolute;bottom:124px;left:0;right:0;
- display:flex;justify-content:center;gap:8px;padding:0 10px;
+ display:flex;justify-content:center;gap:7px;padding:0 10px;
+ overflow-x:auto;scrollbar-width:none;
  pointer-events:auto;
 }
+#weaponBar::-webkit-scrollbar{display:none}
 .weapon{
+ flex:0 0 auto;
  display:flex;flex-direction:column;align-items:center;gap:3px;
- min-width:86px;padding:7px 10px;border-radius:12px;
+ min-width:74px;padding:6px 9px;border-radius:12px;
  border:1px solid rgba(124,162,142,0.36);
  background:rgba(12,24,23,0.84);
  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
- font-size:10px;font-weight:800;letter-spacing:.5px;color:#b8cfc0;
+ font-size:9.5px;font-weight:800;letter-spacing:.4px;color:#b8cfc0;
  box-shadow:0 4px 14px rgba(0,0,0,0.45);
  transition:transform .1s ease,border-color .15s ease,background .15s ease,box-shadow .15s ease;
 }
@@ -197,14 +225,21 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  border-radius:6px;padding:1px 5px;
 }
 
-#overlay,#shop,#pauseScreen,#waveModal{
+#overlay,#shop,#pauseScreen,#waveModal,#npcModal{
  position:absolute;inset:0;z-index:1000;
  display:flex;align-items:center;justify-content:center;padding:12px;
  background:radial-gradient(circle at 50% 40%,rgba(11,26,23,0.72),rgba(4,9,10,0.88));
  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
  pointer-events:auto;
 }
-#shop,#pauseScreen,#waveModal{display:none}
+#shop,#pauseScreen,#waveModal,#npcModal{display:none}
+#npcSay{
+ font-size:12.5px;color:#bfe0ea;font-style:italic;
+ background:rgba(10,26,32,0.75);border:1px solid rgba(100,205,235,0.28);
+ border-radius:10px;padding:8px 10px;margin:6px 0 8px;
+}
+#npcOffers{display:grid;gap:8px;margin-top:8px}
+.npcTag{font-size:10px;padding:1px 6px;border-radius:6px;background:rgba(92,255,58,0.16);color:#8bff74}
 #waveChoices{display:grid;gap:9px;margin-top:10px}
 .itemCard{
  display:flex;align-items:center;gap:12px;width:100%;
@@ -336,9 +371,10 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  .control{width:68px;height:68px}
  #joystickLabel{display:none}
  #weaponBar{bottom:80px;gap:6px}
- .weapon{min-width:72px;padding:5px 7px;font-size:9px}
+ .weapon{min-width:66px;padding:5px 7px;font-size:9px}
  .weapon svg{width:26px;height:12px}
  #weaponInfo{bottom:126px;font-size:11px}
+ #interactBtn{bottom:146px;padding:7px 14px;font-size:12px}
  #radar{width:54px;height:54px;top:calc(max(8px,env(safe-area-inset-top)) + 84px)}
  .box{padding:12px 14px}
  .emblem{width:46px;height:46px;margin-bottom:6px}
@@ -373,7 +409,10 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
     <div id="healthfill"></div>
     <div id="healthTicks"></div>
    </div>
-   <div id="threatBadge">ВОЛНА 1 · 0/10 🧟</div>
+   <div id="badgeRow">
+    <div id="threatBadge">ВОЛНА 1 · 0/10 🧟</div>
+    <div id="zoneBadge">🛡️ БЕЗОПАСНАЯ ЗОНА</div>
+   </div>
    <div id="activeItems"></div>
   </div>
   <button type="button" class="hudBtn" id="shopButton">МАГАЗИН<span id="shopBadge"></span></button>
@@ -382,21 +421,9 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
 
  <canvas id="radar" width="136" height="136" aria-hidden="true"></canvas>
 
- <div id="weaponInfo">Пистолет · точный выстрел</div>
- <div id="weaponBar">
-  <button type="button" class="weapon active" data-weapon="pistol">
-   <svg viewBox="0 0 40 18" fill="none"><rect x="6" y="4" width="24" height="6" rx="1.5" fill="#9fb0ad"/><rect x="26" y="5" width="7" height="4" rx="1" fill="#4f5f63"/><path d="M10 10h7l-2 7H9z" fill="#6b5139"/><rect x="8" y="4" width="19" height="2.2" fill="#d3e0dc"/></svg>
-   <span>ПИСТОЛЕТ</span>
-  </button>
-  <button type="button" class="weapon" data-weapon="shotgun">
-   <svg viewBox="0 0 44 18" fill="none"><path d="M2 7l9-1v7l-9 1z" fill="#8b623f"/><rect x="10" y="6" width="15" height="6" rx="1" fill="#4f6066"/><rect x="24" y="6.5" width="17" height="2" fill="#9fb0ad"/><rect x="24" y="9.5" width="17" height="2" fill="#708085"/><rect x="19" y="11.5" width="10" height="3" rx="1" fill="#8b623f"/></svg>
-   <span>ДРОБОВИК</span>
-  </button>
-  <button type="button" class="weapon" data-weapon="rifle">
-   <svg viewBox="0 0 46 18" fill="none"><path d="M2 7l9-1v6l-9 1z" fill="#6a4e37"/><rect x="10" y="6" width="18" height="5.5" rx="1" fill="#45555b"/><rect x="27" y="7.5" width="17" height="2.5" fill="#93a5a1"/><rect x="16" y="3.2" width="7" height="2.2" rx=".8" fill="#5cff3a"/><path d="M18 11.5h5l1.5 5.5h-4.5z" fill="#2e3b3f"/><rect x="27" y="11" width="5" height="4" rx=".8" fill="#6a4e37"/></svg>
-   <span>АВТОМАТ</span>
-  </button>
- </div>
+ <button type="button" id="interactBtn"></button>
+ <div id="weaponInfo">Пистолет · авто-огонь</div>
+ <div id="weaponBar"></div>
 
  <div id="bottom">
   <div class="control" id="joystick" role="slider" aria-label="Джойстик движения">
@@ -414,14 +441,29 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    <img class="emblem" src="./icon-192.png" alt="CARANTIN">
    <h1>CARA<span class="titleAccent">NTIN</span></h1>
    <div class="titleSlash"></div>
-   <p>Карантинная зона прорвана. Удерживай квартал, отстреливай волны заражённых и собирай доп. предметы.</p>
+   <p>Огромный город с 4 районами и Безопасной зоной в центре. Зачищай волны, покупай новое оружие у NPC-торговцев и выживай.</p>
    <div class="controlsGrid">
-    <div class="ctrlCard"><b>📱 Сенсор</b>Стик — движение<br>Огонь — автоматический</div>
-    <div class="ctrlCard"><b>⌨️ Клавиатура</b>WASD / Стрелки — шаг<br>1 / 2 / 3 — смена оружия</div>
+    <div class="ctrlCard"><b>📱 Сенсор</b>Стик — движение<br>Огонь — автоматический<br>Кнопка внизу — разговор с NPC</div>
+    <div class="ctrlCard"><b>⌨️ Клавиатура</b>WASD / Стрелки — шаг<br>1–6 — оружие · E — NPC</div>
    </div>
   </div>
   <div class="boxFooter">
    <button type="button" class="mainbtn" id="start">НАЧАТЬ ИГРУ</button>
+  </div>
+ </div>
+</div>
+
+<div id="npcModal">
+ <div class="box">
+  <div class="hazardStrip"></div>
+  <div class="boxBody">
+   <h2 id="npcTitle">🔫 ОРУЖЕЙНИК «ВЕКТОР»</h2>
+   <div id="npcSay"></div>
+   <p class="small">Монеты: <b id="npcMoney" style="color:#ffe082">0</b> 🪙</p>
+   <div id="npcOffers"></div>
+  </div>
+  <div class="boxFooter">
+   <button type="button" class="mainbtn" id="npcClose">ОТОЙТИ</button>
   </div>
  </div>
 </div>
@@ -473,10 +515,54 @@ const radarCtx=radarCanvas.getContext('2d');
 const uiEl=document.getElementById('ui');
 const $=id=>document.getElementById(id);
 
-// Large Quarantine District dimensions
-const WORLD_W=2400;
-const WORLD_H=2400;
-const WALL_PAD=28;
+// Large Multi-District Quarantine City dimensions
+const WORLD_W=3600;
+const WORLD_H=3600;
+const WALL_PAD=30;
+const SAFE_ZONE={x:WORLD_W/2,y:WORLD_H/2,r:270};
+
+const DISTRICTS={
+ safe:{id:'safe',name:'🛡️ БЕЗОПАСНАЯ ЗОНА',short:'База',badge:'safe',coinBonus:0,color:'rgba(70,195,245,0.16)'},
+ suburb:{id:'suburb',name:'🏘️ ЖИЛОЙ КВАРТАЛ',short:'Жилой',badge:'',coinBonus:0,color:'rgba(85,155,105,0.10)'},
+ chem:{id:'chem',name:'☣️ ХИМЗОНА (+1🪙)',short:'Химзона',badge:'hazard',coinBonus:1,color:'rgba(140,210,55,0.10)'},
+ hospital:{id:'hospital',name:'🏥 МЕДГОРОДОК',short:'Медгородок',badge:'',coinBonus:0,color:'rgba(95,180,195,0.10)'},
+ military:{id:'military',name:'🪖 БЛОКПОСТ (+2🪙)',short:'Блокпост',badge:'mil',coinBonus:2,color:'rgba(215,145,55,0.10)'}
+};
+
+function isInSafeZone(x,y,pad=0){
+ return Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.r+pad;
+}
+
+function getDistrictAt(x,y){
+ if(isInSafeZone(x,y))return DISTRICTS.safe;
+ if(x<WORLD_W/2&&y<WORLD_H/2)return DISTRICTS.suburb;
+ if(x>=WORLD_W/2&&y<WORLD_H/2)return DISTRICTS.chem;
+ if(x<WORLD_W/2&&y>=WORLD_H/2)return DISTRICTS.hospital;
+ return DISTRICTS.military;
+}
+
+const NPCS=[
+ {
+  id:'armorer',
+  name:'Оружейник «ВЕКТОР»',
+  short:'ВЕКТОР',
+  role:'Оружие и боеприпасы',
+  x:1700,y:1735,
+  tableX:1700,tableY:1696,
+  color:'#d98634',hood:'#2b3940',visor:'#ffbe44',
+  say:'Свежие стволы прямо со склада! Бери пушку помощнее — в Химзоне и на Блокпосте без неё туго.'
+ },
+ {
+  id:'medic',
+  name:'Полевой медик «ДОК»',
+  short:'ДОК',
+  role:'Лечение и энергощит',
+  x:1900,y:1735,
+  tableX:1900,tableY:1696,
+  color:'#5fd6c5',hood:'#2a4745',visor:'#72ff9f',
+  say:'Ранен? Залатай броню и заряди энергощит — купол восстановит силы, пока ты на базе.'
+ }
+];
 
 // Cached full-world ground canvas (built once, copied per visible viewport slice)
 const groundCanvas=document.createElement('canvas');
@@ -524,15 +610,17 @@ const glows={
 };
 
 let W=0,H=0,DPR=1;
-let player=null,zombies=[],bullets=[],particles=[],popups=[],decals=[],lightningBolts=[];
+let player=null,zombies=[],bullets=[],particles=[],popups=[],decals=[],lightningBolts=[],railBeams=[];
 let lamps=[],toxicPools=[],canopies=[],obstacles=[],ambientSpores=[],puddles=[],beacons=[],radarBuildings=[],rainDrops=[],mistPatches=[];
 let cam={x:WORLD_W/2,y:WORLD_H/2};
-let score=0,money=0,health=100,maxHealth=100,kills=0;
+let score=0,money=0,health=100,maxHealth=100,shieldHp=0,kills=0;
 let wave=1,waveKills=0,waveGoal=10,waveChoosing=false,waveModalUnlockAt=0,shotCount=0;
 let running=false,paused=false,last=0;
 let spawnTimer=0,fireTimer=0,hasAutoTarget=false;
 let joy={x:0,y:0},touchJoy={x:0,y:0},keys=new Set();
 let weapon='pistol';
+let unlockedWeapons=new Set(['pistol']);
+let currentDistrict='safe',nearbyNpc=null,activeNpc=null,maxHpBuys=0;
 let shake=0,shakeTilt=0,hitKickX=0,hitKickY=0,hurtFlash=0;
 let upgrades={damage:1,speed:1,rate:1};
 let prices={damage:20,speed:20,rate:25};
@@ -546,10 +634,38 @@ let ownedItems={},itemMods={};
 let bestScore=0;
 try{bestScore=Number(localStorage.getItem('carantin_best')||0)||0}catch(_){}
 
+const WEAPON_ORDER=['pistol','shotgun','rifle','minigun','plasma','railgun'];
 const weapons={
- pistol:{name:'Пистолет',damage:1,delay:.35,spread:.04,count:1,speed:510,range:440},
- shotgun:{name:'Дробовик',damage:1.5,delay:.85,spread:.3,count:6,speed:390,range:320},
- rifle:{name:'Автомат',damage:.8,delay:.105,spread:.07,count:1,speed:570,range:480}
+ pistol:{
+  name:'Пистолет',short:'ПИСТОЛЕТ',price:0,damage:1,delay:.34,spread:.04,count:1,speed:520,range:440,
+  desc:'Надёжный табельный ствол',
+  svg:'<svg viewBox="0 0 40 18" fill="none"><rect x="6" y="4" width="24" height="6" rx="1.5" fill="#9fb0ad"/><rect x="26" y="5" width="7" height="4" rx="1" fill="#4f5f63"/><path d="M10 10h7l-2 7H9z" fill="#6b5139"/><rect x="8" y="4" width="19" height="2.2" fill="#d3e0dc"/></svg>'
+ },
+ shotgun:{
+  name:'Дробовик',short:'ДРОБОВИК',price:25,damage:1.5,delay:.82,spread:.3,count:6,speed:400,range:325,
+  desc:'6 дробин веером вблизи',
+  svg:'<svg viewBox="0 0 44 18" fill="none"><path d="M2 7l9-1v7l-9 1z" fill="#8b623f"/><rect x="10" y="6" width="15" height="6" rx="1" fill="#4f6066"/><rect x="24" y="6.5" width="17" height="2" fill="#9fb0ad"/><rect x="24" y="9.5" width="17" height="2" fill="#708085"/><rect x="19" y="11.5" width="10" height="3" rx="1" fill="#8b623f"/></svg>'
+ },
+ rifle:{
+  name:'Автомат',short:'АВТОМАТ',price:55,damage:.9,delay:.105,spread:.07,count:1,speed:580,range:485,
+  desc:'Быстрая прицельная очередь',
+  svg:'<svg viewBox="0 0 46 18" fill="none"><path d="M2 7l9-1v6l-9 1z" fill="#6a4e37"/><rect x="10" y="6" width="18" height="5.5" rx="1" fill="#45555b"/><rect x="27" y="7.5" width="17" height="2.5" fill="#93a5a1"/><rect x="16" y="3.2" width="7" height="2.2" rx=".8" fill="#5cff3a"/><path d="M18 11.5h5l1.5 5.5h-4.5z" fill="#2e3b3f"/><rect x="27" y="11" width="5" height="4" rx=".8" fill="#6a4e37"/></svg>'
+ },
+ minigun:{
+  name:'Пулемёт «Вулкан»',short:'ПУЛЕМЁТ',price:95,damage:.76,delay:.068,spread:.14,count:2,speed:620,range:500,
+  desc:'Шквал из 2 пуль, высокая плотность огня',
+  svg:'<svg viewBox="0 0 48 18" fill="none"><rect x="3" y="6" width="17" height="7" rx="2" fill="#3a4a4e"/><rect x="20" y="5" width="24" height="2.2" fill="#9eb0ac"/><rect x="20" y="8.2" width="24" height="2.2" fill="#7d8f8b"/><rect x="20" y="11.4" width="24" height="2.2" fill="#9eb0ac"/><rect x="36" y="4.5" width="3" height="9.5" fill="#d98e32"/><rect x="12" y="12" width="7" height="4" rx="1" fill="#5b6659"/></svg>'
+ },
+ plasma:{
+  name:'Плазмаган «Ион-7»',short:'ПЛАЗМА',price:135,damage:3.2,delay:.34,spread:.03,count:1,speed:480,range:510,aoe:62,
+  desc:'Плазменные заряды со взрывом по площади',
+  svg:'<svg viewBox="0 0 46 18" fill="none"><path d="M2 8l10-2v7l-10 1z" fill="#293d45"/><rect x="11" y="5" width="20" height="7" rx="2" fill="#35525c"/><rect x="31" y="6.5" width="12" height="4" rx="1" fill="#46c9e8"/><rect x="15" y="6.8" width="11" height="3.2" rx="1" fill="#8cf6ff"/></svg>'
+ },
+ railgun:{
+  name:'Рельсотрон «Луч»',short:'РЕЛЬСОТРОН',price:180,damage:5.2,delay:.90,spread:.005,count:1,speed:0,range:560,rail:true,
+  desc:'Мгновенный луч насквозь через толпу зомби',
+  svg:'<svg viewBox="0 0 48 18" fill="none"><path d="M2 7l11-1v7l-11 1z" fill="#233238"/><rect x="12" y="5.5" width="14" height="7" rx="1.5" fill="#3b4d54"/><rect x="26" y="5.2" width="20" height="2.2" fill="#72f3ff"/><rect x="26" y="10.2" width="20" height="2.2" fill="#72f3ff"/><rect x="17" y="7.5" width="25" height="2.6" fill="#d8ffff"/></svg>'
+ }
 };
 
 const ITEMS_POOL=[
@@ -969,11 +1085,159 @@ function drawCrate(g,x,y,angle,size,solid=true){
  g.restore();
 }
 
-// Road network layout constants (3x3 city district)
+function drawChemTank(g,cx,cy,r,rng){
+ obstacles.push({x:cx,y:cy,r:r*0.92});
+ radarBuildings.push({x:cx-r,y:cy-r,w:r*2,h:r*2,style:'tech'});
+ g.save();
+ g.translate(cx,cy);
+ g.fillStyle='rgba(3,8,8,0.52)';
+ g.beginPath();g.arc(9,11,r,0,Math.PI*2);g.fill();
+ const gr=g.createRadialGradient(-r*0.3,-r*0.3,4,0,0,r);
+ gr.addColorStop(0,'#6c8070');
+ gr.addColorStop(0.55,'#3f4f44');
+ gr.addColorStop(1,'#212b24');
+ g.fillStyle=gr;
+ g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
+ g.strokeStyle='#151c17';g.lineWidth=2.4;g.stroke();
+ // Top catwalk & hatch
+ g.strokeStyle='rgba(190,235,175,0.22)';g.lineWidth=1.5;
+ g.beginPath();g.arc(0,0,r*0.72,0,Math.PI*2);g.stroke();
+ g.fillStyle='#2a332d';g.beginPath();g.arc(0,-r*0.25,r*0.24,0,Math.PI*2);g.fill();
+ drawBiohazardSymbol(g,0,r*0.18,r*0.38,'#c8f03e',0.58);
+ if(rng()>0.35){
+  beacons.push({x:cx+r*0.55,y:cy-r*0.55,kind:'amber',phase:rng()*6.28});
+  g.fillStyle='#a8ff44';g.beginPath();g.arc(r*0.55,-r*0.55,3,0,Math.PI*2);g.fill();
+ }
+ g.restore();
+}
+
+function drawHelipad(g,cx,cy,r,kind){
+ g.save();
+ g.translate(cx,cy);
+ g.fillStyle=kind==='med'?'#26383b':'#232924';
+ g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
+ g.strokeStyle=kind==='med'?'rgba(235,85,90,0.65)':'rgba(235,190,55,0.65)';
+ g.lineWidth=3.5;
+ g.setLineDash([14,10]);
+ g.beginPath();g.arc(0,0,r-7,0,Math.PI*2);g.stroke();
+ g.setLineDash([]);
+ if(kind==='med'){
+  g.fillStyle='rgba(235,245,242,0.82)';
+  g.beginPath();g.arc(0,0,r*0.46,0,Math.PI*2);g.fill();
+  g.fillStyle='#c9383e';
+  g.fillRect(-7,-r*0.30,14,r*0.60);
+  g.fillRect(-r*0.30,-7,r*0.60,14);
+ }else{
+  g.strokeStyle='rgba(235,195,62,0.82)';
+  g.lineWidth=7;
+  g.beginPath();
+  g.moveTo(-16,-24);g.lineTo(-16,24);
+  g.moveTo(16,-24);g.lineTo(16,24);
+  g.moveTo(-16,0);g.lineTo(16,0);
+  g.stroke();
+ }
+ g.restore();
+}
+
+function drawTradeCounter(g,cx,cy,kind){
+ addRectObstacle(cx,cy,76,24);
+ g.save();
+ g.translate(cx,cy);
+ g.fillStyle='rgba(0,0,0,0.48)';
+ g.beginPath();g.roundRect(-36,-9,78,26,5);g.fill();
+ const bg=g.createLinearGradient(0,-12,0,12);
+ if(kind==='armorer'){bg.addColorStop(0,'#5d4a35');bg.addColorStop(1,'#382c1f')}
+ else{bg.addColorStop(0,'#3b5a5c');bg.addColorStop(1,'#24393b')}
+ g.fillStyle=bg;
+ g.beginPath();g.roundRect(-38,-12,76,24,4);g.fill();
+ g.strokeStyle=kind==='armorer'?'#c9913d':'#62dcd0';
+ g.lineWidth=2;g.stroke();
+ if(kind==='armorer'){
+  // Weapon rack silhouette & ammo box on counter
+  g.fillStyle='#1b2224';g.fillRect(-28,-5,24,6);g.fillRect(-22,-7,16,3);
+  g.fillStyle='#4f613f';g.fillRect(6,-6,16,12);
+  g.fillStyle='#e5b14c';g.fillRect(10,-4,8,3);
+ }else{
+  // Medical box & cryo capsule on counter
+  g.fillStyle='#eef5f2';g.beginPath();g.roundRect(-27,-7,22,14,2.5);g.fill();
+  g.fillStyle='#d13b40';g.fillRect(-18,-5,4,10);g.fillRect(-21,-2,10,4);
+  g.fillStyle='#5be8ff';g.beginPath();g.roundRect(6,-6,18,12,4);g.fill();
+  g.fillStyle='#c4fbff';g.fillRect(9,-3,12,2.5);
+ }
+ g.restore();
+}
+
+function drawSafeZoneGround(g){
+ const sx=SAFE_ZONE.x,sy=SAFE_ZONE.y,r=SAFE_ZONE.r;
+ g.save();
+ g.translate(sx,sy);
+
+ // Reinforced circular concrete plaza
+ const pg=g.createRadialGradient(0,0,30,0,0,r);
+ pg.addColorStop(0,'#273d44');
+ pg.addColorStop(0.7,'#1d2e34');
+ pg.addColorStop(1,'#142126');
+ g.fillStyle=pg;
+ g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
+
+ // Radial tactical plaza plates
+ g.strokeStyle='rgba(110,205,235,0.14)';
+ g.lineWidth=1.5;
+ for(let a=0;a<Math.PI*2;a+=Math.PI/4){
+  g.beginPath();
+  g.moveTo(Math.cos(a)*48,Math.sin(a)*48);
+  g.lineTo(Math.cos(a)*(r-14),Math.sin(a)*(r-14));
+  g.stroke();
+ }
+ g.beginPath();g.arc(0,0,r*0.54,0,Math.PI*2);g.stroke();
+
+ // Center Safe Zone emblem
+ g.fillStyle='rgba(75,205,245,0.10)';
+ g.beginPath();g.arc(0,0,54,0,Math.PI*2);g.fill();
+ g.strokeStyle='rgba(105,230,255,0.34)';
+ g.lineWidth=2.4;
+ g.beginPath();g.arc(0,0,54,0,Math.PI*2);g.stroke();
+ g.fillStyle='rgba(155,240,255,0.45)';
+ g.font='800 11px system-ui,sans-serif';
+ g.textAlign='center';
+ g.fillText('SAFE ZONE',0,-4);
+ g.font='700 9px monospace';
+ g.fillText('БАЗА ВЫЖИВШИХ',0,10);
+
+ // Glowing perimeter ring line + emitter pylons at 4 diagonal corners
+ g.strokeStyle='rgba(78,225,255,0.46)';
+ g.lineWidth=4;
+ g.beginPath();g.arc(0,0,r-2,0,Math.PI*2);g.stroke();
+ g.strokeStyle='rgba(240,192,64,0.32)';
+ g.lineWidth=2.5;
+ g.setLineDash([16,12]);
+ g.beginPath();g.arc(0,0,r+8,0,Math.PI*2);g.stroke();
+ g.setLineDash([]);
+ g.restore();
+
+ // Trade counters & corner shield pylons inside Safe Zone
+ drawTradeCounter(g,NPCS[0].tableX,NPCS[0].tableY,'armorer');
+ drawTradeCounter(g,NPCS[1].tableX,NPCS[1].tableY,'medic');
+ lamps.push({x:NPCS[0].tableX,y:NPCS[0].tableY,phase:0.4,soft:true});
+ lamps.push({x:NPCS[1].tableX,y:NPCS[1].tableY,phase:2.1,soft:true});
+
+ for(const [px,py] of [[-175,-175],[175,-175],[-175,175],[175,175]]){
+  const ax=sx+px,ay=sy+py;
+  obstacles.push({x:ax,y:ay,r:14});
+  lamps.push({x:ax,y:ay,phase:Math.abs(px+py)*0.01});
+  beacons.push({x:ax,y:ay,kind:'cyan',phase:Math.abs(px)*0.02});
+  g.fillStyle='#24363d';g.beginPath();g.arc(ax,ay,14,0,Math.PI*2);g.fill();
+  g.strokeStyle='#6be8ff';g.lineWidth=2.2;g.stroke();
+  g.fillStyle='#c4fbff';g.beginPath();g.arc(ax,ay,5,0,Math.PI*2);g.fill();
+  drawSandbags(g,ax+(px>0?-18:18),ay+(py>0?-18:18),Math.atan2(-py,-px)+Math.PI/2,3);
+ }
+}
+
+// Road network layout constants (3600x3600 4-district city grid)
 const ROADS=[
- {pos:450,w:144},
- {pos:1200,w:210},
- {pos:1950,w:144}
+ {pos:650,w:152},
+ {pos:1800,w:210},
+ {pos:2950,w:152}
 ];
 
 function isOnRoad(x,y,pad=0){
@@ -990,22 +1254,27 @@ function buildWorldGround(){
  const rng=makeRng(77193);
  lamps=[];toxicPools=[];canopies=[];obstacles=[];puddles=[];beacons=[];radarBuildings=[];
 
- // 1. Deep overgrown soil & concrete district base
- const baseGrad=g.createRadialGradient(WORLD_W/2,WORLD_H/2,120,WORLD_W/2,WORLD_H/2,WORLD_W*0.72);
- baseGrad.addColorStop(0,'#17271f');
- baseGrad.addColorStop(1,'#0b1511');
- g.fillStyle=baseGrad;
- g.fillRect(0,0,WORLD_W,WORLD_H);
+ // 1. Four District Ground Bases (NW Suburb, NE Chem, SW Hospital, SE Military)
+ const halfW=WORLD_W/2,halfH=WORLD_H/2;
+ g.fillStyle='#16281c';g.fillRect(0,0,halfW,halfH);            // NW Residential Suburb
+ g.fillStyle='#19221d';g.fillRect(halfW,0,halfW,halfH);        // NE Chemical Zone
+ g.fillStyle='#172427';g.fillRect(0,halfH,halfW,halfH);        // SW Medical Campus
+ g.fillStyle='#191e17';g.fillRect(halfW,halfH,halfW,halfH);    // SE Military Outpost
 
- // Organic moss / dirt patches
- for(let i=0;i<560;i++){
-  g.fillStyle=rng()>.5?'rgba(32,68,42,0.30)':'rgba(9,19,15,0.40)';
+ // Organic district soil / grime patches
+ for(let i=0;i<920;i++){
+  const ox=rng()*WORLD_W,oy=rng()*WORLD_H;
+  const dist=getDistrictAt(ox,oy);
+  if(dist.id==='chem')g.fillStyle=rng()>.5?'rgba(85,135,35,0.22)':'rgba(48,40,22,0.34)';
+  else if(dist.id==='hospital')g.fillStyle=rng()>.5?'rgba(42,90,95,0.24)':'rgba(12,24,28,0.34)';
+  else if(dist.id==='military')g.fillStyle=rng()>.5?'rgba(58,64,38,0.26)':'rgba(14,18,12,0.38)';
+  else g.fillStyle=rng()>.5?'rgba(32,76,42,0.28)':'rgba(10,20,14,0.36)';
   g.beginPath();
-  g.ellipse(rng()*WORLD_W,rng()*WORLD_H,18+rng()*64,14+rng()*46,rng()*Math.PI,0,Math.PI*2);
+  g.ellipse(ox,oy,20+rng()*70,15+rng()*52,rng()*Math.PI,0,Math.PI*2);
   g.fill();
  }
 
- // 2. Sidewalk Blocks around the 3x3 Road Grid
+ // 2. Sidewalk Blocks around the 3x3 Road Grid (styled per district)
  const edges=[WALL_PAD];
  for(const rd of ROADS){edges.push(rd.pos-rd.w/2,rd.pos+rd.w/2)}
  edges.push(WORLD_W-WALL_PAD);
@@ -1016,26 +1285,28 @@ function buildWorldGround(){
   for(let col=0;col<edges.length;col+=2){
    const qx=edges[col],qw=edges[col+1]-qx;
    if(qw<=12)continue;
-   g.fillStyle='#23302c';
+   const dist=getDistrictAt(qx+qw/2,qy+qh/2);
+   g.fillStyle=dist.id==='chem'?'#252a25':dist.id==='hospital'?'#243539':dist.id==='military'?'#242821':'#223029';
    g.fillRect(qx,qy,qw,qh);
 
    // Paving grid + subtle worn slabs
-   g.strokeStyle='rgba(10,18,16,0.38)';
+   g.strokeStyle='rgba(10,18,16,0.36)';
    g.lineWidth=1;
-   for(let tx=qx;tx<qx+qw;tx+=36){g.beginPath();g.moveTo(tx,qy);g.lineTo(tx,qy+qh);g.stroke()}
-   for(let ty=qy;ty<qy+qh;ty+=36){g.beginPath();g.moveTo(qx,ty);g.lineTo(qx+qw,ty);g.stroke()}
-   for(let k=0;k<12;k++){
+   for(let tx=qx;tx<qx+qw;tx+=42){g.beginPath();g.moveTo(tx,qy);g.lineTo(tx,qy+qh);g.stroke()}
+   for(let ty=qy;ty<qy+qh;ty+=42){g.beginPath();g.moveTo(qx,ty);g.lineTo(qx+qw,ty);g.stroke()}
+   for(let k=0;k<16;k++){
     const sx=qx+6+rng()*Math.max(1,qw-42),sy=qy+6+rng()*Math.max(1,qh-42);
     g.fillStyle=rng()>.5?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.14)';
-    g.fillRect(sx,sy,30,30);
+    g.fillRect(sx,sy,32,32);
    }
 
-   // Overgrown inner park / courtyard zone inside each block
-   const inset=Math.min(48,Math.min(qw,qh)*0.22);
+   // District courtyard interior
+   const inset=Math.min(54,Math.min(qw,qh)*0.18);
    if(qw>inset*2+40&&qh>inset*2+40){
-    g.fillStyle=((row+col)/2)%2===0?'rgba(18,44,29,0.72)':'rgba(24,38,31,0.62)';
+    g.fillStyle=dist.id==='chem'?'rgba(32,38,24,0.72)':dist.id==='hospital'?'rgba(24,48,52,0.68)':dist.id==='military'?'rgba(30,34,24,0.75)':'rgba(19,52,31,0.76)';
     g.beginPath();g.roundRect(qx+inset,qy+inset,qw-inset*2,qh-inset*2,16);g.fill();
-    g.strokeStyle='rgba(55,82,68,0.48)';g.lineWidth=2;g.stroke();
+    g.strokeStyle=dist.id==='chem'?'rgba(145,180,48,0.28)':dist.id==='hospital'?'rgba(85,185,195,0.30)':dist.id==='military'?'rgba(165,145,75,0.32)':'rgba(65,112,78,0.45)';
+    g.lineWidth=2;g.stroke();
    }
 
    // Curb bevel + highlight
@@ -1053,7 +1324,7 @@ function buildWorldGround(){
  }
 
  // Asphalt grain, stains, scattered debris & cracks
- for(let i=0;i<2800;i++){
+ for(let i=0;i<4800;i++){
   const rd=ROADS[Math.floor(rng()*ROADS.length)];
   const onH=rng()>.5;
   const ax=onH?(WALL_PAD+rng()*(WORLD_W-WALL_PAD*2)):(rd.pos-rd.w/2+rng()*rd.w);
@@ -1061,16 +1332,17 @@ function buildWorldGround(){
   g.fillStyle=rng()>.5?'rgba(255,255,255,0.035)':'rgba(0,0,0,0.20)';
   g.fillRect(ax,ay,1+rng()*3,1+rng()*3);
  }
- // Scattered quarantine leaflets / papers on streets
- for(let i=0;i<75;i++){
+ for(let i=0;i<110;i++){
   const px=80+rng()*(WORLD_W-160),py=80+rng()*(WORLD_H-160);
+  if(isInSafeZone(px,py,30))continue;
   g.save();g.translate(px,py);g.rotate(rng()*Math.PI);
   g.fillStyle=rng()>.3?'rgba(210,220,210,0.16)':'rgba(235,195,70,0.16)';
   g.fillRect(-3.5,-2.5,7,5);
   g.restore();
  }
- for(let i=0;i<110;i++){
+ for(let i=0;i<160;i++){
   const sx=80+rng()*(WORLD_W-160),sy=80+rng()*(WORLD_H-160);
+  if(isInSafeZone(sx,sy,20))continue;
   g.strokeStyle='rgba(5,9,10,0.65)';g.lineWidth=1.3;
   g.beginPath();g.moveTo(sx,sy);
   let cx=sx,cy=sy;
@@ -1078,10 +1350,10 @@ function buildWorldGround(){
   g.stroke();
  }
 
- // Wet rain puddles (visual ground contour + animated sheen in drawPuddles)
- for(let i=0;i<44;i++){
+ // Wet rain puddles (skip inside Safe Zone)
+ for(let i=0;i<74;i++){
   const px=90+rng()*(WORLD_W-180),py=90+rng()*(WORLD_H-180);
-  if(Math.hypot(px-1200,py-1200)<90)continue;
+  if(isInSafeZone(px,py,45))continue;
   const rx=18+rng()*26,ry=12+rng()*18,rot=rng()*Math.PI;
   puddles.push({x:px,y:py,rx,ry,rot,phase:rng()*6.28});
   g.save();g.translate(px,py);g.rotate(rot);
@@ -1091,11 +1363,11 @@ function buildWorldGround(){
   g.restore();
  }
 
- // 4. Road Markings, Crosswalks & Biohazard Zones at all 9 intersections
+ // 4. Road Markings, Crosswalks & Intersections
  for(const rx of ROADS){
   g.strokeStyle='rgba(230,185,68,0.28)';
   g.lineWidth=3;
-  g.setLineDash([20,18]);
+  g.setLineDash([22,18]);
   g.beginPath();
   g.moveTo(WALL_PAD,rx.pos);g.lineTo(WORLD_W-WALL_PAD,rx.pos);
   g.moveTo(rx.pos,WALL_PAD);g.lineTo(rx.pos,WORLD_H-WALL_PAD);
@@ -1110,7 +1382,6 @@ function buildWorldGround(){
    g.fillStyle='#171f22';
    g.fillRect(ix-rx.w*0.52,iy-ry.w*0.52,rx.w*1.04,ry.w*1.04);
 
-   // Crosswalks
    g.fillStyle='rgba(218,224,210,0.18)';
    const stripeN=5;
    const stepX=(rx.w-24)/stripeN,stepY=(ry.w-24)/stripeN;
@@ -1123,33 +1394,20 @@ function buildWorldGround(){
     g.fillRect(ix+rx.w*0.56,oy+iy,14,stepY*0.52);
    }
 
-   // Tire skid marks & storm grates
-   g.strokeStyle='rgba(9,11,12,0.45)';g.lineWidth=3.5;
-   g.beginPath();g.moveTo(ix-rw*0.45,iy+12);g.quadraticCurveTo(ix,iy+8,ix+14,iy-rw*0.45);g.stroke();
-   g.fillStyle='#11181a';g.fillRect(ix+rx.w*0.36,iy-ry.w*0.42,14,8);
-
-   // Central intersection gets large Quarantine Biohazard emblem; outer ones get smaller emblems
-   const isCenter=(ix===1200&&iy===1200);
-   const bioR=isCenter?74:34;
-   if(isCenter){
-    g.strokeStyle='rgba(235,180,45,0.18)';
-    g.lineWidth=3;
-    g.setLineDash([14,10]);
-    g.beginPath();g.arc(ix,iy,bioR*1.28,0,Math.PI*2);g.stroke();
-    g.setLineDash([]);
+   const isCenter=(ix===WORLD_W/2&&iy===WORLD_H/2);
+   if(!isCenter){
+    g.strokeStyle='rgba(9,11,12,0.45)';g.lineWidth=3.5;
+    g.beginPath();g.moveTo(ix-rw*0.45,iy+12);g.quadraticCurveTo(ix,iy+8,ix+14,iy-rw*0.45);g.stroke();
+    g.fillStyle='#11181a';g.fillRect(ix+rx.w*0.36,iy-ry.w*0.42,14,8);
+    drawBiohazardSymbol(g,ix,iy,36,'#eab32e',0.14);
    }
-   drawBiohazardSymbol(g,ix,iy,bioR,'#eab32e',isCenter?0.22:0.13);
 
-   // Manhole
-   g.fillStyle='#2a3437';g.beginPath();g.arc(ix-rx.w*0.26,iy+ry.w*0.26,10,0,Math.PI*2);g.fill();
-   g.strokeStyle='#12181a';g.lineWidth=2;g.stroke();
-
-   // Streetlamps at intersection corners (central + outer avenues)
    const cornerSigns=[[-1,-1],[1,-1],[-1,1],[1,1]];
    for(const [sx,sy] of cornerSigns){
-    if(!isCenter&&rng()>.58)continue;
-    const lx=ix+sx*(rx.w/2+12);
-    const ly=iy+sy*(ry.w/2+12);
+    if(!isCenter&&rng()>.62)continue;
+    const lx=ix+sx*(rx.w/2+14);
+    const ly=iy+sy*(ry.w/2+14);
+    if(isInSafeZone(lx,ly,5))continue;
     lamps.push({x:lx-sx*14,y:ly-sy*14,phase:rng()*10});
     g.fillStyle='rgba(0,0,0,0.48)';
     g.beginPath();g.arc(lx+2,ly+3,6,0,Math.PI*2);g.fill();
@@ -1163,87 +1421,112 @@ function buildWorldGround(){
   }
  }
 
- // 4b. District Buildings & Quarantine Medical Tents inside block interiors
- drawBuildingRoof(g,785,775,160,115,'med','MED-01',rng,true);
- drawBuildingRoof(g,1615,775,168,110,'tech','SEC-02',rng,false);
- drawBuildingRoof(g,785,1625,164,114,'ind','BIO-03',rng,true);
- drawBuildingRoof(g,1615,1620,156,112,'med','LAB-04',rng,false);
+ // 4a. Central Safe Zone Plaza & NPC Outpost (at 1800, 1800)
+ drawSafeZoneGround(g);
 
- drawQuarantineTent(g,215,795,112,72,0.10,rng);
- drawQuarantineTent(g,2185,810,112,72,-0.14,rng);
- drawQuarantineTent(g,800,210,116,74,Math.PI/2+0.08,rng);
- drawQuarantineTent(g,1600,2185,116,74,Math.PI/2-0.09,rng);
+ // 4b. District Landmarks: Buildings, Chem Tanks, Helipads & Medical Tents
+ // NW: Residential Suburb
+ drawBuildingRoof(g,1210,1175,180,124,'ind','RES-01',rng,false);
+ drawBuildingRoof(g,315,1190,165,116,'ind','RES-02',rng,true);
+ drawBuildingRoof(g,1210,305,172,116,'ind','APT-03',rng,false);
+ drawQuarantineTent(g,310,315,118,74,0.12,rng);
 
- // 5. Wrecked Cars along roads & quarantine checkpoints (including police & medics with flashing beacons!)
+ // NE: Chemical Zone
+ drawBuildingRoof(g,2390,1185,182,124,'tech','CHEM-A',rng,true);
+ drawBuildingRoof(g,3290,1190,168,118,'ind','CHEM-B',rng,true);
+ drawChemTank(g,2315,310,48,rng);
+ drawChemTank(g,2455,310,48,rng);
+ drawChemTank(g,3295,310,54,rng);
+
+ // SW: Medical Campus
+ drawBuildingRoof(g,1115,2410,174,122,'med','MED-A',rng,true);
+ drawBuildingRoof(g,315,2410,168,118,'med','MED-B',rng,false);
+ drawHelipad(g,1395,2410,66,'med');
+ drawQuarantineTent(g,1210,3285,124,78,0.06,rng);
+ drawQuarantineTent(g,315,3285,122,76,-0.08,rng);
+
+ // SE: Military Outpost
+ drawBuildingRoof(g,2410,2410,184,124,'tech','BASE-1',rng,true);
+ drawBuildingRoof(g,3290,2410,170,120,'tech','MIL-02',rng,true);
+ drawHelipad(g,2395,3295,72,'mil');
+ drawQuarantineTent(g,3295,3295,120,76,Math.PI/2-0.06,rng);
+
+ // 5. Wrecked Cars along roads & district approaches (all outside Safe Zone)
  const carSpots=[
-  [970,1148,0.08,'#354844','police'],
-  [1435,1252,Math.PI-0.06,'#524034','none'],
-  [1148,960,Math.PI/2+0.12,'#3a464f','none'],
-  [1252,1455,-Math.PI/2-0.08,'#454d38','med'],
-  [450,820,Math.PI/2-0.14,'#4d3932','none'],
-  [1950,1580,-Math.PI/2+0.1,'#344745','police'],
-  [800,450,0.05,'#47473a','none'],
-  [1620,1950,Math.PI+0.11,'#3a474f','none'],
-  [410,1640,Math.PI/2+0.07,'#524034','none'],
-  [1990,780,-Math.PI/2-0.12,'#354844','none']
+  [1415,1744,0.08,'#354844','police'],
+  [2190,1856,Math.PI-0.06,'#524034','none'],
+  [1744,1405,Math.PI/2+0.12,'#3a464f','none'],
+  [1856,2205,-Math.PI/2-0.08,'#454d38','med'],
+  [650,1160,Math.PI/2-0.14,'#4d3932','none'],
+  [2950,2410,-Math.PI/2+0.1,'#344745','police'],
+  [1180,650,0.05,'#47473a','none'],
+  [2420,2950,Math.PI+0.11,'#3a474f','none'],
+  [615,2430,Math.PI/2+0.07,'#3c5458','med'],
+  [2990,1120,-Math.PI/2-0.12,'#51543c','none'],
+  [2410,650,0.08,'#464b3a','none'],
+  [1190,2950,-0.09,'#3c5458','med']
  ];
  for(const [cx,cy,ca,cc,sp] of carSpots){
   drawWreckedCar(g,cx,cy,ca,cc,rng,true,sp);
  }
 
- // 6. Concrete Quarantine Barriers & Sandbags around main hub & checkpoints
+ // 6. Concrete Quarantine Barriers & Military Sandbags at checkpoints
  const barrierSpots=[
-  [1045,1075,-0.3],[1355,1075,0.3],[1045,1325,0.3],[1355,1325,-0.3],
-  [450,1095,0],[450,1305,0],[1950,1095,0],[1950,1305,0],
-  [1095,450,Math.PI/2],[1305,450,Math.PI/2],[1095,1950,Math.PI/2],[1305,1950,Math.PI/2]
+  [650,1640,0],[650,1960,0],[2950,1640,0],[2950,1960,0],
+  [1640,650,Math.PI/2],[1960,650,Math.PI/2],[1640,2950,Math.PI/2],[1960,2950,Math.PI/2],
+  [2220,2245,-0.35],[2575,2245,0.35],[2810,2790,0.2],[3090,2790,-0.2]
  ];
  for(const [bx,by,ba] of barrierSpots){
-  drawBarrier(g,bx,by,ba,46,true);
+  drawBarrier(g,bx,by,ba,48,true);
  }
- for(const [sx,sy,sa] of [[1010,1110,0.9],[1390,1110,-0.9],[1010,1290,-0.9],[1390,1290,0.9]]){
+ for(const [sx,sy,sa] of [[2240,2280,0.8],[2555,2280,-0.8],[2850,2900,0.1],[3050,2900,-0.1],[1460,2135,-0.7]]){
   drawSandbags(g,sx,sy,sa,4);
  }
 
- // 7. Supply Crates & Biohazard Barrel Clusters inside city blocks & corners
+ // 7. Supply Crates & Biohazard Barrel Clusters across the 4 districts
  const crateAreas=[
-  [925,940],[1475,940],[925,1460],[1475,1460],
-  [245,245],[2140,245],[245,2140],[2140,2140],
-  [820,315],[1580,240],[820,2160],[1580,2080],
-  [240,910],[2160,910],[240,1560],[2160,1560]
+  [1410,1410],[2190,1410],[1410,2190],[2190,2190],
+  [380,380],[3220,380],[380,3220],[3220,3220],
+  [1040,460],[2560,460],[1040,3140],[2560,3140],
+  [440,1030],[3160,1030],[440,2570],[3160,2570],
+  [2200,980],[2620,1420],[980,2210],[2620,2620]
  ];
  for(const [ax,ay] of crateAreas){
+  const dist=getDistrictAt(ax,ay);
   const nCrates=2+Math.floor(rng()*3);
   for(let k=0;k<nCrates;k++){
-   const kx=ax+(rng()-.5)*85,ky=ay+(rng()-.5)*85;
-   if(isOnRoad(kx,ky,20)||Math.hypot(kx-1200,ky-1200)<180)continue;
+   const kx=ax+(rng()-.5)*105,ky=ay+(rng()-.5)*105;
+   if(isOnRoad(kx,ky,22)||isInSafeZone(kx,ky,56))continue;
    let overlap=false;
-   for(const ob of obstacles){if(Math.hypot(ob.x-kx,ob.y-ky)<ob.r+22){overlap=true;break}}
+   for(const ob of obstacles){if(Math.hypot(ob.x-kx,ob.y-ky)<ob.r+24){overlap=true;break}}
    if(overlap)continue;
-   drawCrate(g,kx,ky,(rng()-.5)*0.7,16+rng()*8,true);
+   drawCrate(g,kx,ky,(rng()-.5)*0.7,16+rng()*9,true);
   }
-  const nBarrels=2+Math.floor(rng()*3);
+  const nBarrels=dist.id==='chem'?4:2+Math.floor(rng()*2);
   for(let k=0;k<nBarrels;k++){
-   const bx=ax+(rng()-.5)*105,by=ay+(rng()-.5)*105;
-   if(isOnRoad(bx,by,18)||Math.hypot(bx-1200,by-1200)<180)continue;
+   const bx=ax+(rng()-.5)*125,by=ay+(rng()-.5)*125;
+   if(isOnRoad(bx,by,20)||isInSafeZone(bx,by,56))continue;
    let overlap=false;
-   for(const ob of obstacles){if(Math.hypot(ob.x-bx,ob.y-by)<ob.r+20){overlap=true;break}}
+   for(const ob of obstacles){if(Math.hypot(ob.x-bx,ob.y-by)<ob.r+22){overlap=true;break}}
    if(overlap)continue;
-   const toxic=rng()>.35,leak=toxic&&rng()>.45;
+   const toxic=dist.id==='chem'?rng()>.15:rng()>.35;
+   const leak=toxic&&(dist.id==='chem'?rng()>.25:rng()>.52);
    drawBarrel(g,bx,by,toxic,leak,rng,true);
    if(leak)toxicPools.push({x:bx+8,y:by+6,phase:rng()*6.28});
   }
  }
 
- // 8. Park Trees inside non-road courtyard blocks (avoiding buildings, tents & props)
- for(let i=0;i<72;i++){
+ // 8. Park Trees inside non-road courtyard blocks (dense in Residential, sparser in Chem/Military)
+ for(let i=0;i<135;i++){
   const tx=110+rng()*(WORLD_W-220);
   const ty=110+rng()*(WORLD_H-220);
-  if(isOnRoad(tx,ty,28))continue;
-  if(Math.hypot(tx-1200,ty-1200)<200)continue;
+  if(isOnRoad(tx,ty,30)||isInSafeZone(tx,ty,64))continue;
+  const dist=getDistrictAt(tx,ty);
+  if((dist.id==='chem'||dist.id==='military')&&rng()>.35)continue;
   let nearProp=false;
-  for(const ob of obstacles){if(Math.hypot(ob.x-tx,ob.y-ty)<ob.r+30){nearProp=true;break}}
+  for(const ob of obstacles){if(Math.hypot(ob.x-tx,ob.y-ty)<ob.r+32){nearProp=true;break}}
   if(nearProp)continue;
-  const tr=21+rng()*16;
+  const tr=22+rng()*17;
   g.fillStyle='rgba(0,0,0,0.44)';
   g.beginPath();g.arc(tx+8,ty+10,tr*0.95,0,Math.PI*2);g.fill();
   g.fillStyle='#3b2c20';
@@ -1266,7 +1549,6 @@ function buildWorldGround(){
  g.strokeRect(WALL_PAD-2,WALL_PAD-2,WORLD_W-WALL_PAD*2+4,WORLD_H-WALL_PAD*2+4);
  g.restore();
 
- // Concrete wall posts along perimeter
  g.fillStyle='#4a5853';
  for(let p=WALL_PAD;p<=WORLD_W-WALL_PAD;p+=90){
   g.fillRect(p-5,WALL_PAD-10,10,10);
@@ -1361,11 +1643,30 @@ function updateActiveItemsUI(){
  }
 }
 
+function updateZoneUI(){
+ if(!player)return;
+ const d=getDistrictAt(player.x,player.y);
+ if(d.id!==currentDistrict){
+  currentDistrict=d.id;
+  if(running){
+   const col=d.id==='safe'?'#74e8ff':d.id==='chem'?'#b5ff5c':d.id==='military'?'#ffbe5c':d.id==='hospital'?'#6ef2ff':'#9cffb5';
+   addPopup(player.x,player.y-42,d.name,col,14);
+  }
+ }
+ const zb=$('zoneBadge');
+ if(zb){
+  zb.textContent=d.name;
+  zb.className='zoneBadge'+(d.badge?' '+d.badge:'');
+ }
+}
+
 function updateUI(){
- $('health').textContent=maxHealth>100?`${Math.max(0,Math.ceil(health))}/${maxHealth}`:Math.max(0,Math.ceil(health));
+ const hpTxt=maxHealth>100?`${Math.max(0,Math.ceil(health))}/${maxHealth}`:Math.max(0,Math.ceil(health));
+ $('health').textContent=shieldHp>0?`${hpTxt} · 🛡️${Math.ceil(shieldHp)}`:hpTxt;
  $('score').textContent=score;
  $('money').textContent=money;
  $('shopMoney').textContent=money;
+ if($('npcMoney'))$('npcMoney').textContent=money;
  const hpPct=Math.max(0,Math.min(100,(health/maxHealth)*100));
  $('healthfill').style.width=hpPct+'%';
  $('healthtrail').style.width=hpPct+'%';
@@ -1380,25 +1681,50 @@ function updateUI(){
   $('healthfill').style.boxShadow='0 0 14px rgba(255,77,88,0.6)';
  }
  $('threatBadge').textContent=`ВОЛНА ${wave} · ${waveKills}/${waveGoal} 🧟`;
+ updateZoneUI();
  updateShopBadge();
 }
 
-function selectWeapon(name){
- weapon=name;
- document.querySelectorAll('.weapon').forEach(b=>b.classList.toggle('active',b.dataset.weapon===name));
- $('weaponInfo').textContent=weapons[name].name+' · '+(name==='pistol'?'авто-огонь, точный':name==='shotgun'?'авто-огонь, разброс':'авто-огонь, очередь');
+function renderWeaponBar(){
+ const bar=$('weaponBar');
+ if(!bar)return;
+ bar.innerHTML='';
+ let slotNum=1;
+ for(const id of WEAPON_ORDER){
+  if(!unlockedWeapons.has(id))continue;
+  const w=weapons[id];
+  const btn=document.createElement('button');
+  btn.type='button';
+  btn.className='weapon'+(weapon===id?' active':'');
+  btn.dataset.weapon=id;
+  btn.innerHTML=`<span class="wNum">${slotNum}</span>${w.svg}<span class="wLbl">${w.short}</span>`;
+  btn.addEventListener('click',()=>selectWeapon(id));
+  bar.appendChild(btn);
+  slotNum++;
+ }
 }
-document.querySelectorAll('.weapon').forEach(b=>b.addEventListener('click',()=>selectWeapon(b.dataset.weapon)));
+
+function selectWeapon(name){
+ if(!unlockedWeapons.has(name))return;
+ weapon=name;
+ renderWeaponBar();
+ const w=weapons[name];
+ const modeTxt=player&&isInSafeZone(player.x,player.y,-4)?'передышка на базе (огонь отключён)':w.desc;
+ $('weaponInfo').textContent=`${w.name} · ${modeTxt}`;
+}
 
 function init(){
- player={x:WORLD_W/2,y:WORLD_H/2,r:15,speed:195,angle:0,inv:0,walkPhase:0,recoil:0,muzzleFlash:0,moving:false};
+ player={x:SAFE_ZONE.x,y:SAFE_ZONE.y+115,r:15,speed:195,angle:-Math.PI/2,inv:0,walkPhase:0,recoil:0,muzzleFlash:0,moving:false,regenAcc:0};
  const c=clampCamera(player.x,player.y);
  cam.x=c.x;cam.y=c.y;
- zombies=[];bullets=[];particles=[];popups=[];decals=[];lightningBolts=[];
- score=0;money=0;maxHealth=100;health=100;kills=0;
+ zombies=[];bullets=[];particles=[];popups=[];decals=[];lightningBolts=[];railBeams=[];
+ score=0;money=0;maxHealth=100;health=100;shieldHp=0;kills=0;
  wave=1;waveKills=0;waveGoal=10;waveChoosing=false;waveModalUnlockAt=0;shotCount=0;
  spawnTimer=.5;fireTimer=0;hasAutoTarget=false;
  joy={x:0,y:0};touchJoy={x:0,y:0};keys.clear();
+ weapon='pistol';
+ unlockedWeapons=new Set(['pistol']);
+ currentDistrict='safe';nearbyNpc=null;activeNpc=null;maxHpBuys=0;
  shake=0;shakeTilt=0;hitKickX=0;hitKickY=0;hurtFlash=0;
  uiEl.style.transform='';
  upgrades={damage:1,speed:1,rate:1};
@@ -1406,6 +1732,8 @@ function init(){
  ownedItems={};
  itemMods={dmgMult:1,rateMult:1,speedMult:1,rangeMult:1,armor:0,crit:0,coinBonus:0,extraShots:0,tesla:0,explosive:0,vamp:0,hasLaser:false};
  $('waveModal').style.display='none';
+ if($('npcModal'))$('npcModal').style.display='none';
+ if($('interactBtn'))$('interactBtn').style.display='none';
  $('joystickThumb').style.transform='translate(0px,0px)';
  initAmbientSpores();
  selectWeapon('pistol');updateActiveItemsUI();updateUI();
@@ -1417,6 +1745,35 @@ function resolveObstacles(entity,isZombie){
  const maxBoundY=WORLD_H-WALL_PAD-entity.r;
  entity.x=Math.max(minBound,Math.min(maxBoundX,entity.x));
  entity.y=Math.max(minBound,Math.min(maxBoundY,entity.y));
+
+ // Keep zombies outside the central Safe Zone forcefield
+ if(isZombie){
+  const dx=entity.x-SAFE_ZONE.x,dy=entity.y-SAFE_ZONE.y;
+  const dist=Math.hypot(dx,dy);
+  const barrierR=SAFE_ZONE.r+entity.r+4;
+  if(dist<barrierR){
+   const nx=dist>0.001?dx/dist:0,ny=dist>0.001?dy/dist:1;
+   entity.x=SAFE_ZONE.x+nx*barrierR;
+   entity.y=SAFE_ZONE.y+ny*barrierR;
+   if(Math.random()<0.08){
+    addParticles(SAFE_ZONE.x+nx*SAFE_ZONE.r,SAFE_ZONE.y+ny*SAFE_ZONE.r,'#78ecff',2,65,'spark');
+   }
+  }
+ }
+
+ // Prevent player from walking directly inside NPC character bodies
+ if(!isZombie){
+  for(const npc of NPCS){
+   const minD=entity.r+14;
+   const dx=entity.x-npc.x,dy=entity.y-npc.y;
+   const d=Math.hypot(dx,dy);
+   if(d<minD){
+    const nx=d>0.001?dx/d:0,ny=d>0.001?dy/d:1;
+    entity.x=npc.x+nx*minD;
+    entity.y=npc.y+ny*minD;
+   }
+  }
+ }
 
  for(let i=0;i<obstacles.length;i++){
   const ob=obstacles[i];
@@ -1451,8 +1808,8 @@ function resolveObstacles(entity,isZombie){
 function spawnZombie(){
  const viewX=cam.x-W/2,viewY=cam.y-H/2;
  let x=0,y=0;
- const pad=42;
- for(let attempt=0;attempt<10;attempt++){
+ const pad=44;
+ for(let attempt=0;attempt<14;attempt++){
   const side=Math.floor(Math.random()*4);
   if(side===0){x=viewX+Math.random()*W;y=viewY-pad}
   if(side===1){x=viewX+W+pad;y=viewY+Math.random()*H}
@@ -1460,7 +1817,15 @@ function spawnZombie(){
   if(side===3){x=viewX-pad;y=viewY+Math.random()*H}
   x=Math.max(WALL_PAD+24,Math.min(WORLD_W-WALL_PAD-24,x));
   y=Math.max(WALL_PAD+24,Math.min(WORLD_H-WALL_PAD-24,y));
-  if(Math.hypot(x-player.x,y-player.y)<Math.min(W,H)*0.42)continue;
+  // Never spawn inside Safe Zone or right next to player
+  if(isInSafeZone(x,y,75)){
+   const a=Math.atan2(y-SAFE_ZONE.y,x-SAFE_ZONE.x)||(Math.random()*Math.PI*2);
+   x=SAFE_ZONE.x+Math.cos(a)*(SAFE_ZONE.r+82);
+   y=SAFE_ZONE.y+Math.sin(a)*(SAFE_ZONE.r+82);
+   x=Math.max(WALL_PAD+24,Math.min(WORLD_W-WALL_PAD-24,x));
+   y=Math.max(WALL_PAD+24,Math.min(WORLD_H-WALL_PAD-24,y));
+  }
+  if(Math.hypot(x-player.x,y-player.y)<Math.min(W,H)*0.40)continue;
   let blocked=false;
   for(let i=0;i<obstacles.length;i++){
    if(Math.hypot(x-obstacles[i].x,y-obstacles[i].y)<obstacles[i].r+20){blocked=true;break}
@@ -1468,11 +1833,16 @@ function spawnZombie(){
   if(!blocked)break;
  }
 
- let roll=Math.random();
- const tankCut=Math.max(0.76,0.90-(wave-1)*0.02);
- const runCut=Math.max(0.50,0.65-(wave-1)*0.02);
- let type=roll<runCut?'normal':roll<tankCut?'runner':'tank';
- let s={
+ // District-themed zombie mix
+ const dist=getDistrictAt(x,y);
+ let tankCut=Math.max(0.76,0.90-(wave-1)*0.02);
+ let runCut=Math.max(0.50,0.65-(wave-1)*0.02);
+ if(dist.id==='chem'){runCut-=0.16;tankCut-=0.02}
+ else if(dist.id==='military'){tankCut-=0.14;runCut-=0.04}
+
+ const roll=Math.random();
+ const type=roll<runCut?'normal':roll<tankCut?'runner':'tank';
+ const s={
   normal:{r:15,hp:1,speed:50,color:'#6f9857',points:10},
   runner:{r:12,hp:1,speed:96,color:'#bd9b4c',points:15},
   tank:{r:23,hp:5,speed:27,color:'#7b648f',points:35}
@@ -1571,6 +1941,14 @@ function triggerTeslaArc(sourceZombie){
  }
 }
 
+function distToSegment(px,py,x1,y1,x2,y2){
+ const dx=x2-x1,dy=y2-y1;
+ const lenSq=dx*dx+dy*dy;
+ if(lenSq===0)return Math.hypot(px-x1,py-y1);
+ const t=Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/lenSq));
+ return Math.hypot(px-(x1+t*dx),py-(y1+t*dy));
+}
+
 function shoot(target){
  if(!target)return;
  let base=Math.atan2(target.y-player.y,target.x-player.x);
@@ -1579,11 +1957,45 @@ function shoot(target){
  player.muzzleFlash=1;
  shotCount++;
  let w=weapons[weapon];
- const barrelLen=weapon==='pistol'?24:weapon==='shotgun'?30:31;
+ const barrelLen=weapon==='pistol'?24:weapon==='shotgun'?30:weapon==='minigun'?36:weapon==='railgun'?38:32;
  const mx=player.x+Math.cos(base)*barrelLen;
  const my=player.y+Math.sin(base)*barrelLen;
  const totalCount=w.count+(itemMods.extraShots||0);
- const spread=w.count===1&&totalCount>1?Math.max(w.spread,0.12):w.spread;
+ const spread=w.count===1&&totalCount>1?Math.max(w.spread,0.10):w.spread;
+
+ if(w.rail){
+  const beamLen=getAutoRange();
+  for(let i=0;i<totalCount;i++){
+   const a=base+(i===0?0:(i-(totalCount-1)/2)*0.07);
+   let ex=mx+Math.cos(a)*beamLen,ey=my+Math.sin(a)*beamLen;
+   // Clamp beam at first hard obstacle if hit
+   let bestObsT=1;
+   for(const ob of obstacles){
+    if(ob.r<12)continue;
+    const dx=ex-mx,dy=ey-my,lenSq=dx*dx+dy*dy||1;
+    const proj=((ob.x-mx)*dx+(ob.y-my)*dy)/lenSq;
+    if(proj>0&&proj<bestObsT){
+     const perp=Math.hypot(ob.x-(mx+proj*dx),ob.y-(my+proj*dy));
+     if(perp<ob.r+2)bestObsT=proj;
+    }
+   }
+   ex=mx+(ex-mx)*bestObsT;ey=my+(ey-my)*bestObsT;
+   const isCrit=itemMods.crit>0&&Math.random()<itemMods.crit;
+   const dmg=w.damage*upgrades.damage*itemMods.dmgMult*(isCrit?2:1);
+   for(const z of zombies){
+    if(distToSegment(z.x,z.y,mx,my,ex,ey)<=z.r+12){
+     z.hp-=dmg;z.hit=.18;
+     addDirectionalBlood(z.x,z.y,a,z.type==='tank'?'#8a477e':'#589948',6,155);
+     addParticles(z.x,z.y,'#96fbff',5,130,'spark');
+     if(isCrit)addPopup(z.x,z.y-12,'КРИТ!','#86ff78',11);
+    }
+   }
+   railBeams.push({x1:mx,y1:my,x2:ex,y2:ey,life:0.24,max:0.24});
+  }
+  addParticles(mx,my,'#9cfcff',8,145,'spark');
+  shake=Math.max(shake,weapon==='railgun'?8:3);
+  return;
+ }
 
  for(let i=0;i<totalCount;i++){
   let a=base+(Math.random()-.5)*spread;
@@ -1592,9 +2004,10 @@ function shoot(target){
   bullets.push({
    x:mx,y:my,px:mx,py:my,sx:mx,sy:my,
    vx:Math.cos(a)*w.speed,vy:Math.sin(a)*w.speed,
-   angle:a,damage:dmg,crit:isCrit,
-   life:1.25*(itemMods.rangeMult||1),
-   color:isCrit?'#74ff68':weapon==='shotgun'?'#ffae52':weapon==='rifle'?'#fff39c':'#ffe47a'
+   angle:a,damage:dmg,crit:isCrit,aoe:w.aoe||0,
+   kind:weapon,
+   life:1.30*(itemMods.rangeMult||1),
+   color:weapon==='plasma'?'#5ff2ff':isCrit?'#74ff68':weapon==='shotgun'?'#ffae52':weapon==='minigun'?'#ffd466':weapon==='rifle'?'#fff39c':'#ffe47a'
   });
  }
 
@@ -1605,26 +2018,168 @@ function shoot(target){
   triggerTeslaArc(target);
  }
 
+ const muzzleCol=weapon==='plasma'?'#6ef4ff':'#ffd87a';
  for(let i=0;i<4;i++){
   const a=base+(Math.random()-.5)*0.55;
   const sp=85+Math.random()*135;
-  particles.push({x:mx,y:my,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.14+Math.random()*.1,max:.24,color:'#ffd87a',size:1.8+Math.random()*2,kind:'spark',rot:0,vrot:0});
+  particles.push({x:mx,y:my,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.14+Math.random()*.1,max:.24,color:muzzleCol,size:1.8+Math.random()*2,kind:'spark',rot:0,vrot:0});
  }
  particles.push({x:mx+Math.cos(base)*6,y:my+Math.sin(base)*6,vx:Math.cos(base)*30,vy:Math.sin(base)*30,life:.32,max:.32,color:'rgba(205,220,215,0.45)',size:5,kind:'smoke',rot:0,vrot:0});
 
- const ejectAngle=base+Math.PI/2+(Math.random()-.5)*0.45;
- const ejectSpd=48+Math.random()*42;
- particles.push({
-  x:player.x+Math.cos(base)*12,y:player.y+Math.sin(base)*12,
-  vx:Math.cos(ejectAngle)*ejectSpd,vy:Math.sin(ejectAngle)*ejectSpd,
-  life:.28+Math.random()*.12,max:.4,color:'#e4b856',size:2.5,kind:'casing',
-  rot:Math.random()*6.28,vrot:(Math.random()>.5?1:-1)*(16+Math.random()*10)
- });
+ if(weapon!=='plasma'){
+  const ejectAngle=base+Math.PI/2+(Math.random()-.5)*0.45;
+  const ejectSpd=48+Math.random()*42;
+  particles.push({
+   x:player.x+Math.cos(base)*12,y:player.y+Math.sin(base)*12,
+   vx:Math.cos(ejectAngle)*ejectSpd,vy:Math.sin(ejectAngle)*ejectSpd,
+   life:.28+Math.random()*.12,max:.4,color:'#e4b856',size:2.5,kind:'casing',
+   rot:Math.random()*6.28,vrot:(Math.random()>.5?1:-1)*(16+Math.random()*10)
+  });
+ }
 
  if(weapon==='shotgun'){
   particles.push({x:mx,y:my,vx:0,vy:0,life:.18,max:.18,color:'#ffbb66',size:10,kind:'ring',rot:0,vrot:0});
  }
- shake=Math.max(shake,weapon==='shotgun'?6:weapon==='rifle'?1.6:2);
+ shake=Math.max(shake,weapon==='shotgun'?6:weapon==='minigun'?2.2:weapon==='plasma'?3.5:weapon==='rifle'?1.6:2);
+}
+
+function openNpcDialog(npc){
+ if(!running||waveChoosing||!npc)return;
+ activeNpc=npc;
+ paused=true;
+ stopJoy();
+ keys.clear();
+ $('npcTitle').textContent=npc.name;
+ $('npcSay').textContent=`«${npc.say}»`;
+ renderNpcOffers();
+ $('npcModal').style.display='flex';
+}
+
+function closeNpcDialog(){
+ activeNpc=null;
+ $('npcModal').style.display='none';
+ if(running&&!waveChoosing){paused=false;last=performance.now()}
+}
+
+function renderNpcOffers(){
+ if(!activeNpc)return;
+ $('npcMoney').textContent=money;
+ const box=$('npcOffers');
+ box.innerHTML='';
+
+ if(activeNpc.id==='armorer'){
+  for(const wid of ['shotgun','rifle','minigun','plasma','railgun']){
+   const w=weapons[wid];
+   const owned=unlockedWeapons.has(wid);
+   const equipped=weapon===wid;
+   const row=document.createElement('div');
+   row.className='npcOffer';
+
+   const info=document.createElement('div');
+   info.className='npcOfferInfo';
+   info.innerHTML=`<div class="npcOfferName">${w.name}</div><div class="npcOfferDesc">${w.desc}</div>`;
+
+   const btn=document.createElement('button');
+   btn.type='button';
+   btn.className='buybtn'+(owned?(equipped?' equipped':''):(money>=w.price?'':' locked'));
+   btn.textContent=owned?(equipped?'В руках ✓':'Взять'):`${w.price} 🪙`;
+   btn.addEventListener('click',()=>{
+    if(owned){
+     selectWeapon(wid);
+     renderNpcOffers();
+     return;
+    }
+    if(money<w.price){
+     btn.classList.remove('shake');void btn.offsetWidth;btn.classList.add('shake');
+     return;
+    }
+    money-=w.price;
+    unlockedWeapons.add(wid);
+    selectWeapon(wid);
+    addPopup(player.x,player.y-34,`+${w.short}!`,'#ffe17d',14);
+    updateUI();
+    renderNpcOffers();
+   });
+   row.appendChild(info);row.appendChild(btn);
+   box.appendChild(row);
+  }
+ }else{
+  const offers=[
+   {
+    name:'💉 Полевая инъекция',
+    desc:'Восстанавливает +45 HP сейчас',
+    price:15,
+    disabled:health>=maxHealth,
+    doneText:'Полное HP',
+    buy:()=>{
+     health=Math.min(maxHealth,health+45);
+     addPopup(player.x,player.y-30,'+45 ❤️','#6bff88',13);
+    }
+   },
+   {
+    name:'❤️ Био-стимулятор',
+    desc:'+20 к макс. здоровью и +25 HP',
+    price:35+maxHpBuys*15,
+    disabled:false,
+    buy:()=>{
+     maxHpBuys++;
+     maxHealth+=20;
+     health=Math.min(maxHealth,health+25);
+     addPopup(player.x,player.y-30,'+20 MAX HP','#6bff88',13);
+    }
+   },
+   {
+    name:'🛡️ Энергощит (50)',
+    desc:'Силовой барьер на 50 ед. поглощает любой урон',
+    price:30,
+    disabled:shieldHp>=50,
+    doneText:'Щит 50/50',
+    buy:()=>{
+     shieldHp=50;
+     addPopup(player.x,player.y-30,'ЩИТ 50 🛡️','#72e8ff',13);
+    }
+   },
+   {
+    name:'🧪 Адреналин-набор',
+    desc:'+30 HP, +30 щита и +5% к скорости (макс 185%)',
+    price:45,
+    disabled:false,
+    buy:()=>{
+     health=Math.min(maxHealth,health+30);
+     shieldHp=Math.min(50,shieldHp+30);
+     if(getPlayerSpeedMult()<MAX_SPEED_MULT){
+      itemMods.speedMult=Number((itemMods.speedMult+0.05).toFixed(2));
+     }
+     addPopup(player.x,player.y-30,'СВЕРХЗАРЯД!','#72ff9f',13);
+    }
+   }
+  ];
+  for(const ofr of offers){
+   const row=document.createElement('div');
+   row.className='npcOffer';
+   const info=document.createElement('div');
+   info.className='npcOfferInfo';
+   info.innerHTML=`<div class="npcOfferName">${ofr.name}</div><div class="npcOfferDesc">${ofr.desc}</div>`;
+   const btn=document.createElement('button');
+   btn.type='button';
+   btn.className='buybtn'+(ofr.disabled?' equipped':(money>=ofr.price?'':' locked'));
+   btn.textContent=ofr.disabled?ofr.doneText:`${ofr.price} 🪙`;
+   if(ofr.disabled)btn.disabled=true;
+   btn.addEventListener('click',()=>{
+    if(ofr.disabled)return;
+    if(money<ofr.price){
+     btn.classList.remove('shake');void btn.offsetWidth;btn.classList.add('shake');
+     return;
+    }
+    money-=ofr.price;
+    ofr.buy();
+    updateUI();
+    renderNpcOffers();
+   });
+   row.appendChild(info);row.appendChild(btn);
+   box.appendChild(row);
+  }
+ }
 }
 
 function openWaveChoice(clearedWave){
@@ -1672,8 +2227,10 @@ function openWaveChoice(clearedWave){
 }
 
 function gameOver(){
- running=false;waveChoosing=false;
+ running=false;waveChoosing=false;activeNpc=null;
  $('waveModal').style.display='none';
+ if($('npcModal'))$('npcModal').style.display='none';
+ if($('interactBtn'))$('interactBtn').style.display='none';
  uiEl.style.transform='';
  if(score>bestScore){
   bestScore=score;
@@ -1724,19 +2281,26 @@ $('overlay').addEventListener('click',e=>{
 
 function damagePlayer(amount,srcX,srcY){
  if(player.inv>0)return;
- const taken=Math.max(1,Math.round(amount*(1-(itemMods.armor||0))));
- health-=taken;player.inv=.75;hurtFlash=1;
+ let rem=Math.max(1,Math.round(amount*(1-(itemMods.armor||0))));
+ let absorbed=0;
+ if(shieldHp>0){
+  absorbed=Math.min(shieldHp,rem);
+  shieldHp-=absorbed;
+  rem-=absorbed;
+ }
+ health-=rem;player.inv=.75;hurtFlash=rem>0?1:0.35;
  const heavy=amount>=20;
- shake=Math.max(shake,heavy?32:22);
- shakeTilt=(Math.random()>.5?1:-1)*(heavy?0.034:0.022);
+ shake=Math.max(shake,rem>0?(heavy?32:22):10);
+ shakeTilt=(Math.random()>.5?1:-1)*(rem>0?(heavy?0.034:0.022):0.008);
  if(srcX!==undefined&&srcY!==undefined){
   const dx=player.x-srcX,dy=player.y-srcY,d=Math.hypot(dx,dy)||1;
   hitKickX=(dx/d)*(heavy?20:13);
   hitKickY=(dy/d)*(heavy?20:13);
  }
- addParticles(player.x,player.y,'#ff5e66',14,155,'blood');
- particles.push({x:player.x,y:player.y,vx:0,vy:0,life:.22,max:.22,color:'#ff5c66',size:22,kind:'ring',rot:0,vrot:0});
- addPopup(player.x,player.y-24,`-${taken}`,'#ff767d',14);
+ addParticles(player.x,player.y,rem>0?'#ff5e66':'#6eeeff',14,155,rem>0?'blood':'spark');
+ particles.push({x:player.x,y:player.y,vx:0,vy:0,life:.22,max:.22,color:rem>0?'#ff5c66':'#6eeeff',size:22,kind:'ring',rot:0,vrot:0});
+ if(rem>0)addPopup(player.x,player.y-24,`-${rem}`,'#ff767d',14);
+ else addPopup(player.x,player.y-24,`🛡️ -${absorbed}`,'#72e8ff',13);
  updateUI();
  if(health<=0)gameOver();
 }
@@ -1754,7 +2318,6 @@ function syncJoyInput(){
 
 function update(dt,now){
  const viewX=cam.x-W/2,viewY=cam.y-H/2;
- // Ambient spores, mist & rain wrap smoothly around camera viewport
  for(const sp of ambientSpores){
   sp.x+=sp.vx*dt;sp.y+=sp.vy*dt;sp.phase+=dt*2;
   if(sp.x<viewX-20)sp.x+=W+40;
@@ -1778,7 +2341,6 @@ function update(dt,now){
   }
  }
 
- // Subtle camera pan around central quarantine hub before game starts
  if(!running){
   const damp=Math.pow(0.0018,dt);
   shake*=damp;if(shake<0.15)shake=0;
@@ -1789,7 +2351,7 @@ function update(dt,now){
   hurtFlash=Math.max(0,hurtFlash-dt*2.4);
   if(uiEl.style.transform)uiEl.style.transform='';
   if(!paused&&player&&health>0){
-   const c=clampCamera(WORLD_W/2+Math.sin(now*0.0004)*120,WORLD_H/2+Math.cos(now*0.0003)*85);
+   const c=clampCamera(SAFE_ZONE.x+Math.sin(now*0.0004)*120,SAFE_ZONE.y+Math.cos(now*0.0003)*85);
    cam.x=c.x;cam.y=c.y;
   }
   return;
@@ -1808,7 +2370,46 @@ function update(dt,now){
   player.walkPhase+=dt*(8+speedMult*2.5)*Math.min(1,moveMag);
  }
 
- const autoTarget=getNearestZombie(getAutoRange());
+ const inSafe=isInSafeZone(player.x,player.y,-4);
+ updateZoneUI();
+
+ // Check nearby NPC in Safe Zone
+ let near=null,nearD=84;
+ for(const npc of NPCS){
+  const d=Math.hypot(player.x-npc.x,player.y-npc.y);
+  if(d<nearD){nearD=d;near=npc}
+ }
+ if(near!==nearbyNpc){
+  nearbyNpc=near;
+  const ib=$('interactBtn');
+  if(ib){
+   if(nearbyNpc){
+    ib.textContent=`💬 Поговорить: ${nearbyNpc.short} [E]`;
+    ib.style.display='block';
+   }else{
+    ib.style.display='none';
+   }
+  }
+ }
+
+ // Base Safe Zone HP regeneration + truce status
+ if(inSafe&&health<maxHealth){
+  player.regenAcc=(player.regenAcc||0)+6*dt;
+  if(player.regenAcc>=1){
+   const heal=Math.floor(player.regenAcc);
+   player.regenAcc-=heal;
+   health=Math.min(maxHealth,health+heal);
+   updateUI();
+  }
+ }else{
+  player.regenAcc=0;
+ }
+
+ const w=weapons[weapon];
+ const expectedInfo=`${w.name} · ${inSafe?'передышка на базе (огонь отключён)':w.desc}`;
+ if($('weaponInfo').textContent!==expectedInfo)$('weaponInfo').textContent=expectedInfo;
+
+ const autoTarget=inSafe?null:getNearestZombie(getAutoRange());
  hasAutoTarget=!!autoTarget;
  if(autoTarget){
   const targetAngle=Math.atan2(autoTarget.y-player.y,autoTarget.x-player.x);
@@ -1816,6 +2417,12 @@ function update(dt,now){
   while(diff>Math.PI)diff-=Math.PI*2;
   while(diff<-Math.PI)diff+=Math.PI*2;
   player.angle+=diff*Math.min(1,dt*18);
+ }else if(nearbyNpc&&!player.moving){
+  const targetAngle=Math.atan2(nearbyNpc.y-player.y,nearbyNpc.x-player.x);
+  let diff=targetAngle-player.angle;
+  while(diff>Math.PI)diff-=Math.PI*2;
+  while(diff<-Math.PI)diff+=Math.PI*2;
+  player.angle+=diff*Math.min(1,dt*10);
  }else if(player.moving){
   const targetAngle=Math.atan2(joy.y,joy.x);
   let diff=targetAngle-player.angle;
@@ -1865,11 +2472,24 @@ function update(dt,now){
   let hit=false;
   for(let j=zombies.length-1;j>=0;j--){
    let z=zombies[j];
-   if(Math.hypot(z.x-b.x,z.y-b.y)<z.r+5){
-    z.hp-=b.damage;z.hit=.11;
+   if(Math.hypot(z.x-b.x,z.y-b.y)<z.r+(b.aoe?9:5)){
+    if(b.aoe>0){
+     for(const zz of zombies){
+      const dd=Math.hypot(zz.x-b.x,zz.y-b.y);
+      if(dd<=b.aoe+zz.r){
+       zz.hp-=b.damage*(dd<24?1:0.75);
+       zz.hit=.14;
+      }
+     }
+     particles.push({x:b.x,y:b.y,vx:0,vy:0,life:.24,max:.24,color:'#5ef4ff',size:b.aoe*0.56,kind:'ring',rot:0,vrot:0});
+     addParticles(b.x,b.y,'#7ef9ff',12,150,'spark');
+     shake=Math.max(shake,4.5);
+    }else{
+     z.hp-=b.damage;z.hit=.11;
+    }
     const hitCol=z.type==='tank'?'#8a477e':z.type==='runner'?'#b5983c':'#589948';
     addDirectionalBlood(b.x,b.y,b.angle,hitCol,4,135);
-    addParticles(b.x,b.y,b.crit?'#78ff68':'#fff3a8',2,85,'spark');
+    addParticles(b.x,b.y,b.crit?'#78ff68':(b.aoe?'#7ef9ff':'#fff3a8'),2,85,'spark');
     if(b.crit)addPopup(b.x,b.y-10,'КРИТ!','#86ff78',11);
     if(z.hp>0)addDecalSplat(b.x,b.y,'#1e331c',7,2);
     hit=true;
@@ -1879,7 +2499,16 @@ function update(dt,now){
   if(!hit){
    for(const ob of obstacles){
     if(Math.hypot(b.x-ob.x,b.y-ob.y)<ob.r){
-     addParticles(b.x,b.y,'#ffd580',3,75,'spark');
+     if(b.aoe>0){
+      for(const zz of zombies){
+       const dd=Math.hypot(zz.x-b.x,zz.y-b.y);
+       if(dd<=b.aoe+zz.r){zz.hp-=b.damage*0.75;zz.hit=.14}
+      }
+      particles.push({x:b.x,y:b.y,vx:0,vy:0,life:.24,max:.24,color:'#5ef4ff',size:b.aoe*0.56,kind:'ring',rot:0,vrot:0});
+      addParticles(b.x,b.y,'#7ef9ff',10,140,'spark');
+     }else{
+      addParticles(b.x,b.y,'#ffd580',3,75,'spark');
+     }
      hit=true;break;
     }
    }
@@ -1903,7 +2532,8 @@ function update(dt,now){
     shake=Math.max(shake,13);
     shakeTilt=(Math.random()>.5?1:-1)*0.015;
    }
-   const gainCoins=(z.type==='tank'?5:2)+(itemMods.coinBonus||0);
+   const zDist=getDistrictAt(z.x,z.y);
+   const gainCoins=(z.type==='tank'?5:2)+(itemMods.coinBonus||0)+(zDist.coinBonus||0);
    score+=z.points;money+=gainCoins;kills++;waveKills++;
    if(itemMods.vamp>0&&kills%4===0&&health<maxHealth){
     health=Math.min(maxHealth,health+itemMods.vamp);
@@ -1946,6 +2576,10 @@ function update(dt,now){
  for(let i=lightningBolts.length-1;i>=0;i--){
   lightningBolts[i].life-=dt;
   if(lightningBolts[i].life<=0)lightningBolts.splice(i,1);
+ }
+ for(let i=railBeams.length-1;i>=0;i--){
+  railBeams[i].life-=dt;
+  if(railBeams[i].life<=0)railBeams.splice(i,1);
  }
 
  for(let i=particles.length-1;i>=0;i--){
@@ -2050,7 +2684,6 @@ function drawWeaponModel(type){
   ctx.beginPath();ctx.arc(13,-7,3.4,0,Math.PI*2);ctx.arc(13,6,3.4,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#242e33';ctx.beginPath();ctx.roundRect(10,-4.4,19,8.8,2);ctx.fill();
   ctx.fillStyle='#86989b';ctx.fillRect(12,-3.2,14,3.2);
-  // Suppressor / tactical compensator
   ctx.fillStyle='#12181a';ctx.fillRect(27,-2.7,7,5.4);
   ctx.fillStyle='#3b4a4e';ctx.fillRect(29,-1.8,4,1.4);
   ctx.fillStyle='#5cff3a';ctx.fillRect(24,-0.8,2.2,1.6);
@@ -2062,7 +2695,6 @@ function drawWeaponModel(type){
   ctx.fillStyle='#171e21';
   ctx.beginPath();ctx.arc(11,-6,3.3,0,Math.PI*2);ctx.arc(22,4,3.4,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#785232';ctx.beginPath();ctx.roundRect(-3,-3.8,12,7.6,2);ctx.fill();
-  // Shell holder on stock
   ctx.fillStyle='#c43c3c';ctx.fillRect(0,-2.6,2,5.2);ctx.fillRect(3,-2.6,2,5.2);
   ctx.fillStyle='#2d3a3f';ctx.fillRect(8,-4.2,15,8.4);
   ctx.fillStyle='#7e8e8d';ctx.fillRect(10,-2.6,11,2.6);
@@ -2070,13 +2702,43 @@ function drawWeaponModel(type){
   ctx.fillStyle='#a2b0aa';ctx.fillRect(35,-3.7,4,3.3);ctx.fillRect(35,0.4,4,3.3);
   ctx.fillStyle='#91643c';ctx.beginPath();ctx.roundRect(19,0.5,10,4.5,1.5);ctx.fill();
   if(itemMods.hasLaser){ctx.fillStyle='#22d445';ctx.fillRect(26,3.2,6,2)}
+ }else if(type==='minigun'){
+  ctx.fillStyle='#213740';
+  ctx.beginPath();ctx.roundRect(1,-13,12,6,3);ctx.fill();
+  ctx.beginPath();ctx.roundRect(6,6,16,5.5,3);ctx.fill();
+  ctx.fillStyle='#2c383b';ctx.beginPath();ctx.roundRect(6,-5.8,16,11.6,2.5);ctx.fill();
+  ctx.fillStyle='#596852';ctx.fillRect(10,3,9,6);
+  // Multi-barrel rotary cluster
+  ctx.fillStyle='#192224';ctx.fillRect(22,-4.6,20,2.4);ctx.fillRect(22,-1.2,20,2.4);ctx.fillRect(22,2.2,20,2.4);
+  ctx.fillStyle='#96a8a4';ctx.fillRect(26,-4.4,16,1.2);ctx.fillRect(26,-1.0,16,1.2);ctx.fillRect(26,2.4,16,1.2);
+  ctx.fillStyle='#d98e32';ctx.fillRect(36,-5.1,3,10.2);
+  if(itemMods.hasLaser){ctx.fillStyle='#22d445';ctx.fillRect(28,4.6,6,2)}
+ }else if(type==='plasma'){
+  ctx.fillStyle='#213740';
+  ctx.beginPath();ctx.roundRect(0,-13,12,6,3);ctx.fill();
+  ctx.beginPath();ctx.roundRect(4,6,18,5.5,3);ctx.fill();
+  ctx.fillStyle='#243b45';ctx.beginPath();ctx.roundRect(2,-4.5,24,9,3);ctx.fill();
+  ctx.fillStyle='#3b5e6b';ctx.fillRect(10,-3.5,14,7);
+  ctx.fillStyle='#4ce6ff';ctx.fillRect(12,-1.6,12,3.2);
+  ctx.fillStyle='#1d2e36';ctx.fillRect(26,-3.8,13,7.6);
+  ctx.fillStyle='#8cf7ff';ctx.fillRect(36,-2.5,5,5);
+  if(itemMods.hasLaser){ctx.fillStyle='#22d445';ctx.fillRect(26,3.4,6,2)}
+ }else if(type==='railgun'){
+  ctx.fillStyle='#213740';
+  ctx.beginPath();ctx.roundRect(0,-13,12,6,3);ctx.fill();
+  ctx.beginPath();ctx.roundRect(4,6,18,5.5,3);ctx.fill();
+  ctx.fillStyle='#212e33';ctx.beginPath();ctx.roundRect(0,-4.4,24,8.8,2);ctx.fill();
+  ctx.fillStyle='#3b4f57';ctx.fillRect(10,-3.4,14,6.8);
+  // Twin magnetic rails + glowing core
+  ctx.fillStyle='#6cf2ff';ctx.fillRect(24,-4.2,21,2.2);ctx.fillRect(24,2.0,21,2.2);
+  ctx.fillStyle='#dfffff';ctx.fillRect(16,-1.2,27,2.4);
+  if(itemMods.hasLaser){ctx.fillStyle='#22d445';ctx.fillRect(28,4.2,6,2)}
  }else{
   ctx.fillStyle='#213740';
   ctx.beginPath();ctx.roundRect(0,-13,12,6,3);ctx.fill();
   ctx.beginPath();ctx.roundRect(4,6,18,5.5,3);ctx.fill();
   ctx.fillStyle='#171e21';
   ctx.beginPath();ctx.arc(12,-5,3.3,0,Math.PI*2);ctx.arc(22,3,3.3,0,Math.PI*2);ctx.fill();
-  // Curved tactical mag
   ctx.fillStyle='#1c2426';
   ctx.beginPath();ctx.roundRect(14,2,7,10,2);ctx.fill();
   ctx.fillStyle='#5c4532';ctx.beginPath();ctx.roundRect(-4,-3.4,12,6.8,1.5);ctx.fill();
@@ -2084,11 +2746,89 @@ function drawWeaponModel(type){
   ctx.fillStyle='#7b8c8a';ctx.fillRect(9,-2.7,15,2.6);
   ctx.fillStyle='#182123';ctx.fillRect(25,-2.6,16,5.2);
   ctx.fillStyle='#9aa8a4';ctx.fillRect(38,-3.3,4.5,6.6);
-  // Holo sight
   ctx.fillStyle='#141c1e';ctx.fillRect(12,-3.6,7,7.2);
   ctx.fillStyle='#5cff3a';ctx.fillRect(14.5,-1.1,2.6,2.2);
   if(itemMods.hasLaser){ctx.fillStyle='#22d445';ctx.fillRect(28,2.2,6,2)}
  }
+}
+
+function drawSafeZoneBarrier(now){
+ const sx=SAFE_ZONE.x,sy=SAFE_ZONE.y,r=SAFE_ZONE.r;
+ ctx.save();
+ ctx.translate(sx,sy);
+
+ // Soft defensive aura inside dome perimeter
+ const aura=ctx.createRadialGradient(0,0,r*0.72,0,0,r+12);
+ aura.addColorStop(0,'rgba(70,215,255,0)');
+ aura.addColorStop(0.84,'rgba(70,215,255,0.08)');
+ aura.addColorStop(0.96,'rgba(110,242,255,0.28)');
+ aura.addColorStop(1,'rgba(70,215,255,0)');
+ ctx.fillStyle=aura;
+ ctx.beginPath();ctx.arc(0,0,r+12,0,Math.PI*2);ctx.fill();
+
+ // Rotating pulse arcs
+ const rot=now*0.00075;
+ ctx.strokeStyle='rgba(120,240,255,0.52)';
+ ctx.lineWidth=2.6;
+ for(let i=0;i<6;i++){
+  const a=rot+i*(Math.PI/3);
+  ctx.beginPath();ctx.arc(0,0,r,a,a+0.42);ctx.stroke();
+ }
+ ctx.restore();
+}
+
+function drawNpcTrader(npc,now){
+ const distToPlayer=player?Math.hypot(player.x-npc.x,player.y-npc.y):999;
+ const near=distToPlayer<=84;
+ const bob=Math.sin(now*0.004+(npc.id==='medic'?2:0))*1.2;
+ ctx.save();
+ ctx.translate(npc.x,npc.y+bob);
+
+ // Interaction ring under NPC
+ if(near){
+  const pulse=0.6+Math.sin(now*0.008)*0.25;
+  ctx.strokeStyle=`rgba(120,255,140,${pulse.toFixed(2)})`;
+  ctx.lineWidth=2.4;
+  ctx.beginPath();ctx.arc(0,0,26+Math.sin(now*0.008)*2,0,Math.PI*2);ctx.stroke();
+ }
+
+ // Shadow
+ ctx.fillStyle='rgba(0,0,0,0.45)';
+ ctx.beginPath();ctx.ellipse(2,5,15,12,0,0,Math.PI*2);ctx.fill();
+
+ const faceAng=player&&near?Math.atan2(player.y-npc.y,player.x-npc.x):Math.PI/2;
+ ctx.save();
+ ctx.rotate(faceAng);
+ // Coat / vest
+ ctx.fillStyle=npc.hood;
+ ctx.beginPath();ctx.ellipse(-1,0,12,15,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#0f181c';ctx.lineWidth=1.6;ctx.stroke();
+ ctx.fillStyle=npc.color;
+ ctx.fillRect(-5,-11,9,3.5);ctx.fillRect(-5,7.5,9,3.5);
+ // Head / hood + visor
+ ctx.fillStyle=npc.hood;
+ ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='rgba(200,240,240,0.32)';ctx.lineWidth=1.3;ctx.stroke();
+ ctx.fillStyle=npc.visor;
+ ctx.beginPath();ctx.roundRect(4,-5.5,4.2,11,2);ctx.fill();
+ ctx.restore();
+
+ // Overhead role badge & name label
+ ctx.textAlign='center';
+ ctx.font='800 10px system-ui,-apple-system,sans-serif';
+ const tag=npc.id==='armorer'?'🔫 ВЕКТОР':'✚ ДОК';
+ ctx.lineWidth=3;
+ ctx.strokeStyle='rgba(4,10,12,0.9)';
+ ctx.strokeText(tag,0,-24);
+ ctx.fillStyle=near?'#8dff76':(npc.id==='armorer'?'#ffd269':'#84f7e8');
+ ctx.fillText(tag,0,-24);
+ if(near){
+  ctx.font='700 9px system-ui,-apple-system,sans-serif';
+  ctx.strokeText('[E] ТОРГОВАТЬ',0,30);
+  ctx.fillStyle='#ffffff';
+  ctx.fillText('[E] ТОРГОВАТЬ',0,30);
+ }
+ ctx.restore();
 }
 
 function drawPlayer(now){
@@ -2101,6 +2841,14 @@ function drawPlayer(now){
  ctx.beginPath();ctx.ellipse(7,9,17,14,0.3,0,Math.PI*2);ctx.fill();
  ctx.fillStyle='rgba(0,0,0,0.52)';
  ctx.beginPath();ctx.ellipse(2,5,15,12,0,0,Math.PI*2);ctx.fill();
+
+ // Energy shield halo when active
+ if(shieldHp>0){
+  const sPulse=0.45+Math.sin(now*0.009)*0.18;
+  ctx.strokeStyle=`rgba(105,235,255,${sPulse.toFixed(2)})`;
+  ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.arc(0,0,22,0,Math.PI*2);ctx.stroke();
+ }
 
  if(player.inv>0&&Math.floor(now/75)%2===0){
   ctx.strokeStyle='rgba(255,100,108,0.85)';
@@ -2124,7 +2872,6 @@ function drawPlayer(now){
  ctx.beginPath();ctx.roundRect(-16,-10.5,8,21,3);ctx.fill();
  ctx.strokeStyle='#14110e';ctx.lineWidth=1.3;ctx.stroke();
  ctx.fillStyle='#3d352a';ctx.fillRect(-15,-7,3,14);
- // Antenna
  ctx.strokeStyle='#637576';ctx.lineWidth=1.2;
  ctx.beginPath();ctx.moveTo(-14,-9);ctx.lineTo(-20,-15);ctx.stroke();
  if(itemMods.tesla>0){
@@ -2136,21 +2883,18 @@ function drawPlayer(now){
  const sway=player.moving?Math.sin(player.walkPhase*2)*0.7:0;
  ctx.save();
  ctx.translate(0,sway);
- // Jacket & shoulders
  ctx.fillStyle='#1c343d';
  ctx.beginPath();ctx.ellipse(-1,0,12.5,15.5,0,0,Math.PI*2);ctx.fill();
  ctx.strokeStyle='#0d1a1f';ctx.lineWidth=1.7;ctx.stroke();
  ctx.fillStyle='#2e515d';
  ctx.beginPath();ctx.ellipse(1,-3,9.2,11.5,0,0,Math.PI*2);ctx.fill();
 
- // Kevlar shoulder armor visual when owned
  if(itemMods.armor>0){
   ctx.fillStyle='#3a4c52';
   ctx.beginPath();ctx.roundRect(-5,-14.5,10,5,2);ctx.roundRect(-5,9.5,10,5,2);ctx.fill();
   ctx.strokeStyle='#7a9498';ctx.lineWidth=1;ctx.stroke();
  }
 
- // Biohazard hazard harness straps
  ctx.fillStyle='#dc792a';
  ctx.fillRect(-7,-11.5,10.5,3.4);
  ctx.fillRect(-7,8.1,10.5,3.4);
@@ -2159,18 +2903,18 @@ function drawPlayer(now){
  ctx.fillRect(-2,8.1,2.4,3.4);
  ctx.restore();
 
- const kick=player.recoil*(weapon==='shotgun'?6.5:3.5);
+ const kick=player.recoil*(weapon==='shotgun'||weapon==='railgun'?6.5:3.5);
  ctx.save();
  ctx.translate(-kick,0);
  drawWeaponModel(weapon);
 
- if(player.muzzleFlash>0){
-  const tipX=weapon==='pistol'?34:weapon==='shotgun'?40:43;
+ if(player.muzzleFlash>0&&weapon!=='railgun'){
+  const tipX=weapon==='pistol'?34:weapon==='shotgun'?40:weapon==='minigun'?42:weapon==='plasma'?41:43;
   const fScale=(weapon==='shotgun'?1.55:1.1)*player.muzzleFlash;
   ctx.save();
   ctx.translate(tipX,0);
   ctx.scale(fScale,fScale);
-  ctx.fillStyle='#ff9f2e';
+  ctx.fillStyle=weapon==='plasma'?'#52eeff':'#ff9f2e';
   ctx.beginPath();
   ctx.moveTo(0,0);ctx.lineTo(15,-7.5);ctx.lineTo(10,-2);ctx.lineTo(22,0);
   ctx.lineTo(10,2);ctx.lineTo(15,7.5);ctx.closePath();ctx.fill();
@@ -2191,7 +2935,6 @@ function drawPlayer(now){
  ctx.fillStyle='#2c4d59';
  ctx.beginPath();ctx.arc(-2,-3,6.6,0,Math.PI*2);ctx.fill();
 
- // Gas mask respirator & dual filters
  ctx.fillStyle='#3f4e52';
  ctx.beginPath();ctx.roundRect(4,-4.8,8.5,9.6,3);ctx.fill();
  ctx.fillStyle='#1b2427';
@@ -2199,7 +2942,6 @@ function drawPlayer(now){
  ctx.strokeStyle='#91a3a6';ctx.lineWidth=1.1;
  ctx.beginPath();ctx.arc(6,-7.4,2.7,0,Math.PI*2);ctx.arc(6,7.4,2.7,0,Math.PI*2);ctx.stroke();
 
- // Neon green glowing goggles + sharp specular gleam
  ctx.fillStyle='#142018';
  ctx.beginPath();ctx.roundRect(4.5,-6.2,4.8,12.4,2);ctx.fill();
  ctx.fillStyle='#5cff38';
@@ -2320,7 +3062,7 @@ function drawZombie(z,now){
 }
 
 function drawTargetReticle(now){
- if(!running||!player)return;
+ if(!running||!player||isInSafeZone(player.x,player.y,-4))return;
  const range=getAutoRange();
  // Subtle auto-fire range ring
  ctx.save();
@@ -2482,15 +3224,26 @@ function drawNightMask(now,viewX,viewY){
   lightCtx.restore();
  }
 
- // Bullets, Tesla bolts & explosions illuminate the night
+ // Safe Zone plaza warm/cyan ambient cutout
+ lightCtx.globalAlpha=0.72;
+ lightCtx.drawImage(glows.cutSoft,SAFE_ZONE.x-SAFE_ZONE.r*1.08,SAFE_ZONE.y-SAFE_ZONE.r*1.08,SAFE_ZONE.r*2.16,SAFE_ZONE.r*2.16);
+
+ // Bullets, Tesla bolts & railgun beams illuminate the night
  for(const b of bullets){
-  lightCtx.globalAlpha=0.72;
-  lightCtx.drawImage(glows.cutSoft,b.x-44,b.y-44,88,88);
+  const br=b.aoe?70:44;
+  lightCtx.globalAlpha=0.78;
+  lightCtx.drawImage(glows.cutSoft,b.x-br,b.y-br,br*2,br*2);
  }
  for(const lb of lightningBolts){
   const t=Math.max(0,lb.life/lb.max);
   lightCtx.globalAlpha=0.9*t;
   lightCtx.drawImage(glows.cutSoft,lb.x2-95,lb.y2-95,190,190);
+ }
+ for(const rb of railBeams){
+  const t=Math.max(0,rb.life/rb.max);
+  lightCtx.globalAlpha=0.9*t;
+  const mx=(rb.x1+rb.x2)/2,my=(rb.y1+rb.y2)/2;
+  lightCtx.drawImage(glows.cutSoft,mx-160,my-160,320,320);
  }
 
  lightCtx.setTransform(1,0,0,1,0,0);
@@ -2515,7 +3268,7 @@ function drawWorldLights(now,viewX,viewY){
   ctx.drawImage(glows.amber,lp.x-28,lp.y-28,56,56);
  }
 
- // Emergency beacons (red/blue police lightbar + amber warnings)
+ // Emergency beacons (red/blue police lightbar, cyan shield pylons, amber warnings)
  for(const bc of beacons){
   if(bc.x<minX||bc.x>maxX||bc.y<minY||bc.y>maxY)continue;
   if(bc.kind==='siren'){
@@ -2524,6 +3277,10 @@ function drawWorldLights(now,viewX,viewY){
    const intensity=0.22+Math.abs(phase)*0.34;
    ctx.globalAlpha=intensity;
    ctx.drawImage(isRed?glows.red:glows.blue,bc.x-66,bc.y-66,132,132);
+  }else if(bc.kind==='cyan'){
+   const pulse=0.22+Math.sin(now*0.005+bc.phase)*0.12;
+   ctx.globalAlpha=pulse;
+   ctx.drawImage(glows.cyan,bc.x-58,bc.y-58,116,116);
   }else{
    const pulse=0.14+Math.max(0,Math.sin(now*0.008+bc.phase))*0.34;
    ctx.globalAlpha=pulse;
@@ -2571,8 +3328,14 @@ function drawWorldLights(now,viewX,viewY){
  }
 
  for(const b of bullets){
-  ctx.globalAlpha=b.crit?0.78:0.62;
-  ctx.drawImage(b.crit?glows.green:glows.amber,b.x-18,b.y-18,36,36);
+  ctx.globalAlpha=b.aoe?0.85:(b.crit?0.78:0.62);
+  ctx.drawImage(b.aoe?glows.cyan:(b.crit?glows.green:glows.amber),b.x-(b.aoe?30:18),b.y-(b.aoe?30:18),b.aoe?60:36,b.aoe?60:36);
+ }
+
+ for(const rb of railBeams){
+  const t=Math.max(0,rb.life/rb.max);
+  ctx.globalAlpha=0.75*t;
+  ctx.drawImage(glows.cyan,rb.x2-52,rb.y2-52,104,104);
  }
 
  for(const lb of lightningBolts){
@@ -2630,6 +3393,13 @@ function renderRadar(now){
 
  const sx=rw/WORLD_W,sy=rh/WORLD_H;
 
+ // 4 District tints on radar
+ const hw=rw/2,hh=rh/2;
+ g.fillStyle='rgba(85,155,105,0.10)';g.fillRect(0,0,hw,hh);
+ g.fillStyle='rgba(155,210,55,0.10)';g.fillRect(hw,0,hw,hh);
+ g.fillStyle='rgba(85,180,200,0.10)';g.fillRect(0,hh,hw,hh);
+ g.fillStyle='rgba(210,145,65,0.10)';g.fillRect(hw,hh,hw,hh);
+
  // Subtle tactical grid
  g.strokeStyle='rgba(92,255,90,0.08)';
  g.lineWidth=1;
@@ -2649,6 +3419,17 @@ function renderRadar(now){
  for(const b of radarBuildings){
   g.fillStyle=b.style==='tent'?'rgba(105,148,96,0.45)':'rgba(130,165,165,0.42)';
   g.fillRect(b.x*sx,b.y*sy,Math.max(2,b.w*sx),Math.max(2,b.h*sy));
+ }
+
+ // Central Safe Zone ring & NPC icons
+ g.fillStyle='rgba(75,215,255,0.18)';
+ g.beginPath();g.arc(SAFE_ZONE.x*sx,SAFE_ZONE.y*sy,SAFE_ZONE.r*sx,0,Math.PI*2);g.fill();
+ g.strokeStyle='rgba(105,235,255,0.75)';
+ g.lineWidth=1.5;
+ g.stroke();
+ for(const npc of NPCS){
+  g.fillStyle=npc.id==='armorer'?'#ffb84d':'#62f5e6';
+  g.beginPath();g.arc(npc.x*sx,npc.y*sy,2.8,0,Math.PI*2);g.fill();
  }
 
  // Rotating scanner sweep
@@ -2711,6 +3492,7 @@ function render(now){
 
  drawGround(viewX,viewY);
  drawPuddles(now,viewX,viewY);
+ drawSafeZoneBarrier(now);
  drawTargetReticle(now);
 
  for(const p of particles){
@@ -2742,10 +3524,21 @@ function render(now){
   if(z.x<viewX-visPad||z.x>viewX+W+visPad||z.y<viewY-visPad||z.y>viewY+H+visPad)continue;
   drawZombie(z,now);
  }
+ for(const npc of NPCS){
+  if(npc.x<viewX-80||npc.x>viewX+W+80||npc.y<viewY-80||npc.y>viewY+H+80)continue;
+  drawNpcTrader(npc,now);
+ }
  drawPlayer(now);
 
  ctx.lineCap='round';
  for(const b of bullets){
+  if(b.aoe){
+   ctx.fillStyle='rgba(82,240,255,0.45)';
+   ctx.beginPath();ctx.arc(b.x,b.y,8.5,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#ffffff';
+   ctx.beginPath();ctx.arc(b.x,b.y,4.2,0,Math.PI*2);ctx.fill();
+   continue;
+  }
   const sp=Math.hypot(b.vx,b.vy)||1;
   const maxTail=weapon==='shotgun'?18:30;
   const traveled=b.sx!==undefined?Math.hypot(b.x-b.sx,b.y-b.sy):maxTail;
@@ -2767,6 +3560,17 @@ function render(now){
 
  ctx.save();
  ctx.globalCompositeOperation='lighter';
+ for(const rb of railBeams){
+  const t=Math.max(0,rb.life/rb.max);
+  ctx.globalAlpha=t*0.75;
+  ctx.strokeStyle='#4ee8ff';
+  ctx.lineWidth=11*t;
+  ctx.beginPath();ctx.moveTo(rb.x1,rb.y1);ctx.lineTo(rb.x2,rb.y2);ctx.stroke();
+  ctx.globalAlpha=t;
+  ctx.strokeStyle='#e8ffff';
+  ctx.lineWidth=3.6*t;
+  ctx.beginPath();ctx.moveTo(rb.x1,rb.y1);ctx.lineTo(rb.x2,rb.y2);ctx.stroke();
+ }
  for(const p of particles){
   if(p.kind!=='spark')continue;
   const t=Math.max(0,p.life/p.max);
@@ -2882,9 +3686,9 @@ function renderShop(){
  }
 }
 
-function openShop(){if(!running||waveChoosing)return;paused=true;$('shop').style.display='flex';renderShop()}
+function openShop(){if(!running||waveChoosing||activeNpc)return;paused=true;$('shop').style.display='flex';renderShop()}
 function closeShop(){$('shop').style.display='none';paused=false;last=performance.now()}
-function pauseGame(){if(!running||waveChoosing)return;paused=true;$('pauseScreen').style.display='flex'}
+function pauseGame(){if(!running||waveChoosing||activeNpc)return;paused=true;$('pauseScreen').style.display='flex'}
 function resumeGame(){paused=false;$('pauseScreen').style.display='none';last=performance.now()}
 
 $('shopButton').addEventListener('click',openShop);
@@ -2892,6 +3696,20 @@ $('shopClose').addEventListener('click',closeShop);
 $('pauseButton').addEventListener('click',pauseGame);
 $('resume').addEventListener('click',resumeGame);
 $('pauseShop').addEventListener('click',()=>{$('pauseScreen').style.display='none';$('shop').style.display='flex';renderShop()});
+if($('interactBtn'))$('interactBtn').addEventListener('click',()=>{if(nearbyNpc)openNpcDialog(nearbyNpc)});
+if($('npcClose'))$('npcClose').addEventListener('click',closeNpcDialog);
+canvas.addEventListener('pointerdown',e=>{
+ if(!running||paused||!player)return;
+ const rect=canvas.getBoundingClientRect();
+ const wx=(e.clientX-rect.left)+(cam.x-W/2);
+ const wy=(e.clientY-rect.top)+(cam.y-H/2);
+ for(const npc of NPCS){
+  if(Math.hypot(wx-npc.x,wy-npc.y)<=40&&Math.hypot(player.x-npc.x,player.y-npc.y)<=110){
+   openNpcDialog(npc);
+   break;
+  }
+ }
+});
 
 let joyPointerId=null;
 function moveJoystick(e){
@@ -2934,11 +3752,17 @@ window.addEventListener('keydown',e=>{
  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyS','KeyA','KeyD'].includes(e.code)||['w','a','s','d','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){
   keys.add(e.code||e.key);
  }
- if(e.key==='1')selectWeapon('pistol');
- if(e.key==='2')selectWeapon('shotgun');
- if(e.key==='3')selectWeapon('rifle');
+ if((e.code==='KeyE'||e.key==='e'||e.key==='E'||e.key==='у'||e.key==='У')&&running&&!paused&&nearbyNpc){
+  openNpcDialog(nearbyNpc);
+ }
+ if(['1','2','3','4','5','6'].includes(e.key)){
+  const unlocked=WEAPON_ORDER.filter(id=>unlockedWeapons.has(id));
+  const idx=Number(e.key)-1;
+  if(unlocked[idx])selectWeapon(unlocked[idx]);
+ }
  if(e.key==='Escape'&&running&&!waveChoosing){
-  if($('shop').style.display==='flex')closeShop();
+  if(activeNpc)closeNpcDialog();
+  else if($('shop').style.display==='flex')closeShop();
   else if(paused)resumeGame();
   else pauseGame();
  }
