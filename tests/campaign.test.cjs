@@ -33,19 +33,13 @@ run('let worldBuilds=0;const originalWorldBuild=buildWorldGround;'+
 // the full-size ground canvas a second time when the user taps Play.
 // A second allocation could exhaust mobile WebView memory.
 assert.equal(run('groundIsCampaign'),false);
-// The original survival mode still initializes normally.
-run("setGameMode('free'); startGame();");
+// Only the campaign is selectable: the game starts without a second mode.
+assert.ok(!html.includes('data-mode="free"'));
+assert.ok(!html.includes('data-mode="campaign"'));
+assert.equal(run('readCampaignSave()'),null);
+run('startGame();campaignSkipDialogue();');
 assert.equal(run('worldBuilds'),0);
-assert.equal(run('gameMode'),'free');
-assert.equal(run('evacHeli!==null'),true);
-run('update(.016,1015);render(1015);');
-const freeObstacleCount=run('obstacles.length');
-assert.equal(run('$("locBadge").textContent'),'База');
-// The evacuation achievement used to be checked only after running=false.
-run('evacHeli.bought=true;victoryEscape();');
-assert.equal(run('!!metaStats.unlocked.evac'),true);
-run('setGameMode("campaign"); startGame(); campaignSkipDialogue();');
-assert.equal(run('worldBuilds'),0);
+assert.equal(run('gameMode'),'campaign');
 assert.equal(run('groundIsCampaign'),true);
 assert.equal(run('campaignStage'),0);
 assert.equal(run('paused'),false);
@@ -53,7 +47,6 @@ run('update(.016,1016);render(1016);');
 assert.equal(run('evacHeli'),null);
 assert.equal(run('campaignBarrels.length'),5);
 assert.equal(run('campaignNearbyCheckpoint()'),false);
-assert.ok(run('obstacles.length')>freeObstacleCount,'Campaign adds its own arena barriers');
 // A distant campaign target may be non-aggro; the ambient spawn cap must not
 // recycle it and make the kill objective permanently unreachable.
 assert.equal(run(`(()=>{const saved=zombies;
@@ -69,6 +62,48 @@ run('player.x=CAMPAIGN_LOCATIONS[0].arena.x-100;player.y=1800;campaignUpdate(.01
 assert.equal(run('campaignState'),'combat');
 assert.equal(run('campaignPhase'),0);
 assert.equal(run('campaignTotal'),5);
+// Manual save round-trip during combat: enemies, doors, containers, vehicle,
+// loadout and the exact polygon objective survive a reload of the page.
+run('money=150;health=73;shieldHp=14;upgrades.damage=1.7;lootBag=[LOOT_TYPES.radio];'+
+    'turretCharges=2;lootNodes[0].opened=true;groundLoot.pop();'+
+    'buildings[0].door.locked=true;syncBuildingDoorWall(buildings[0]);'+
+    'campaignBarrels[0].live=false;player.inVehicle=vehicles[0];'+
+    'vehicles[0].hp=67;player.x=vehicles[0].x;player.y=vehicles[0].y;');
+assert.equal(run('saveCampaign()'),true);
+const saved=store.get('carantin_campaign_v1');
+assert.ok(saved&&saved.length>1000);
+const freshNodes=new Map();
+const freshDoc={...document,getElementById(id){if(!freshNodes.has(id))freshNodes.set(id,element());return freshNodes.get(id)}};
+const fresh=vm.createContext({document:freshDoc,window:{addEventListener(){},location:{}},
+ localStorage:context.localStorage,navigator:{},screen:{},performance:{now:()=>1000},requestAnimationFrame(){},
+ innerWidth:1000,innerHeight:650,devicePixelRatio:1,setInterval:()=>1,clearInterval(){},setTimeout:()=>1,clearTimeout(){},
+ CanvasRenderingContext2D:function(){},console});
+vm.runInContext(inline,fresh,{timeout:30000});
+const loaded=src=>vm.runInContext(src,fresh,{timeout:30000});
+assert.equal(loaded('loadCampaign()'),true);
+assert.equal(loaded('running&&!paused'),true);
+assert.equal(loaded('campaignState'),'combat');
+assert.equal(loaded('campaignTotal'),5);
+assert.equal(loaded('zombies.filter(z=>z.campaignTag===0).length'),5);
+assert.equal(loaded('zombies[0].def===ZOMBIE_TYPES[zombies[0].type]'),true);
+assert.equal(loaded('health'),73);
+assert.equal(loaded('shieldHp'),14);
+assert.equal(loaded('money'),150);
+assert.equal(loaded('upgrades.damage'),1.7);
+assert.equal(loaded('lootBag[0]===LOOT_TYPES.radio'),true);
+assert.equal(loaded('player.inVehicle===vehicles[0]'),true);
+assert.equal(loaded('vehicles[0].hp'),67);
+assert.equal(loaded('buildings[0].door.locked'),true);
+assert.equal(loaded('lootNodes[0].opened'),true);
+assert.equal(loaded('campaignBarrels[0].live'),false);
+loaded('update(.016,1016);render(1016);');
+// Loading in-place from the pause screen also restores the saved checkpoint.
+run('health=1;money=0;pauseGame();loadCampaign();');
+assert.equal(run('health'),73);
+assert.equal(run('money'),150);
+assert.equal(run('paused'),false);
+// Continue the scripted campaign on foot.
+run('player.inVehicle=null;player.x=CAMPAIGN_LOCATIONS[0].arena.x-100;player.y=1800;');
 run('zombies.slice().forEach(z=>{campaignOnKill(z);zombies.splice(zombies.indexOf(z),1)});campaignCheckWave();');
 assert.equal(run('campaignPhase'),1);
 run('campaignUpdate(3,1000);');
@@ -76,24 +111,31 @@ assert.equal(run('campaignTotal'),7);
 run('zombies.slice().forEach(z=>{campaignOnKill(z);zombies.splice(zombies.indexOf(z),1)});campaignCheckWave();');
 assert.equal(run('campaignState'),'hold');
 assert.equal(run('campaignPhase'),2);
+assert.equal(run('saveCampaign()'),true);
+assert.equal(loaded('loadCampaign()'),true);
+assert.equal(loaded('campaignState'),'hold');
+assert.equal(loaded('campaignPhase'),2);
+assert.equal(loaded('campaignHold'),8);
+loaded('player.x=CAMPAIGN_LOCATIONS[0].arena.x;player.y=1800;campaignUpdate(9,1000);');
+assert.equal(loaded('campaignState'),'combat');
 run('campaignUpdate(9,1000);');
 assert.equal(run('campaignState'),'combat');
 assert.equal(run('zombies.some(z=>z.type===CAMPAIGN_LOCATIONS[0].boss)'),true);
 // Barrel explosion applies damage and cannot be triggered twice.
-assert.equal(run('campaignBarrels[0].live'),true);
-run('campaignHitBarrelsSegment(campaignBarrels[0].x-30,campaignBarrels[0].y,campaignBarrels[0].x+30,campaignBarrels[0].y);');
-assert.equal(run('campaignBarrels[0].live'),false);
+assert.equal(run('campaignBarrels[1].live'),true);
+run('campaignHitBarrelsSegment(campaignBarrels[1].x-30,campaignBarrels[1].y,campaignBarrels[1].x+30,campaignBarrels[1].y);');
+assert.equal(run('campaignBarrels[1].live'),false);
 // Complete the polygon and carry an actual vehicle, bag, money, upgrades,
 // mercenaries, turret charges and health to a freshly generated next map.
 run('zombies.slice().forEach(z=>{campaignOnKill(z);zombies.splice(zombies.indexOf(z),1)});campaignCheckWave();campaignSkipDialogue();');
 assert.equal(run('campaignState'),'ready');
 run('money=913;upgrades.damage=2;turretCharges=3;lootBag=[LOOT_TYPES.radio];\n'+
-    'mercenaries=[{id:"test",x:1,y:1,hp:90,def:MERC_TYPES.assault}];\n'+
+    'mercenaries=[{id:"test",type:"assault",x:1,y:1,hp:90,def:MERC_TYPES.assault}];\n'+
     'const carried=vehicles.find(v=>!v.broken);carried.hp=101;carried.nitro=42;player.inVehicle=carried;\n'+
     'player.x=CAMPAIGN_LOCATIONS[0].checkpoint.x;player.y=CAMPAIGN_LOCATIONS[0].checkpoint.y;\n'+
     'campaignStartTravel();campaignArrive();campaignSkipDialogue();');
 assert.equal(run('campaignStage'),1);
-assert.equal(run('worldBuilds'),1);
+assert.equal(run('worldBuilds'),2);
 assert.equal(run('money'),913);
 assert.equal(run('upgrades.damage'),2);
 assert.equal(run('turretCharges'),3);
@@ -104,6 +146,22 @@ assert.equal(run('player.inVehicle.nitro'),42);
 assert.equal(run('campaignBarrels.length'),5);
 assert.equal(run('campaignState'),'approach');
 assert.equal(run('paused'),false);
+assert.equal(run('saveCampaign()'),true);
+assert.equal(loaded('loadCampaign()'),true);
+assert.equal(loaded('campaignStage'),1);
+assert.equal(loaded('player.inVehicle.hp'),101);
+assert.equal(loaded('lootBag[0].id'),'radio');
+assert.equal(loaded('money'),913);
+loaded('gameOver();');
+assert.equal(loaded('running'),false);
+assert.equal(loaded('loadCampaign()'),true);
+assert.equal(loaded('campaignStage'),1);
+assert.equal(loaded('running&&!paused'),true);
+// Corrupt or incompatible save must not overwrite live gameplay.
+store.set('carantin_campaign_v1','{invalid json');
+assert.equal(loaded('loadCampaign()'),false);
+assert.equal(loaded('campaignStage'),1);
+store.set('carantin_campaign_v1',saved);
 // Finish the remaining three locations, including the two-phase Patriarch.
 for(let stage=1;stage<4;stage++){
  run(`player.x=CAMPAIGN_LOCATIONS[${stage}].arena.x-100;player.y=1800;`+
@@ -127,14 +185,10 @@ for(let stage=1;stage<4;stage++){
 assert.equal(run('storyCompleted'),true);
 assert.equal(run('running'),false);
 assert.equal(run('campaignStage'),3);
-// Starting free survival after a campaign must remove its polygon barriers,
-// checkpoint paint and tinted ground rather than retaining the final sector.
-run('setGameMode("free"); startGame();');
-assert.equal(run('worldBuilds'),4);
-assert.equal(run('groundIsCampaign'),false);
-assert.equal(run('obstacles.length'),freeObstacleCount);
-assert.equal(run('campaignBarrels.length'),0);
-assert.equal(run('$("locBadge").textContent'),'База');
-assert.equal(run('gameMode'),'free');
-run('update(.016,1515);render(1515);');
-console.log('CAMPAIGN / SURVIVAL / TRAVEL / HOLDOUT / ACHIEVEMENTS / RESET TESTS PASSED');
+// A new game is always the campaign, not the old free-survival mode.
+run('startGame();campaignSkipDialogue();');
+assert.equal(run('gameMode'),'campaign');
+assert.equal(run('campaignStage'),0);
+assert.equal(run('worldBuilds'),5);
+assert.equal(run('campaignBarrels.length'),5);
+console.log('CAMPAIGN / SAVE-LOAD / TRAVEL / HOLDOUT / ACHIEVEMENTS / RESET TESTS PASSED');

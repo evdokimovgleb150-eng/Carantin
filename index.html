@@ -356,26 +356,6 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  display:block;
 }
 
-/* Mode selector on title / result screens */
-#modeRow{
- display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:8px 0 4px;
-}
-.modeBtn{
- padding:8px 8px;border-radius:11px;font-size:11.5px;font-weight:800;
- background:rgba(10,20,21,0.84);border:1.5px solid rgba(114,166,138,0.32);
- color:#b8d0c2;display:flex;flex-direction:column;align-items:center;gap:2px;
- transition:transform .08s ease,border-color .15s ease,background .15s ease;
-}
-.modeBtn small{font-size:9.5px;font-weight:600;opacity:.85;line-height:1.2}
-.modeBtn.active{
- background:linear-gradient(180deg,rgba(36,88,118,0.92),rgba(16,44,64,0.95));
- border-color:#7ce8ff;color:#f2fbff;box-shadow:0 0 14px rgba(100,225,255,0.28);
-}
-.modeBtn[data-mode="free"].active{
- background:linear-gradient(180deg,rgba(45,98,62,0.92),rgba(21,54,34,0.95));
- border-color:#72ff8c;color:#f5fff6;box-shadow:0 0 14px rgba(92,255,112,0.28);
-}
-
 /* Modern RPG-style Dialogue Cutscene Panel */
 #dialogueOverlay{
  display:none;position:absolute;inset:0;z-index:1150;
@@ -812,12 +792,13 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  color:#07170b;
  box-shadow:0 6px 20px rgba(72,224,97,0.32),inset 0 1px 0 rgba(255,255,255,0.45);
 }
-.mainbtn.secondary{
+ .mainbtn.secondary{
  background:linear-gradient(180deg,#39554d,#243833);
  color:#e4f0e7;
  border:1px solid rgba(130,175,148,0.35);
  box-shadow:0 4px 14px rgba(0,0,0,0.4);
 }
+.mainbtn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
 #shopClose{background:linear-gradient(180deg,#526263,#364244);color:#ecf4f0;box-shadow:none}
 
 #shopItems{display:grid;gap:9px;margin-top:10px}
@@ -945,10 +926,10 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
      <div id="polygonBanner"></div>
      <div id="activeItems"></div>
      <div id="squadBar"></div>
-     <div id="missionBar" title="Открыть сюжет и вылазки [Q]"></div>
+     <div id="missionBar" title="Открыть сюжет кампании [Q]"></div>
     </div>
     <div id="hudBtns">
-     <button type="button" class="hudBtn" id="storyBtn" aria-label="Сюжет, вылазки и отряд" title="КПК: Сюжет и Вылазки [Q]">📜 КПК</button>
+     <button type="button" class="hudBtn" id="storyBtn" aria-label="Сюжет и отряд" title="КПК: Сюжет и отряд [Q]">📜 КПК</button>
      <button type="button" class="hudBtn" id="codexButton" aria-label="Индекс зомби">🧟<span id="codexBadge">0/43</span></button>
      <button type="button" class="hudBtn" id="shopButton">МАГАЗИН<span id="shopBadge"></span></button>
      <button type="button" class="hudBtn" id="muteButton" aria-label="Звук" title="Включить/выключить звук [M]">🔊</button>
@@ -1003,11 +984,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    <img class="emblem" src="./icon-192.png" alt="CARANTIN">
    <h1>CARA<span class="titleAccent">NTIN</span></h1>
    <div class="titleSlash"></div>
-   <p>«Протокол Зачистки 4.0»: <b style="color:#8be6ff">сюжетная кампания с диалогами</b>, <b style="color:#ffd878">боями на полигонах</b>, <b style="color:#7cff9c">переездами на машинах между локациями</b> и битвой с <b style="color:#ff848a">Патриархом-0</b>!</p>
-   <div id="modeRow" role="group" aria-label="Выбор режима игры">
-    <button type="button" class="modeBtn active" data-mode="campaign"><span>📖 Сюжетная кампания</span><small>4 локации · Диалоги · Полигоны</small></button>
-    <button type="button" class="modeBtn" data-mode="free"><span>♾️ Свободная зачистка</span><small>Открытый город · Вылазки</small></button>
-   </div>
+   <p>«Протокол Зачистки 4.1»: <b style="color:#8be6ff">сюжетная кампания с диалогами</b>, <b style="color:#ffd878">боями на полигонах</b>, <b style="color:#7cff9c">переездами на машинах между локациями</b> и битвой с <b style="color:#ff848a">Патриархом-0</b>! Сохраняй прогресс через меню паузы и загружай его позже на этом устройстве.</p>
    <div id="diffRow" role="group" aria-label="Выбор сложности">
     <button type="button" class="diffBtn active" data-diff="normal"><span>🟢 Стандарт</span><small>1.0× баланс</small></button>
     <button type="button" class="diffBtn" data-diff="hard"><span>🟠 Выживание+</span><small>1.35× HP · +30% 🪙</small></button>
@@ -1019,7 +996,9 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    </div>
   </div>
   <div class="boxFooter">
-   <button type="button" class="mainbtn" id="start">НАЧАТЬ ИГРУ</button>
+   <button type="button" class="mainbtn" id="start">НОВАЯ КАМПАНИЯ</button>
+   <button type="button" class="mainbtn secondary" id="loadCampaign">📂 ЗАГРУЗИТЬ СОХРАНЕНИЕ</button>
+   <p class="small" id="saveInfo" role="status"></p>
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
     <button type="button" class="mainbtn secondary" id="startCodex" style="font-size:12.5px;padding:10px 8px">🧟 ИНДЕКС (<span id="startCodexCount">0</span>/43)</button>
     <button type="button" class="mainbtn secondary" id="startAch" style="font-size:12.5px;padding:10px 8px">🏆 ТРОФЕИ (<span id="startAchCount">0</span>/12)</button>
@@ -1094,6 +1073,11 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   <div class="boxFooter">
    <button type="button" class="mainbtn" id="resume">ПРОДОЛЖИТЬ</button>
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <button type="button" class="mainbtn secondary" id="saveCampaign">💾 СОХРАНИТЬ</button>
+    <button type="button" class="mainbtn secondary" id="pauseLoadCampaign">📂 ЗАГРУЗИТЬ</button>
+   </div>
+   <p class="small" id="pauseSaveInfo" role="status"></p>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
     <button type="button" class="mainbtn secondary" id="pauseShop" style="font-size:12.5px;padding:10px 8px">🏪 МАГАЗИН</button>
     <button type="button" class="mainbtn secondary" id="pauseMute" style="font-size:12.5px;padding:10px 8px">🔊 ЗВУК: ВКЛ</button>
    </div>
@@ -1138,8 +1122,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    <p class="small" id="storySubtitle" style="margin:2px 0 8px">Канал связи: <b style="color:#7cff8c">АКТИВЕН</b> · Монеты: <b id="storyMoney" style="color:#ffe082">0</b> 🪙</p>
    <div class="codexFilters" id="storyTabs">
     <button type="button" class="codexTab active" data-tab="story">📖 Сюжет</button>
-    <button type="button" class="codexTab" data-tab="expeditions">🎯 Вылазки</button>
-    <button type="button" class="codexTab" data-tab="squad">👥 Наёмники</button>
+    <button type="button" class="codexTab" data-tab="squad">👥 Отряд</button>
    </div>
    <div id="storyContent"></div>
   </div>
@@ -5191,9 +5174,8 @@ function closeStoryModal(){
 
 function init(){
  if(typeof campaignReset==='function')campaignReset();
- // Only a campaign-themed map needs restoring; the original free city is
- // already cached and must not allocate another large canvas on each start.
- if(gameMode==='free'&&groundIsCampaign)buildWorldGround();
+ // The next campaign sector rebuilds its map in campaignLoadLocation(),
+ // so init() must not allocate another large canvas here.
  player={x:SAFE_ZONE.x,y:SAFE_ZONE.y+115,r:15,speed:195,angle:-Math.PI/2,inv:0,walkPhase:0,recoil:0,muzzleFlash:0,moving:false,regenAcc:0,slowTimer:0,vampKills:0,vampCd:0,stimTimer:0,inVehicle:null,carRegenAcc:0};
  const c=clampCamera(player.x,player.y);
  cam.x=c.x;cam.y=c.y;
@@ -6156,24 +6138,22 @@ function victoryEscape(){
      <div class="sumCard"><div class="k">Волна / Убито</div><div class="v">${wave} · ${kills}</div></div>
      <div class="sumCard"><div class="k">Рекорд</div><div class="v" style="color:#ffe082">${bestScore}</div></div>
     </div>
-    <div id="modeRow" role="group" aria-label="Выбор режима игры">
-     <button type="button" class="modeBtn${gameMode==='campaign'?' active':''}" data-mode="campaign"><span>📖 Сюжетная кампания</span><small>4 локации · Полигоны · КПП</small></button>
-     <button type="button" class="modeBtn${gameMode==='free'?' active':''}" data-mode="free"><span>♾️ Свободная зачистка</span><small>Открытый город · Вылазки</small></button>
-    </div>
     <div id="diffRow" aria-label="Сложность игры">
      <button type="button" class="diffBtn${currentDifficulty==='normal'?' active':''}" data-diff="normal">🟢 СТАНДАРТ</button>
      <button type="button" class="diffBtn${currentDifficulty==='hard'?' active':''}" data-diff="hard">🟠 ХАРДКОР</button>
      <button type="button" class="diffBtn${currentDifficulty==='nightmare'?' active':''}" data-diff="nightmare">🔴 КОШМАР</button>
     </div>
-    <p class="small">${gameMode==='campaign'?`Секторы: <b>${campaignStage+1}/4</b>`:`Вылазки: <b>${storyStats.expeditionsDone}</b> · Главы: <b>${Math.min(storyStep,5)}/5</b>`} · Индекс: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
+    <p class="small">Секторы: <b>${campaignStage+1}/4</b> · Индекс: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
    </div>
    <div class="boxFooter">
-    <button type="button" class="mainbtn" id="restart">ИГРАТЬ СНОВА</button>
+    <button type="button" class="mainbtn" id="restart">НОВАЯ КАМПАНИЯ</button>
+    <button type="button" class="mainbtn secondary" id="loadCampaign">📂 ЗАГРУЗИТЬ СОХРАНЕНИЕ</button>
     <button type="button" class="mainbtn secondary" id="overAch">🏆 ДОСТИЖЕНИЯ (${achCount}/${ACHIEVEMENTS.length})</button>
     <button type="button" class="mainbtn secondary" id="overCodex">🧟 ИНДЕКС ЗОМБИ (${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length})</button>
    </div>
   </div>`;
  $('overlay').style.display='flex';
+ refreshSaveInfo();
 }
 
 function gameOver(){
@@ -6214,24 +6194,22 @@ function gameOver(){
      <div class="sumCard"><div class="k">Убито</div><div class="v">${kills}</div></div>
      <div class="sumCard"><div class="k">Рекорд</div><div class="v" style="color:#ffe082">${bestScore}</div></div>
     </div>
-    <div id="modeRow" role="group" aria-label="Выбор режима игры">
-     <button type="button" class="modeBtn${gameMode==='campaign'?' active':''}" data-mode="campaign"><span>📖 Сюжетная кампания</span><small>4 локации · Полигоны · КПП</small></button>
-     <button type="button" class="modeBtn${gameMode==='free'?' active':''}" data-mode="free"><span>♾️ Свободная зачистка</span><small>Открытый город · Вылазки</small></button>
-    </div>
     <div id="diffRow" aria-label="Сложность игры">
      <button type="button" class="diffBtn${currentDifficulty==='normal'?' active':''}" data-diff="normal">🟢 СТАНДАРТ</button>
      <button type="button" class="diffBtn${currentDifficulty==='hard'?' active':''}" data-diff="hard">🟠 ХАРДКОР</button>
      <button type="button" class="diffBtn${currentDifficulty==='nightmare'?' active':''}" data-diff="nightmare">🔴 КОШМАР</button>
     </div>
-    <p class="small">Монеты: <b style="color:#ffe082">${money}</b> 🪙 · Вылазки: <b>${storyStats.expeditionsDone}</b> · Индекс: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
+    <p class="small">Сектор: <b>${campaignStage+1}/4</b> · Монеты: <b style="color:#ffe082">${money}</b> 🪙 · Индекс: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
    </div>
    <div class="boxFooter">
-    <button type="button" class="mainbtn" id="restart">ИГРАТЬ СНОВА</button>
+    <button type="button" class="mainbtn" id="restart">НОВАЯ КАМПАНИЯ</button>
+    <button type="button" class="mainbtn secondary" id="loadCampaign">📂 ЗАГРУЗИТЬ СОХРАНЕНИЕ</button>
     <button type="button" class="mainbtn secondary" id="overAch">🏆 ДОСТИЖЕНИЯ (${achCount}/${ACHIEVEMENTS.length})</button>
     <button type="button" class="mainbtn secondary" id="overCodex">🧟 ИНДЕКС ЗОМБИ (${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length})</button>
    </div>
   </div>`;
  $('overlay').style.display='flex';
+ refreshSaveInfo();
 }
 
 function startGame(){
@@ -6259,8 +6237,7 @@ $('overlay').addEventListener('pointerup',e=>{
  startGame();
 });
 $('overlay').addEventListener('click',e=>{
- const modeBtn=e.target.closest('.modeBtn[data-mode]');
- if(modeBtn){e.preventDefault();setGameMode(modeBtn.dataset.mode);SFX.buy();return;}
+ if(e.target.closest('#loadCampaign')){e.preventDefault();loadCampaign();return;}
  const diffBtn=e.target.closest('.diffBtn[data-diff]');
  if(diffBtn){
   e.preventDefault();
@@ -9477,8 +9454,9 @@ function pauseGame(){
  if($('achModal'))$('achModal').style.display='none';
  paused=true;stopAllControls();
  const d=getDifficulty();
- if($('pauseDiffInfo'))$('pauseDiffInfo').innerHTML=`Режим: <b style="color:${d.color}">${d.icon} ${d.name}</b> · Волна <b>${wave}</b> · Счёт <b>${score}</b>`;
+ if($('pauseDiffInfo'))$('pauseDiffInfo').innerHTML=`Кампания: сектор <b>${campaignStage+1}/4</b> · <b style="color:${d.color}">${d.icon} ${d.name}</b> · Счёт <b>${score}</b>`;
  $('pauseScreen').style.display='flex';
+ refreshSaveInfo();
 }
 function resumeGame(){paused=false;$('pauseScreen').style.display='none';last=performance.now()}
 
@@ -9667,6 +9645,8 @@ $('pauseShop').addEventListener('click',()=>{$('pauseScreen').style.display='non
 if($('muteButton'))$('muteButton').addEventListener('click',toggleMute);
 if($('pauseMute'))$('pauseMute').addEventListener('click',toggleMute);
 if($('pauseAch'))$('pauseAch').addEventListener('click',()=>openAchModal('pause'));
+if($('saveCampaign'))$('saveCampaign').addEventListener('click',saveCampaign);
+if($('pauseLoadCampaign'))$('pauseLoadCampaign').addEventListener('click',loadCampaign);
 if($('pauseRestart'))$('pauseRestart').addEventListener('click',()=>{
  $('pauseScreen').style.display='none';
  running=false;
@@ -9948,7 +9928,7 @@ function loop(t){
 }
 
 /* CARANTIN 4.0 — story campaign; the original free-survival city remains untouched. */
-let gameMode='campaign';
+const gameMode='campaign';
 let campaignStage=0, campaignPhase=0, campaignState='approach';
 let campaignBarrels=[], campaignKills=0, campaignTotal=0, campaignHold=0, campaignWaveDelay=0;
 let campaignDialogue=null, campaignTypeTimer=null, campaignTravel=null;
@@ -9966,11 +9946,6 @@ const CAMPAIGN_LOCATIONS=[
   intro:[{who:'ШРАМ',role:'КОМАНДИР',text:'Цитадель Ноль. За воротами — первоисточник заражения. Три этапа, а затем Патриарх-0. Назад пути нет.'},{who:'ВЕКТОР',role:'ОРУЖЕЙНИК',text:'Взрывные бочки по флангам. Во второй фазе босса следи за кислотными залпами.'},{who:'ШРАМ',role:'КОМАНДИР',text:'Последний приказ отряду?',choices:[{text:'Прикрыть бойцов',tag:'+55 🛡️',effect:'shield'},{text:'Полная огневая мощь',tag:'+1 🤖 турель',effect:'turret'}]}],
   radio:[]}
 ];
-function setGameMode(mode){
- if(running)return;
- gameMode=mode==='free'?'free':'campaign';
- document.querySelectorAll('.modeBtn').forEach(b=>b.classList.toggle('active',b.dataset.mode===gameMode));
-}
 function campaignReset(){
  campaignStage=0;campaignPhase=0;campaignState='approach';campaignKills=0;campaignTotal=0;
  campaignHold=0;campaignWaveDelay=0;campaignBarrels=[];campaignTravel=null;campaignDialogue=null;
@@ -10085,7 +10060,9 @@ function campaignLoadLocation(index,carry){
  const spawn={x:a.x-a.r-138,y:a.y};
  if(carry){
   const v=carry.vehicle;
-  vehicles=vehicles.filter(it=>it!==v);
+  // A carried vehicle may come from the previous sector's array; remove its
+  // freshly generated duplicate by stable ID before attaching it here.
+  vehicles=vehicles.filter(it=>it.id!==v.id);
   v.x=spawn.x;v.y=spawn.y;v.vx=0;v.vy=0;v.steer=0;v.angle=0;v.nitroActive=0;
   vehicles.push(v);player.inVehicle=v;
   player.x=v.x;player.y=v.y;
@@ -10423,9 +10400,8 @@ function campaignFinish(){
  box.appendChild(body);
  const footer=document.createElement('div');footer.className='boxFooter';
  const replay=document.createElement('button');replay.type='button';replay.className='mainbtn';replay.id='restart';replay.textContent='🔄 НОВАЯ КАМПАНИЯ';footer.appendChild(replay);
- const free=document.createElement('button');free.type='button';free.className='mainbtn secondary';free.textContent='♾️ СВОБОДНАЯ ЗАЧИСТКА';
- free.addEventListener('click',()=>{setGameMode('free');startGame();});footer.appendChild(free);
- box.appendChild(footer);$('overlay').replaceChildren(box);$('overlay').style.display='flex';
+ const load=document.createElement('button');load.type='button';load.className='mainbtn secondary';load.id='loadCampaign';load.textContent='📂 ЗАГРУЗИТЬ СОХРАНЕНИЕ';footer.appendChild(load);
+ box.appendChild(footer);$('overlay').replaceChildren(box);$('overlay').style.display='flex';refreshSaveInfo();
  if(score>bestScore){bestScore=score;try{localStorage.setItem('carantin_best',String(bestScore));}catch(_){}}
  SFX.ach();
 }
@@ -10434,7 +10410,119 @@ $('dlgSkip').addEventListener('click',campaignSkipDialogue);
 $('travelRadioNext').addEventListener('click',campaignNextRadio);
 $('travelArrive').addEventListener('click',campaignArrive);
 
+// Single manual campaign slot. Only JSON game state is stored: no canvases, DOM,
+// timers, or circular player/vehicle references. Saves stay on this device.
+const CAMPAIGN_SAVE_KEY='carantin_campaign_v1';
+function readCampaignSave(){
+ try{
+  const s=JSON.parse(localStorage.getItem(CAMPAIGN_SAVE_KEY)||'null');
+  if(!s||s.version!==1||!Number.isInteger(s.stage)||s.stage<0||s.stage>=CAMPAIGN_LOCATIONS.length||
+     !['approach','combat','hold','ready'].includes(s.state)||!s.player||
+     !Number.isFinite(s.player.x)||!Number.isFinite(s.player.y)||
+     s.player.x<0||s.player.x>WORLD_W||s.player.y<0||s.player.y>WORLD_H||
+     !Number.isFinite(s.health)||s.health<=0||!Array.isArray(s.zombies)||
+     !Array.isArray(s.vehicles)||!Array.isArray(s.lootBag)||!Array.isArray(s.groundLoot)||
+     !Array.isArray(s.lootNodes)||!Array.isArray(s.buildings)||
+     !Array.isArray(s.mercenaries)||!Array.isArray(s.barrels)||
+     !Array.isArray(s.unlockedWeapons)||!Array.isArray(s.seenZombieTypes)||
+     !Array.isArray(s.turrets)||!Array.isArray(s.hazardZones)||
+     !s.upgrades||!s.prices||!s.ownedItems||!s.itemMods||!s.storyStats||
+     !Number.isInteger(s.phase)||s.phase<0||s.phase>2||
+     !Number.isFinite(s.stageKills)||!Number.isFinite(s.total)||
+     !Number.isFinite(s.hold)||!Number.isFinite(s.delay)||
+     !Number.isFinite(s.money)||!Number.isFinite(s.maxHealth)||
+     !DIFFICULTIES[s.difficulty]||
+     !s.vehicles.every(v=>v&&VEHICLE_TYPES[v.type]&&typeof v.id==='string')||
+     !s.zombies.every(z=>z&&ZOMBIE_TYPES[z.type]&&Number.isFinite(z.hp))||
+     !s.mercenaries.every(m=>m&&MERC_TYPES[m.type])||
+     !s.groundLoot.every(g=>g&&LOOT_TYPES[g.typeId])||
+     !s.buildings.every(b=>b&&typeof b.id==='string'))return null;
+  return s;
+ }catch(_){return null;}
+}
+function refreshSaveInfo(){
+ const s=readCampaignSave();
+ const text=s?`💾 Сектор ${s.stage+1}/4 · ${CAMPAIGN_LOCATIONS[s.stage].name} · ${new Date(s.savedAt).toLocaleString('ru-RU')}`:'Сохранений пока нет';
+ for(const id of ['saveInfo','pauseSaveInfo'])if($(id))$(id).textContent=text;
+ document.querySelectorAll('#loadCampaign,#pauseLoadCampaign').forEach(b=>{b.disabled=!s;});
+}
+function saveCampaign(){
+ if(!running||gameMode!=='campaign'||!player||campaignDialogue||campaignTravel||health<=0)return false;
+ const carId=player.inVehicle?player.inVehicle.id:null;
+ const snapshot={
+  version:1,savedAt:Date.now(),stage:campaignStage,state:campaignState,
+  phase:campaignPhase,stageKills:campaignKills,total:campaignTotal,hold:campaignHold,delay:campaignWaveDelay,
+  difficulty:currentDifficulty,player:{...player,inVehicle:null},carId,
+  health,maxHealth,shieldHp,score,money,kills,shotCount,maxHpBuys,
+  upgrades,prices,ownedItems,itemMods,weapon,unlockedWeapons:[...unlockedWeapons],
+  turretCharges,storyStats,seenZombieTypes:[...seenZombieTypes],
+  barrels:campaignBarrels,vehicles:vehicles.map(({def,...v})=>v),
+  mercenaries:mercenaries.map(({def,inVehicle,...m})=>({...m,carId:inVehicle?inVehicle.id:null})),
+  zombies:zombies.map(({def,...z})=>z),turrets,hazardZones,
+  lootBag:lootBag.map(item=>item.id),
+  lootNodes:lootNodes.filter(n=>n.opened).map(n=>n.id),groundLoot,
+  buildings:buildings.map(b=>({id:b.id,guardSpawned:b.guardSpawned,
+   door:b.door?{locked:b.door.locked,hp:b.door.hp}:null}))
+ };
+ try{
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,JSON.stringify(snapshot));
+  refreshSaveInfo();
+  return true;
+ }catch(_){
+  if($('pauseSaveInfo'))$('pauseSaveInfo').textContent='Не удалось сохранить: проверьте свободное место и настройки браузера.';
+  return false;
+ }
+}
+function loadCampaign(){
+ const s=readCampaignSave();
+ if(!s){refreshSaveInfo();return false;}
+ // Recreate the deterministic sector geometry and loot, then restore the
+ // combat state. Do not call campaignStart(): that would restart sector one.
+ init();
+ setDifficulty(s.difficulty);
+ campaignLoadLocation(s.stage,null);
+ campaignState=s.state;campaignPhase=s.phase;campaignKills=s.stageKills;
+ campaignTotal=s.total;campaignHold=s.hold;campaignWaveDelay=s.delay;
+ player={...player,...s.player,inVehicle:null};
+ health=s.health;maxHealth=s.maxHealth;shieldHp=s.shieldHp;
+ score=s.score;money=s.money;kills=s.kills;shotCount=s.shotCount;maxHpBuys=s.maxHpBuys;
+ upgrades=s.upgrades;prices=s.prices;ownedItems=s.ownedItems;itemMods=s.itemMods;
+ unlockedWeapons=new Set(s.unlockedWeapons.filter(id=>weapons[id]));
+ unlockedWeapons.add('pistol');weapon=unlockedWeapons.has(s.weapon)?s.weapon:'pistol';
+ turretCharges=s.turretCharges;storyStats=s.storyStats;
+ seenZombieTypes=new Set(s.seenZombieTypes);
+ campaignBarrels=s.barrels;
+ vehicles=s.vehicles.filter(v=>VEHICLE_TYPES[v.type]).map(v=>({...v,def:VEHICLE_TYPES[v.type]}));
+ player.inVehicle=vehicles.find(v=>v.id===s.carId)||null;
+ mercenaries=s.mercenaries.filter(m=>MERC_TYPES[m.type]).map(m=>{
+  const {carId,...rest}=m;
+  return {...rest,def:MERC_TYPES[m.type],inVehicle:vehicles.find(v=>v.id===carId)||null};
+ });
+ zombies=s.zombies.filter(z=>ZOMBIE_TYPES[z.type]).map(z=>({...z,def:ZOMBIE_TYPES[z.type]}));
+ turrets=s.turrets||[];hazardZones=s.hazardZones||[];
+ lootBag=s.lootBag.map(id=>LOOT_TYPES[id]).filter(Boolean);
+ const opened=new Set(s.lootNodes);
+ for(const node of lootNodes)if(opened.has(node.id)){node.opened=true;node.progress=1;}
+ groundLoot=s.groundLoot.filter(g=>LOOT_TYPES[g.typeId]);
+ const savedBuildings=new Map(s.buildings.map(b=>[b.id,b]));
+ for(const b of buildings){
+  const saved=savedBuildings.get(b.id);
+  if(!saved)continue;
+  b.guardSpawned=!!saved.guardSpawned;
+  if(b.door&&saved.door){b.door.locked=!!saved.door.locked;b.door.hp=saved.door.hp;syncBuildingDoorWall(b);}
+ }
+ const c=clampCamera(player.x,player.y);cam.x=c.x;cam.y=c.y;
+ spawnTimer=999;nearbyNpc=null;nearbyVehicle=null;nearbyLootNode=null;
+ stopAllControls();
+ for(const id of ['overlay','pauseScreen','shop','storyModal','bagModal','npcModal','codexModal','achModal','dialogueOverlay','travelOverlay'])
+  if($(id))$(id).style.display='none';
+ running=true;paused=false;last=performance.now();
+ selectWeapon(weapon);updateActiveItemsUI();updateUI();updateSquadAndMissionUI();
+ return true;
+}
+
 loadMeta();
+refreshSaveInfo();
 syncMuteUI();
 buildWorldGround();
 resize();
