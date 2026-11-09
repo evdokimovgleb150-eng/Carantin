@@ -38,7 +38,7 @@ cp "$ROOT_DIR/icon-192.png" "$BUILD_DIR/res/mipmap-xhdpi/ic_launcher.png"
 cp "$ROOT_DIR/icon-192.png" "$BUILD_DIR/res/mipmap-xxhdpi/ic_launcher.png"
 cp "$ROOT_DIR/icon-512.png" "$BUILD_DIR/res/mipmap-xxxhdpi/ic_launcher.png"
 
-cp "$ROOT_DIR/index.html" "$ROOT_DIR/campaign.js" "$ROOT_DIR/manifest.json" "$ROOT_DIR/sw.js" "$ROOT_DIR/icon-192.png" "$ROOT_DIR/icon-512.png" "$BUILD_DIR/assets/www/"
+cp "$ROOT_DIR/index.html" "$ROOT_DIR/manifest.json" "$ROOT_DIR/sw.js" "$ROOT_DIR/icon-192.png" "$ROOT_DIR/icon-512.png" "$BUILD_DIR/assets/www/"
 
 "$AAPT2" compile --dir "$BUILD_DIR/res" -o "$BUILD_DIR/compiled.zip"
 "$AAPT2" link \

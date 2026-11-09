@@ -1,9 +1,8 @@
-const CACHE_NAME = "carantin-v24";
+const CACHE_NAME = "carantin-v25";
 
 const FILES = [
   "./",
   "./index.html",
-  "./campaign.js",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png"
