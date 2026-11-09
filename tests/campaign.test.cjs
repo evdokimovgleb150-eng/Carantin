@@ -4,7 +4,9 @@ const vm=require('node:vm');
 const assert=require('node:assert/strict');
 const html=fs.readFileSync('index.html','utf8');
 const inline=html.match(/<script>([\s\S]*?)<\/script>/)[1];
-const campaign=fs.readFileSync('campaign.js','utf8');
+// If the separate script was unavailable (offline/stale cache/WebView 404),
+// startGame() used to throw after hiding the menu, leaving only HUD buttons.
+assert.ok(!html.includes('<script src="./campaign.js">'));
 const nodes=new Map();
 const grad=()=>({addColorStop(){}});
 const canvasMethods={createRadialGradient:grad,createLinearGradient:grad,measureText:()=>({width:50})};
@@ -24,10 +26,16 @@ const context=vm.createContext({document,window:{addEventListener(){},location:{
  innerWidth:1000,innerHeight:650,devicePixelRatio:1,setInterval:()=>1,clearInterval(){},setTimeout:()=>1,clearTimeout(){},
  CanvasRenderingContext2D:function(){},console});
 vm.runInContext(inline,context,{timeout:30000});
-vm.runInContext(campaign,context,{timeout:30000});
 const run=src=>vm.runInContext(src,context,{timeout:30000});
+run('let worldBuilds=0;const originalWorldBuild=buildWorldGround;'+
+    'buildWorldGround=()=>{worldBuilds++;return originalWorldBuild();};');
+// The original survival mode still initializes normally, without allocating
+// the full-size ground canvas a second time when the user taps Play.
+// A second allocation could exhaust mobile WebView memory.
+assert.equal(run('groundIsCampaign'),false);
 // The original survival mode still initializes normally.
 run("setGameMode('free'); startGame();");
+assert.equal(run('worldBuilds'),0);
 assert.equal(run('gameMode'),'free');
 assert.equal(run('evacHeli!==null'),true);
 run('update(.016,1015);render(1015);');
@@ -37,6 +45,8 @@ assert.equal(run('$("locBadge").textContent'),'База');
 run('evacHeli.bought=true;victoryEscape();');
 assert.equal(run('!!metaStats.unlocked.evac'),true);
 run('setGameMode("campaign"); startGame(); campaignSkipDialogue();');
+assert.equal(run('worldBuilds'),0);
+assert.equal(run('groundIsCampaign'),true);
 assert.equal(run('campaignStage'),0);
 assert.equal(run('paused'),false);
 run('update(.016,1016);render(1016);');
@@ -83,6 +93,7 @@ run('money=913;upgrades.damage=2;turretCharges=3;lootBag=[LOOT_TYPES.radio];\n'+
     'player.x=CAMPAIGN_LOCATIONS[0].checkpoint.x;player.y=CAMPAIGN_LOCATIONS[0].checkpoint.y;\n'+
     'campaignStartTravel();campaignArrive();campaignSkipDialogue();');
 assert.equal(run('campaignStage'),1);
+assert.equal(run('worldBuilds'),1);
 assert.equal(run('money'),913);
 assert.equal(run('upgrades.damage'),2);
 assert.equal(run('turretCharges'),3);
@@ -119,6 +130,8 @@ assert.equal(run('campaignStage'),3);
 // Starting free survival after a campaign must remove its polygon barriers,
 // checkpoint paint and tinted ground rather than retaining the final sector.
 run('setGameMode("free"); startGame();');
+assert.equal(run('worldBuilds'),4);
+assert.equal(run('groundIsCampaign'),false);
 assert.equal(run('obstacles.length'),freeObstacleCount);
 assert.equal(run('campaignBarrels.length'),0);
 assert.equal(run('$("locBadge").textContent'),'База');
