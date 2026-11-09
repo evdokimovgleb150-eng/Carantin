@@ -106,16 +106,30 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  color:#ffd17a;border-color:rgba(255,176,68,0.45);
 }
 
-#interactBtn{
- display:none;pointer-events:auto;
+#actionBar{
+ pointer-events:none;
  position:absolute;bottom:258px;left:50%;transform:translateX(-50%);
- z-index:20;
+ z-index:20;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+ max-width:92vw;
+}
+#interactBtn,#doorBtn{
+ display:none;pointer-events:auto;
  padding:9px 18px;border-radius:999px;
  background:linear-gradient(180deg,#2d88b8,#195273);
  border:1.5px solid #8be6ff;color:#f3fbff;
  font-size:13px;font-weight:800;letter-spacing:.4px;white-space:nowrap;
  box-shadow:0 6px 24px rgba(0,0,0,0.6),0 0 18px rgba(85,220,255,0.38);
  animation:pulseInteract 1.2s infinite ease-in-out;
+}
+#doorBtn{
+ background:linear-gradient(180deg,#3d6346,#213c29);
+ border-color:#8cffaa;color:#ebfff0;
+ box-shadow:0 6px 24px rgba(0,0,0,0.6),0 0 16px rgba(92,255,130,0.3);
+}
+#doorBtn.locked{
+ background:linear-gradient(180deg,#a66c22,#663d0c);
+ border-color:#ffd678;color:#fff8e6;
+ box-shadow:0 6px 24px rgba(0,0,0,0.6),0 0 16px rgba(255,196,74,0.35);
 }
 #bossBanner{
  display:none;
@@ -141,8 +155,8 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  box-shadow:0 0 10px rgba(255,75,105,0.6);
  transition:width .1s ease;
 }
-#interactBtn.show{display:inline-flex;align-items:center;gap:6px}
-@keyframes pulseInteract{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.04)}}
+#interactBtn.show,#doorBtn.show{display:inline-flex;align-items:center;gap:6px}
+@keyframes pulseInteract{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
 
 .hudBtn{
  pointer-events:auto;position:relative;
@@ -533,7 +547,8 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  .weapon{min-width:64px;padding:5px 7px;font-size:9px}
  .weapon svg{width:26px;height:12px}
  #weaponInfo{bottom:182px;font-size:11px}
- #interactBtn{bottom:204px;padding:7px 14px;font-size:12px}
+ #actionBar{bottom:204px}
+ #interactBtn,#doorBtn{padding:7px 14px;font-size:12px}
  #radar{width:54px;height:54px;top:calc(max(8px,env(safe-area-inset-top)) + 84px)}
  .box{padding:12px 14px}
  .emblem{width:46px;height:46px;margin-bottom:6px}
@@ -547,7 +562,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   left:192px;right:192px;gap:6px;padding:0 6px;
  }
  #weaponInfo{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 54px)}
- #interactBtn{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 78px)}
+ #actionBar{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 78px)}
 }
 @media(orientation:landscape) and (max-height:560px){
  #top{
@@ -584,7 +599,8 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  .weapon{min-width:58px;padding:4px 6px;font-size:8.5px;border-radius:10px}
  .weapon svg{width:24px;height:12px}
  #weaponInfo{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 44px);font-size:10.5px}
- #interactBtn{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 66px);padding:6px 13px;font-size:11.5px}
+ #actionBar{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 66px)}
+ #interactBtn,#doorBtn{padding:6px 13px;font-size:11.5px}
  #bossBanner{top:calc(max(8px,env(safe-area-inset-top)) + 56px);width:min(280px,46vw)}
 }
 @media(max-height:430px){
@@ -635,7 +651,10 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
 
  <canvas id="radar" width="136" height="136" aria-hidden="true"></canvas>
 
- <button type="button" id="interactBtn"></button>
+ <div id="actionBar">
+  <button type="button" id="interactBtn"></button>
+  <button type="button" id="doorBtn"></button>
+ </div>
  <div id="weaponInfo">Пистолет · ручной прицел</div>
  <div id="weaponBar"></div>
 
@@ -663,8 +682,8 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    <div class="titleSlash"></div>
    <p>Огромный город с 4 районами и Безопасной зоной в центре. Заходи в разные здания, собирай лут, продавай его скупщику — накопи <b style="color:#ffe082">2000 🪙</b>, найди эвакуационный <b style="color:#7cff8c">вертолёт 🚁</b> на окраине карты и улети в убежище!</p>
    <div class="controlsGrid">
-    <div class="ctrlCard"><b>📱 Горизонт. сенсор</b>Левый стик — движение<br>Правый стик — прицел и огонь<br>Кнопка ⛶ — полный экран</div>
-    <div class="ctrlCard"><b>⌨️ Клавиатура + Мышь</b>WASD — шаг · Мышь/ЛКМ — огонь<br>1–9, 0 — оружие · E — Лут/NPC · I — Индекс</div>
+    <div class="ctrlCard"><b>📱 Горизонт. сенсор</b>Левый стик — движение<br>Правый стик — прицел и огонь<br>Кнопки 🚪 / 🔍 — дверь и лут</div>
+    <div class="ctrlCard"><b>⌨️ Клавиатура + Мышь</b>WASD — шаг · Мышь/ЛКМ — огонь<br>1–9, 0 — оружие · E — Лут/NPC · F — Дверь · I — Индекс</div>
    </div>
   </div>
   <div class="boxFooter">
@@ -852,7 +871,11 @@ const LOOT_TYPES={
  cipher:{id:'cipher',name:'Шифр-модуль',icon:'💾',value:45,rarity:'epic',districts:['military']}
 };
 const LOOT_KEYS=Object.keys(LOOT_TYPES);
-const BASE_LOOT_CAP=12;
+const BASE_LOOT_CAP=20;
+const MAX_ACTIVE_ZOMBIES_CAP=26;
+function getMaxActiveZombies(){
+ return Math.min(MAX_ACTIVE_ZOMBIES_CAP,12+(wave-1)*3);
+}
 
 // Cached full-world ground canvas (built once, copied per visible viewport slice)
 const groundCanvas=document.createElement('canvas');
@@ -916,7 +939,7 @@ function isNearAnyHeliSpot(x,y,pad=105){
 let W=0,H=0,DPR=1;
 let player=null,zombies=[],bullets=[],enemyProjectiles=[],hazardZones=[],particles=[],popups=[],decals=[],lightningBolts=[],railBeams=[];
 let lamps=[],toxicPools=[],canopies=[],obstacles=[],ambientSpores=[],puddles=[],beacons=[],radarBuildings=[],rainDrops=[],mistPatches=[];
-let buildings=[],wallRects=[],lootNodes=[],groundLoot=[],lootBag=[],nearbyLootNode=null,lootFullToastCd=0,lootRespawnTimer=0;
+let buildings=[],wallRects=[],lootNodes=[],groundLoot=[],lootBag=[],nearbyLootNode=null,nearbyDoor=null,lootFullToastCd=0,lootRespawnTimer=0;
 let evacHeli=null,nearbyHeli=false,evacReadyShown=false;
 let cam={x:WORLD_W/2,y:WORLD_H/2};
 let score=0,money=0,health=100,maxHealth=100,shieldHp=0,kills=0;
@@ -1329,10 +1352,20 @@ function addEnterableBuilding(g,cfg){
   wallRects.push({x:x+w-wallT,y:y+wallT,w:wallT,h:h-wallT*2});
  }
 
+ const doorRect=doorSide==='N'?{x:cx-doorW/2,y,w:doorW,h:wallT,isDoor:true,buildingId:id}:
+  doorSide==='S'?{x:cx-doorW/2,y:y+h-wallT,w:doorW,h:wallT,isDoor:true,buildingId:id}:
+  doorSide==='W'?{x,y:cy-doorW/2,w:wallT,h:doorW,isDoor:true,buildingId:id}:
+  {x:x+w-wallT,y:cy-doorW/2,w:wallT,h:doorW,isDoor:true,buildingId:id};
+
  const b={
   id,cx,cy,x,y,w,h,style,model,label,districtId,doorSide,doorX,doorY,doorW,
-  wallT,isTent,hasBeacon,lootCount,roofAlpha:1,guardSpawned:false
+  wallT,isTent,hasBeacon,lootCount,roofAlpha:1,guardSpawned:false,
+  door:{
+   buildingId:id,rect:doorRect,x:doorX,y:doorY,w:doorW,wallT,side:doorSide,
+   locked:false,hp:isTent?75:120,maxHp:isTent?75:120,hit:0,reopenCd:0
+  }
  };
+ doorRect.building=b;
  buildings.push(b);
  radarBuildings.push({x,y,w,h,style,model,id,doorSide,doorX,doorY});
 
@@ -2244,30 +2277,30 @@ function buildWorldGround(){
 
  // 4b. Enterable Buildings (diverse architectural models), Chem Tanks, Helipads & Medical Tents across all 4 districts
  // NW: Residential Suburb
- addEnterableBuilding(g,{id:'RES-01',cx:1210,cy:1175,w:204,h:144,style:'ind',model:'cottage',label:'КОТТЕДЖ-01',districtId:'suburb',doorSide:'S',hasBeacon:false,lootCount:3});
- addEnterableBuilding(g,{id:'RES-02',cx:315,cy:1190,w:184,h:132,style:'ind',model:'store',label:'МАРКЕТ-24',districtId:'suburb',doorSide:'E',hasBeacon:true,lootCount:3});
- addEnterableBuilding(g,{id:'APT-03',cx:1210,cy:305,w:196,h:136,style:'ind',model:'apartment',label:'БЛОК-03',districtId:'suburb',doorSide:'S',hasBeacon:false,lootCount:3});
- addEnterableBuilding(g,{id:'TENT-NW',cx:310,cy:315,w:148,h:96,style:'tent',model:'camp_tent',label:'ЛАГЕРЬ-СЗ',districtId:'suburb',doorSide:'E',isTent:true,lootCount:2});
+ addEnterableBuilding(g,{id:'RES-01',cx:1210,cy:1175,w:204,h:144,style:'ind',model:'cottage',label:'КОТТЕДЖ-01',districtId:'suburb',doorSide:'S',hasBeacon:false,lootCount:5});
+ addEnterableBuilding(g,{id:'RES-02',cx:315,cy:1190,w:184,h:132,style:'ind',model:'store',label:'МАРКЕТ-24',districtId:'suburb',doorSide:'E',hasBeacon:true,lootCount:5});
+ addEnterableBuilding(g,{id:'APT-03',cx:1210,cy:305,w:196,h:136,style:'ind',model:'apartment',label:'БЛОК-03',districtId:'suburb',doorSide:'S',hasBeacon:false,lootCount:5});
+ addEnterableBuilding(g,{id:'TENT-NW',cx:310,cy:315,w:148,h:96,style:'tent',model:'camp_tent',label:'ЛАГЕРЬ-СЗ',districtId:'suburb',doorSide:'E',isTent:true,lootCount:3});
 
  // NE: Chemical Zone
- addEnterableBuilding(g,{id:'CHEM-A',cx:2390,cy:1185,w:204,h:144,style:'tech',model:'lab',label:'ЛАБ-ХИМ А',districtId:'chem',doorSide:'S',hasBeacon:true,lootCount:3});
- addEnterableBuilding(g,{id:'CHEM-B',cx:3290,cy:1190,w:188,h:134,style:'tech',model:'refinery',label:'ХИМЦЕХ-Б',districtId:'chem',doorSide:'W',hasBeacon:true,lootCount:3});
+ addEnterableBuilding(g,{id:'CHEM-A',cx:2390,cy:1185,w:204,h:144,style:'tech',model:'lab',label:'ЛАБ-ХИМ А',districtId:'chem',doorSide:'S',hasBeacon:true,lootCount:5});
+ addEnterableBuilding(g,{id:'CHEM-B',cx:3290,cy:1190,w:188,h:134,style:'tech',model:'refinery',label:'ХИМЦЕХ-Б',districtId:'chem',doorSide:'W',hasBeacon:true,lootCount:5});
  drawChemTank(g,2315,310,48,rng);
  drawChemTank(g,2455,310,48,rng);
  drawChemTank(g,3295,310,54,rng);
 
  // SW: Medical Campus
- addEnterableBuilding(g,{id:'MED-A',cx:1115,cy:2410,w:198,h:140,style:'med',model:'clinic',label:'ГОСПИТАЛЬ',districtId:'hospital',doorSide:'N',hasBeacon:true,lootCount:3});
- addEnterableBuilding(g,{id:'MED-B',cx:315,cy:2410,w:186,h:134,style:'med',model:'pharmacy',label:'АПТЕКА-Б',districtId:'hospital',doorSide:'E',hasBeacon:false,lootCount:3});
+ addEnterableBuilding(g,{id:'MED-A',cx:1115,cy:2410,w:198,h:140,style:'med',model:'clinic',label:'ГОСПИТАЛЬ',districtId:'hospital',doorSide:'N',hasBeacon:true,lootCount:5});
+ addEnterableBuilding(g,{id:'MED-B',cx:315,cy:2410,w:186,h:134,style:'med',model:'pharmacy',label:'АПТЕКА-Б',districtId:'hospital',doorSide:'E',hasBeacon:false,lootCount:5});
  drawHelipad(g,1395,2410,66,'med');
- addEnterableBuilding(g,{id:'TENT-SW1',cx:1210,cy:3285,w:152,h:98,style:'tent',model:'med_tent',label:'МЕД-ЮЗ1',districtId:'hospital',doorSide:'N',isTent:true,lootCount:2});
- addEnterableBuilding(g,{id:'TENT-SW2',cx:315,cy:3285,w:150,h:96,style:'tent',model:'med_tent',label:'МЕД-ЮЗ2',districtId:'hospital',doorSide:'N',isTent:true,lootCount:2});
+ addEnterableBuilding(g,{id:'TENT-SW1',cx:1210,cy:3285,w:152,h:98,style:'tent',model:'med_tent',label:'МЕД-ЮЗ1',districtId:'hospital',doorSide:'N',isTent:true,lootCount:3});
+ addEnterableBuilding(g,{id:'TENT-SW2',cx:315,cy:3285,w:150,h:96,style:'tent',model:'med_tent',label:'МЕД-ЮЗ2',districtId:'hospital',doorSide:'N',isTent:true,lootCount:3});
 
  // SE: Military Outpost
- addEnterableBuilding(g,{id:'BASE-1',cx:2410,cy:2410,w:206,h:144,style:'tech',model:'bunker',label:'ШТАБ ДОТ-1',districtId:'military',doorSide:'N',hasBeacon:true,lootCount:3});
- addEnterableBuilding(g,{id:'MIL-02',cx:3290,cy:2410,w:190,h:136,style:'tech',model:'hangar',label:'АНГАР-02',districtId:'military',doorSide:'W',hasBeacon:true,lootCount:3});
+ addEnterableBuilding(g,{id:'BASE-1',cx:2410,cy:2410,w:206,h:144,style:'tech',model:'bunker',label:'ШТАБ ДОТ-1',districtId:'military',doorSide:'N',hasBeacon:true,lootCount:5});
+ addEnterableBuilding(g,{id:'MIL-02',cx:3290,cy:2410,w:190,h:136,style:'tech',model:'hangar',label:'АНГАР-02',districtId:'military',doorSide:'W',hasBeacon:true,lootCount:5});
  drawHelipad(g,2395,3295,72,'mil');
- addEnterableBuilding(g,{id:'TENT-SE',cx:3295,cy:3295,w:102,h:152,style:'tent',model:'mil_tent',label:'ПОСТ-ЮВ',districtId:'military',doorSide:'W',isTent:true,lootCount:2});
+ addEnterableBuilding(g,{id:'TENT-SE',cx:3295,cy:3295,w:102,h:152,style:'tent',model:'mil_tent',label:'ПОСТ-ЮВ',districtId:'military',doorSide:'W',isTent:true,lootCount:3});
 
  // 4c. Wet rain puddles outside Safe Zone, Buildings & Evac Heli Spots
  for(let i=0;i<74;i++){
@@ -2509,17 +2542,80 @@ function pickLootForDistrict(districtId,boostRarity=false){
  return LOOT_TYPES.canned;
 }
 
+function syncBuildingDoorWall(b){
+ if(!b||!b.door)return;
+ const idx=wallRects.indexOf(b.door.rect);
+ if(b.door.locked){
+  if(idx<0)wallRects.push(b.door.rect);
+ }else if(idx>=0){
+  wallRects.splice(idx,1);
+ }
+}
+
+function circleOverlapsRect(cx,cy,r,rect){
+ const nearX=Math.max(rect.x,Math.min(cx,rect.x+rect.w));
+ const nearY=Math.max(rect.y,Math.min(cy,rect.y+rect.h));
+ const dx=cx-nearX,dy=cy-nearY;
+ return dx*dx+dy*dy<r*r;
+}
+
+function toggleBuildingDoor(b){
+ if(!b||!b.door||!running||!player)return false;
+ const door=b.door;
+ if(door.locked){
+  door.locked=false;
+  syncBuildingDoorWall(b);
+  addParticles(door.x,door.y,'#8cffaa',7,95,'spark');
+  addPopup(door.x,door.y-22,'🔓 Дверь открыта','#9effa8',12);
+  return true;
+ }
+ if(door.reopenCd>0){
+  addPopup(door.x,door.y-22,`⏳ Подожди ${door.reopenCd.toFixed(1)}с`,'#ffd078',12);
+  return false;
+ }
+ // Prevent locking if a zombie is standing right inside the doorway
+ for(let i=0;i<zombies.length;i++){
+  const z=zombies[i];
+  if(circleOverlapsRect(z.x,z.y,Math.max(6,z.r*0.55),door.rect)){
+   addPopup(door.x,door.y-22,'🚪 В проёме зомби!','#ff9678',12);
+   return false;
+  }
+ }
+ // Safely step player clear of doorway rectangle before locking
+ if(circleOverlapsRect(player.x,player.y,player.r+2,door.rect)){
+  const inside=isPointInBuilding(player.x,player.y,b,-b.wallT*0.4);
+  const pushDist=door.wallT*0.5+player.r+5;
+  if(door.side==='N')player.y=door.y+(inside?pushDist:-pushDist);
+  else if(door.side==='S')player.y=door.y+(inside?-pushDist:pushDist);
+  else if(door.side==='W')player.x=door.x+(inside?pushDist:-pushDist);
+  else if(door.side==='E')player.x=door.x+(inside?-pushDist:pushDist);
+  resolveObstacles(player,false);
+ }
+ door.locked=true;
+ door.hp=door.maxHp;
+ door.hit=0;
+ syncBuildingDoorWall(b);
+ addParticles(door.x,door.y,'#ffd86b',9,105,'spark');
+ particles.push({x:door.x,y:door.y,vx:0,vy:0,life:.24,max:.24,color:'#ffd86b',size:24,kind:'ring',rot:0,vrot:0});
+ addPopup(door.x,door.y-22,'🔒 Дверь заперта!','#ffe484',12);
+ return true;
+}
+
 function createLootNodesForBuilding(b){
  const nodes=[];
  const padX=Math.min(34,b.w*0.20),padY=Math.min(30,b.h*0.22);
- // Pick interior corner/side positions away from the doorway
+ // Pick interior corners & wall midpoints away from the doorway
  const spots=[
   [b.x+padX,b.y+padY],
   [b.x+b.w-padX,b.y+padY],
   [b.x+padX,b.y+b.h-padY],
-  [b.x+b.w-padX,b.y+b.h-padY]
+  [b.x+b.w-padX,b.y+b.h-padY],
+  [b.cx,b.y+padY],
+  [b.cx,b.y+b.h-padY],
+  [b.x+padX,b.cy],
+  [b.x+b.w-padX,b.cy]
  ];
- const filtered=spots.filter(([sx,sy])=>Math.hypot(sx-b.doorX,sy-b.doorY)>46);
+ const filtered=spots.filter(([sx,sy])=>Math.hypot(sx-b.doorX,sy-b.doorY)>42);
  const useSpots=(filtered.length>=b.lootCount?filtered:spots).slice(0,b.lootCount);
  const kinds=b.style==='med'?['med','med','crate']:b.style==='tech'?['tech','safe','crate']:b.isTent?['med','crate']:['crate','safe','drawer'];
  for(let i=0;i<useSpots.length;i++){
@@ -2539,31 +2635,95 @@ function createLootNodesForBuilding(b){
  return nodes;
 }
 
+function isFreeStreetLootSpot(x,y,pad=24){
+ if(x<WALL_PAD+40||x>WORLD_W-WALL_PAD-40||y<WALL_PAD+40||y>WORLD_H-WALL_PAD-40)return false;
+ if(isInSafeZone(x,y,55)||isNearAnyBuilding(x,y,24)||isNearAnyHeliSpot(x,y,70))return false;
+ for(let i=0;i<obstacles.length;i++){
+  if(Math.hypot(x-obstacles[i].x,y-obstacles[i].y)<obstacles[i].r+pad)return false;
+ }
+ return true;
+}
+
+function spawnStreetLoot(){
+ const districtQuadrants=[
+  {id:'suburb',xMin:180,xMax:1640,yMin:180,yMax:1640,kinds:['crate','safe','drawer']},
+  {id:'chem',xMin:1960,xMax:3420,yMin:180,yMax:1640,kinds:['tech','crate','safe']},
+  {id:'hospital',xMin:180,xMax:1640,yMin:1960,yMax:3420,kinds:['med','crate','med']},
+  {id:'military',xMin:1960,xMax:3420,yMin:1960,yMax:3420,kinds:['safe','tech','crate']}
+ ];
+ let crateIdx=0;
+ for(const q of districtQuadrants){
+  let placed=0;
+  for(let attempt=0;attempt<60&&placed<4;attempt++){
+   const sx=q.xMin+Math.random()*(q.xMax-q.xMin);
+   const sy=q.yMin+Math.random()*(q.yMax-q.yMin);
+   if(!isFreeStreetLootSpot(sx,sy,26))continue;
+   if(lootNodes.some(n=>Math.hypot(n.x-sx,n.y-sy)<140))continue;
+   lootNodes.push({
+    id:`ST-${q.id}-${crateIdx++}`,
+    buildingId:null,
+    street:true,
+    districtId:q.id,
+    x:sx,y:sy,r:14,
+    kind:q.kinds[placed%q.kinds.length],
+    opened:false,progress:0,respawnWaves:0
+   });
+   placed++;
+  }
+  let loosePlaced=0;
+  for(let attempt=0;attempt<60&&loosePlaced<6;attempt++){
+   const lx=q.xMin+Math.random()*(q.xMax-q.xMin);
+   const ly=q.yMin+Math.random()*(q.yMax-q.yMin);
+   if(!isFreeStreetLootSpot(lx,ly,18))continue;
+   if(groundLoot.some(g=>Math.hypot(g.x-lx,g.y-ly)<90))continue;
+   const lt=pickLootForDistrict(q.id,Math.random()<0.28);
+   groundLoot.push({
+    buildingId:null,
+    x:lx,y:ly,
+    typeId:lt.id,
+    pickupDelay:0,
+    bobPhase:Math.random()*6.28
+   });
+   loosePlaced++;
+  }
+ }
+}
+
 function initLootState(){
+ wallRects=wallRects.filter(r=>!r.isDoor);
  lootNodes=[];
  groundLoot=[];
  lootBag=[];
  nearbyLootNode=null;
+ nearbyDoor=null;
  lootFullToastCd=0;
  lootRespawnTimer=0;
  for(const b of buildings){
   b.roofAlpha=1;
   b.guardSpawned=false;
+  if(b.door){
+   b.door.locked=false;
+   b.door.hp=b.door.maxHp;
+   b.door.hit=0;
+   b.door.reopenCd=0;
+  }
   const created=createLootNodesForBuilding(b);
   for(const n of created)lootNodes.push(n);
-  // Also place 1 loose floor item inside major buildings
-  if(!b.isTent){
-   const lt=pickLootForDistrict(b.districtId,false);
+  // Place loose floor loot inside buildings and tents
+  const floorCount=b.isTent?(Math.random()<0.55?2:1):(Math.random()<0.6?3:2);
+  for(let k=0;k<floorCount;k++){
+   const lt=pickLootForDistrict(b.districtId,k>0||Math.random()<0.3);
    groundLoot.push({
     buildingId:b.id,
-    x:b.cx+(Math.random()-.5)*28,
-    y:b.cy+(Math.random()-.5)*22,
+    x:b.cx+(Math.random()-.5)*(b.w*0.42),
+    y:b.cy+(Math.random()-.5)*(b.h*0.36),
     typeId:lt.id,
     pickupDelay:0,
     bobPhase:Math.random()*6.28
    });
   }
  }
+ spawnStreetLoot();
 }
 
 function respawnBuildingLoot(limitCount=4){
@@ -2585,6 +2745,14 @@ function respawnBuildingLoot(limitCount=4){
   b.guardSpawned=false;
   restored++;
  }
+ // Also refresh opened street crates far from player
+ for(let i=0;i<lootNodes.length&&restored<limitCount+2;i++){
+  const n=lootNodes[i];
+  if(!n.street||!n.opened)continue;
+  if(player&&Math.hypot(player.x-n.x,player.y-n.y)<360)continue;
+  n.opened=false;n.progress=0;
+  restored++;
+ }
  return restored;
 }
 
@@ -2592,17 +2760,17 @@ function openLootNode(node){
  if(!node||node.opened)return;
  node.opened=true;
  node.progress=1;
- const b=buildings.find(x=>x.id===node.buildingId);
- const tx=b?b.cx:node.x,ty=b?b.cy:node.y;
+ const b=node.buildingId?buildings.find(x=>x.id===node.buildingId):null;
+ const tx=b?b.cx:(player?player.x:node.x),ty=b?b.cy:(player?player.y:node.y);
  const dirX=tx-node.x,dirY=ty-node.y;
  const dirLen=Math.hypot(dirX,dirY)||1;
- const dropCount=Math.random()<0.42?2:1;
+ const dropCount=Math.random()<0.45?3:2;
  for(let i=0;i<dropCount;i++){
-  const lt=pickLootForDistrict(node.districtId,i===1||Math.random()<0.35);
-  const ang=Math.atan2(dirY/dirLen,dirX/dirLen)+(i===0?0:(Math.random()-.5)*0.9);
-  const dist=18+i*12;
+  const lt=pickLootForDistrict(node.districtId,i>=1||Math.random()<0.45);
+  const ang=Math.atan2(dirY/dirLen,dirX/dirLen)+(i===0?0:(i===1?0.55:-0.55)+(Math.random()-.5)*0.35);
+  const dist=16+i*11;
   groundLoot.push({
-   buildingId:node.buildingId,
+   buildingId:node.buildingId||null,
    x:node.x+Math.cos(ang)*dist,
    y:node.y+Math.sin(ang)*dist,
    typeId:lt.id,
@@ -2871,6 +3039,7 @@ function init(){
  if($('npcModal'))$('npcModal').style.display='none';
  if($('bagModal'))$('bagModal').style.display='none';
  if($('interactBtn'))$('interactBtn').style.display='none';
+ if($('doorBtn'))$('doorBtn').style.display='none';
  $('joystickThumb').style.transform='translate(0px,0px)';
  if($('aimJoystickThumb'))$('aimJoystickThumb').style.transform='translate(0px,0px)';
  if($('aimJoystick'))$('aimJoystick').classList.remove('firing');
@@ -2917,16 +3086,22 @@ function resolveObstacles(entity,isZombie){
  for(let i=0;i<wallRects.length;i++){
   const rect=wallRects[i];
   const hitWall=resolveCircleRect(entity,rect);
-  if(hitWall&&isZombie&&player){
-   // Gently slide zombie along wall toward player or nearest doorway
-   const nearX=Math.max(rect.x,Math.min(entity.x,rect.x+rect.w));
-   const nearY=Math.max(rect.y,Math.min(entity.y,rect.y+rect.h));
-   if(Math.abs(entity.y-nearY)>=Math.abs(entity.x-nearX)){
-    const dir=player.x>=entity.x?1:-1;
-    entity.x+=dir*1.4;
+  if(hitWall&&isZombie){
+   if(entity.aggro){
+    const targetX=entity.lastSeenX!==undefined?entity.lastSeenX:(player?player.x:entity.x);
+    const targetY=entity.lastSeenY!==undefined?entity.lastSeenY:(player?player.y:entity.y);
+    const nearX=Math.max(rect.x,Math.min(entity.x,rect.x+rect.w));
+    const nearY=Math.max(rect.y,Math.min(entity.y,rect.y+rect.h));
+    if(Math.abs(entity.y-nearY)>=Math.abs(entity.x-nearX)){
+     const dir=targetX>=entity.x?1:-1;
+     entity.x+=dir*1.4;
+    }else{
+     const dir=targetY>=entity.y?1:-1;
+     entity.y+=dir*1.4;
+    }
    }else{
-    const dir=player.y>=entity.y?1:-1;
-    entity.y+=dir*1.4;
+    entity.wanderAngle+=Math.PI*0.72+(entity.seed-0.5)*0.6;
+    entity.wanderTimer=0.6;
    }
   }
  }
@@ -2942,9 +3117,11 @@ function resolveObstacles(entity,isZombie){
    const push=minDist-d;
    entity.x+=nx*push;
    entity.y+=ny*push;
-   if(isZombie&&player){
+   if(isZombie&&entity.aggro&&player){
     // Smooth tangent slide so zombies route around cars/crates cleanly
-    const toPx=player.x-entity.x,toPy=player.y-entity.y;
+    const targetX=entity.lastSeenX!==undefined?entity.lastSeenX:player.x;
+    const targetY=entity.lastSeenY!==undefined?entity.lastSeenY:player.y;
+    const toPx=targetX-entity.x,toPy=targetY-entity.y;
     const toLen=Math.hypot(toPx,toPy)||1;
     const dot=(toPx/toLen)*nx+(toPy/toLen)*ny;
     if(dot<-0.15){
@@ -2953,6 +3130,8 @@ function resolveObstacles(entity,isZombie){
      entity.x+=tx*side*push*1.1;
      entity.y+=ty*side*push*1.1;
     }
+   }else if(isZombie){
+    entity.wanderAngle=Math.atan2(ny,nx)+(entity.seed-0.5)*1.1;
    }
   }
  }
@@ -2983,17 +3162,41 @@ function pickZombieTypeForLocation(x,y){
  return 'walker';
 }
 
-function spawnZombie(forceType,sx,sy){
+function spawnZombie(forceType,sx,sy,opts){
+ const maxZ=getMaxActiveZombies();
+ if(!(opts&&opts.bypassCap)&&zombies.length>=maxZ){
+  // Recycle the farthest non-aggro wandering zombie so active area never stalls
+  let farIdx=-1,farDist=1000;
+  if(player){
+   for(let i=0;i<zombies.length;i++){
+    const zz=zombies[i];
+    if(zz.aggro||zz.isWaveBoss)continue;
+    const dd=Math.hypot(zz.x-player.x,zz.y-player.y);
+    if(dd>farDist){farDist=dd;farIdx=i;}
+   }
+  }
+  if(farIdx>=0)zombies.splice(farIdx,1);
+  else return null;
+ }
+
  const viewX=cam.x-W/2,viewY=cam.y-H/2;
  let x=sx,y=sy;
  if(x===undefined||y===undefined){
-  const pad=44;
-  for(let attempt=0;attempt<14;attempt++){
-   const side=Math.floor(Math.random()*4);
-   if(side===0){x=viewX+Math.random()*W;y=viewY-pad}
-   if(side===1){x=viewX+W+pad;y=viewY+Math.random()*H}
-   if(side===2){x=viewX+Math.random()*W;y=viewY+H+pad}
-   if(side===3){x=viewX-pad;y=viewY+Math.random()*H}
+  const pad=54;
+  for(let attempt=0;attempt<16;attempt++){
+   if(Math.random()<0.65&&player){
+    // Spawn around outer neighborhood so zombies wander nearby until spotting player
+    const a=Math.random()*Math.PI*2;
+    const rDist=340+Math.random()*320;
+    x=player.x+Math.cos(a)*rDist;
+    y=player.y+Math.sin(a)*rDist;
+   }else{
+    const side=Math.floor(Math.random()*4);
+    if(side===0){x=viewX+Math.random()*W;y=viewY-pad}
+    if(side===1){x=viewX+W+pad;y=viewY+Math.random()*H}
+    if(side===2){x=viewX+Math.random()*W;y=viewY+H+pad}
+    if(side===3){x=viewX-pad;y=viewY+Math.random()*H}
+   }
    x=Math.max(WALL_PAD+24,Math.min(WORLD_W-WALL_PAD-24,x));
    y=Math.max(WALL_PAD+24,Math.min(WORLD_H-WALL_PAD-24,y));
    if(isInSafeZone(x,y,75)){
@@ -3003,7 +3206,7 @@ function spawnZombie(forceType,sx,sy){
     x=Math.max(WALL_PAD+24,Math.min(WORLD_W-WALL_PAD-24,x));
     y=Math.max(WALL_PAD+24,Math.min(WORLD_H-WALL_PAD-24,y));
    }
-   if(Math.hypot(x-player.x,y-player.y)<Math.min(W,H)*0.40)continue;
+   if(Math.hypot(x-player.x,y-player.y)<290)continue;
    if(isNearAnyBuilding(x,y,24))continue;
    let blocked=false;
    for(let i=0;i<obstacles.length;i++){
@@ -3018,7 +3221,8 @@ function spawnZombie(forceType,sx,sy){
  registerZombieSighting(type);
  const waveHpScale=1+(wave-1)*0.24;
  const maxHp=Number(((s.hp*waveHpScale)+(wave-1)*(s.hp>=3?0.9:0.45)).toFixed(2));
- zombies.push({
+ const startAng=Math.random()*Math.PI*2;
+ const z={
   x,y,type,def:s,r:s.r,hp:maxHp,maxHp,
   speed:s.speed+Math.min((wave-1)*5.0,42),
   dmg:s.dmg||10,
@@ -3028,9 +3232,15 @@ function spawnZombie(forceType,sx,sy){
   phase:Math.random()*6,hit:0,
   abilityCd:1.2+Math.random()*2.2,
   dashTimer:0,boostTimer:0,trailCd:0.3,
-  angle:Math.atan2(player.y-y,player.x-x),
+  aggro:!!(opts&&opts.aggro),aggroTimer:(opts&&opts.aggro)?4.5:0,
+  lastSeenX:player?player.x:x,lastSeenY:player?player.y:y,
+  alertFlash:0,doorAtkCd:0,
+  wanderAngle:startAng,wanderTimer:1.0+Math.random()*2.5,wanderPause:0,
+  angle:startAng,
   seed:Math.random()
- });
+ };
+ zombies.push(z);
+ return z;
 }
 
 function spawnWaveBoss(forWave){
@@ -3070,6 +3280,8 @@ function spawnWaveBoss(forWave){
   color:s.color,points:s.points+(tier-1)*100,
   isWaveBoss:true,bossTier:tier,
   phase:0,hit:0,abilityCd:1.4,dashTimer:0,boostTimer:0,trailCd:0.3,
+  aggro:false,aggroTimer:0,lastSeenX:player.x,lastSeenY:player.y,
+  alertFlash:0,doorAtkCd:0,wanderAngle:Math.atan2(player.y-by,player.x-bx),wanderTimer:2,wanderPause:0,
   angle:Math.atan2(player.y-by,player.x-bx),seed:Math.random()
  });
  particles.push({x:bx,y:by,vx:0,vy:0,life:.45,max:.45,color:'#ff3858',size:95,kind:'ring',rot:0,vrot:0});
@@ -3089,7 +3301,32 @@ function applyDamageToZombie(z,rawDmg,hitAngle){
  const finalDmg=Math.max(0.25,rawDmg*mult);
  z.hp-=finalDmg;
  z.hit=.12;
+ // Attacked zombie immediately spots/aggros toward player if player isn't in Safe Zone
+ if(player&&!isInSafeZone(player.x,player.y,-4)){
+  if(!z.aggro)z.alertFlash=0.9;
+  z.aggro=true;
+  z.aggroTimer=Math.max(z.aggroTimer||0,6.5);
+  z.lastSeenX=player.x;
+  z.lastSeenY=player.y;
+ }
  return finalDmg;
+}
+
+function alertZombiesBySound(sx,sy,noiseRadius){
+ if(!noiseRadius||noiseRadius<=0)return;
+ for(let i=0;i<zombies.length;i++){
+  const z=zombies[i];
+  const d=Math.hypot(z.x-sx,z.y-sy);
+  if(d>noiseRadius)continue;
+  const wallMuffle=hasWallBetween(sx,sy,z.x,z.y)?0.45:1;
+  if(d<=noiseRadius*wallMuffle){
+   if(!z.aggro)z.alertFlash=0.7;
+   z.aggro=true;
+   z.aggroTimer=Math.max(z.aggroTimer||0,3.8);
+   z.lastSeenX=sx;
+   z.lastSeenY=sy;
+  }
+ }
 }
 
 function addParticles(x,y,color,n=6,power=120,kind='spark'){
@@ -3267,6 +3504,8 @@ function shoot(targetOrAngle,preferredTarget){
  const barrelLen=getBarrelLen();
  const mx=player.x+Math.cos(base)*barrelLen;
  const my=player.y+Math.sin(base)*barrelLen;
+ const noiseRadius=weapon==='crossbow'?95:(weapon==='pistol'||weapon==='smg')?250:(weapon==='shotgun'||weapon==='launcher'||weapon==='railgun')?470:350;
+ alertZombiesBySound(player.x,player.y,noiseRadius);
  const totalCount=w.count+(itemMods.extraShots||0);
  const spread=w.count===1&&totalCount>1?Math.max(w.spread,0.045):w.spread;
 
@@ -3622,6 +3861,7 @@ function buyHelicopterAndEscape(){
  stopAllControls();
  player.inv=999;
  if($('interactBtn')){$('interactBtn').style.display='none';$('interactBtn').classList.remove('evac')}
+ if($('doorBtn')){$('doorBtn').style.display='none';$('doorBtn').classList.remove('locked')}
  if($('npcModal'))$('npcModal').style.display='none';
  if($('bagModal'))$('bagModal').style.display='none';
  if($('shop'))$('shop').style.display='none';
@@ -3640,6 +3880,7 @@ function victoryEscape(){
  if($('npcModal'))$('npcModal').style.display='none';
  if($('bagModal'))$('bagModal').style.display='none';
  if($('interactBtn'))$('interactBtn').style.display='none';
+ if($('doorBtn'))$('doorBtn').style.display='none';
  if($('bossBanner'))$('bossBanner').style.display='none';
  uiEl.style.transform='';
  score+=500;
@@ -3676,6 +3917,7 @@ function gameOver(){
  if($('npcModal'))$('npcModal').style.display='none';
  if($('bagModal'))$('bagModal').style.display='none';
  if($('interactBtn'))$('interactBtn').style.display='none';
+ if($('doorBtn'))$('doorBtn').style.display='none';
  uiEl.style.transform='';
  if(score>bestScore){
   bestScore=score;
@@ -3867,7 +4109,8 @@ function update(dt,now){
  const inSafe=isInSafeZone(player.x,player.y,-4);
  updateZoneUI();
 
- // Building roof transparency, interior guard wake-up, loot containers & pickups
+ // Building roof transparency, door timers, interior guard wake-up, loot containers & pickups
+ let nearDoor=null,nearDoorD=72;
  for(let i=0;i<buildings.length;i++){
   const b=buildings[i];
   const inside=isPointInBuilding(player.x,player.y,b,6);
@@ -3875,15 +4118,22 @@ function update(dt,now){
   b.roofAlpha+=(targetA-b.roofAlpha)*Math.min(1,dt*12);
   if(Math.abs(b.roofAlpha-targetA)<0.02)b.roofAlpha=targetA;
 
+  if(b.door){
+   b.door.hit=Math.max(0,(b.door.hit||0)-dt);
+   b.door.reopenCd=Math.max(0,(b.door.reopenCd||0)-dt);
+   const dd=Math.hypot(player.x-b.door.x,player.y-b.door.y);
+   if(dd<nearDoorD){nearDoorD=dd;nearDoor=b;}
+  }
+
   if(!b.guardSpawned&&Math.hypot(player.x-b.cx,player.y-b.cy)<340){
    b.guardSpawned=true;
    const hasLootInside=lootNodes.some(n=>n.buildingId===b.id&&!n.opened)||groundLoot.some(g=>g.buildingId===b.id);
-   if(hasLootInside&&zombies.length<58){
-    const chance=b.districtId==='suburb'?0.55:b.isTent?0.45:0.85;
+   if(hasLootInside&&zombies.length<getMaxActiveZombies()){
+    const chance=b.districtId==='suburb'?0.65:b.isTent?0.5:0.88;
     if(Math.random()<chance){
-     const gPool=b.districtId==='chem'?['hazmat','acidic','spitter']:
-                 b.districtId==='hospital'?['nurse','medic','surgeon']:
-                 b.districtId==='military'?['soldier','commando']:['walker','crawler'];
+     const gPool=b.districtId==='chem'?['hazmat','acidic','spitter','chemist']:
+                 b.districtId==='hospital'?['nurse','medic','surgeon','plague']:
+                 b.districtId==='military'?['soldier','commando','swat']:['walker','crawler','butcher'];
      const gType=gPool[Math.floor(Math.random()*gPool.length)];
      const offX=b.doorSide==='W'?b.w*0.22:b.doorSide==='E'?-b.w*0.22:(Math.random()-.5)*b.w*0.35;
      const offY=b.doorSide==='N'?b.h*0.22:b.doorSide==='S'?-b.h*0.22:(Math.random()-.5)*b.h*0.35;
@@ -3892,6 +4142,7 @@ function update(dt,now){
    }
   }
  }
+ nearbyDoor=nearDoor;
 
  // Check nearby NPC in Safe Zone, Evacuation Helicopter, or nearby unopened loot container
  let nearNpc=null,nearNpcD=84;
@@ -3954,7 +4205,26 @@ function update(dt,now){
   }
  }
 
- // Ground loot pickups inside buildings
+ const db=$('doorBtn');
+ if(db){
+  if(nearbyDoor&&nearbyDoor.door){
+   const dObj=nearbyDoor.door;
+   db.classList.toggle('locked',!!dObj.locked);
+   if(dObj.locked){
+    db.textContent=`🔓 Открыть дверь (${Math.ceil(dObj.hp)}❤️) [F]`;
+   }else if(dObj.reopenCd>0){
+    db.textContent=`🔧 Сломана (${dObj.reopenCd.toFixed(1)}с)`;
+   }else{
+    db.textContent='🔒 Запереть дверь [F]';
+   }
+   db.style.display='inline-flex';
+  }else{
+   db.classList.remove('locked');
+   db.style.display='none';
+  }
+ }
+
+ // Ground loot pickups inside buildings & streets
  lootFullToastCd=Math.max(0,lootFullToastCd-dt);
  for(let i=groundLoot.length-1;i>=0;i--){
   const gl=groundLoot[i];
@@ -3976,9 +4246,9 @@ function update(dt,now){
  }
 
  lootRespawnTimer+=dt;
- if(lootRespawnTimer>=42){
+ if(lootRespawnTimer>=24){
   lootRespawnTimer=0;
-  respawnBuildingLoot(2);
+  respawnBuildingLoot(4);
  }
 
  // Base Safe Zone HP regeneration + truce status
@@ -4036,7 +4306,10 @@ function update(dt,now){
  if(Math.abs(cam.y-goal.y)>maxLagY)cam.y=goal.y+Math.sign(cam.y-goal.y)*maxLagY;
 
  spawnTimer-=dt;
- if(spawnTimer<=0){spawnZombie();spawnTimer=Math.max(.22,1.12-(wave-1)*0.09-score*0.0003)}
+ if(spawnTimer<=0){
+  spawnZombie();
+  spawnTimer=zombies.length>=getMaxActiveZombies()?0.45:Math.max(.22,1.12-(wave-1)*0.09-score*0.0003);
+ }
  fireTimer-=dt;
  if(aim.fire&&fireTimer<=0){
   shoot(aim.angle);
@@ -4060,11 +4333,30 @@ function update(dt,now){
    z.hp-=(z.burnDps||0.45)*dt;
    if(Math.random()<dt*7)addParticles(z.x+(Math.random()-.5)*8,z.y+(Math.random()-.5)*8,'#ff8c32',1,35,'spark');
   }
-  if(def.ability==='cloak'&&d<230)spd*=1.28;
   if(def.regen&&z.hp<z.maxHp){z.hp=Math.min(z.maxHp,z.hp+def.regen*dt)}
+  z.alertFlash=Math.max(0,(z.alertFlash||0)-dt);
 
-  // Acid / fire ground trails
-  if(def.trail&&!isInSafeZone(z.x,z.y,18)){
+  // Vision / Line-of-Sight Aggro Check
+  const sightR=def.isBossBar?470:(def.range?Math.max(410,def.range+55):380);
+  const lookDot=Math.cos(z.angle)*(dx/d)+Math.sin(z.angle)*(dy/d);
+  const clearLos=!inSafe&&!hasWallBetween(z.x,z.y,player.x,player.y);
+  const canSee=clearLos&&(d<=150||(d<=sightR&&lookDot>-0.35)||(z.aggro&&d<=sightR*1.18));
+  if(canSee){
+   if(!z.aggro){
+    z.alertFlash=1.0;
+    addPopup(z.x,z.y-z.r-12,'!','#ff5e66',13);
+   }
+   z.aggro=true;
+   z.aggroTimer=def.isBossBar?7.0:4.5;
+   z.lastSeenX=player.x;
+   z.lastSeenY=player.y;
+  }else if(inSafe&&z.aggro){
+   z.aggroTimer=Math.min(z.aggroTimer||0,0.35);
+  }
+  if(def.ability==='cloak'&&z.aggro&&canSee&&d<230)spd*=1.28;
+
+  // Acid / fire ground trails (active while aggroed or moving)
+  if(def.trail&&z.aggro&&!isInSafeZone(z.x,z.y,18)){
    z.trailCd-=dt;
    if(z.trailCd<=0){
     z.trailCd=0.85;
@@ -4072,74 +4364,10 @@ function update(dt,now){
    }
   }
 
-  // Cooldown abilities (spit, zap, snipe, acidBomb, scream, heal, dash, leap, summon, blink)
+  // Cooldown abilities (only trigger offensively when aggro & seeing player)
   z.abilityCd=(z.abilityCd!==undefined?z.abilityCd:1.5)-dt;
   if(def.ability&&z.abilityCd<=0){
-   if(def.ability==='spit'||def.ability==='zap'||def.ability==='snipe'||def.ability==='acidBomb'){
-    const maxR=def.range||270;
-    if(d<=maxR&&!inSafe){
-     const ang=Math.atan2(dy,dx);
-     const isZap=def.ability==='zap';
-     const isSnipe=def.ability==='snipe';
-     const isFlask=def.ability==='acidBomb';
-     const pSpd=isSnipe?430:isZap?320:isFlask?220:235;
-     enemyProjectiles.push({
-      x:z.x+Math.cos(ang)*z.r,y:z.y+Math.sin(ang)*z.r,
-      vx:Math.cos(ang)*pSpd,vy:Math.sin(ang)*pSpd,
-      r:isSnipe?3.6:isZap?4.5:isFlask?7:6,
-      dmg:isSnipe?13:isZap?9:8,
-      life:isSnipe?1.15:isFlask?1.25:1.5,
-      kind:isSnipe?'snipe':isZap?'zap':isFlask?'acidBomb':'acid',
-      color:isSnipe?'#ff8838':isZap?'#ff526a':isFlask?'#a8ff44':'#98ff42'
-     });
-     if(z.type==='alpha'){
-      for(const off of [-0.18,0.18]){
-       enemyProjectiles.push({
-        x:z.x+Math.cos(ang+off)*z.r,y:z.y+Math.sin(ang+off)*z.r,
-        vx:Math.cos(ang+off)*245,vy:Math.sin(ang+off)*245,
-        r:6,dmg:9,life:1.5,kind:'acid',color:'#a8ff48'
-       });
-      }
-     }
-     z.abilityCd=z.type==='alpha'?2.6:isSnipe?3.1:2.8;
-    }else{
-     z.abilityCd=0.5;
-    }
-   }else if(def.ability==='blink'){
-    if(d<310&&d>95&&!inSafe){
-     const ang=Math.atan2(dy,dx)+(Math.random()-.5)*0.55;
-     const distBlink=Math.min(110,d-55);
-     const tx=Math.max(WALL_PAD+24,Math.min(WORLD_W-WALL_PAD-24,z.x+Math.cos(ang)*distBlink));
-     const ty=Math.max(WALL_PAD+24,Math.min(WORLD_H-WALL_PAD-24,z.y+Math.sin(ang)*distBlink));
-     if(!isInSafeZone(tx,ty,22)&&!hasWallBetween(z.x,z.y,tx,ty)){
-      particles.push({x:z.x,y:z.y,vx:0,vy:0,life:.26,max:.26,color:'#d47eff',size:24,kind:'ring',rot:0,vrot:0});
-      z.x=tx;z.y=ty;
-      particles.push({x:z.x,y:z.y,vx:0,vy:0,life:.26,max:.26,color:'#e2a8ff',size:26,kind:'ring',rot:0,vrot:0});
-      addParticles(z.x,z.y,'#d47eff',6,95,'spark');
-     }
-     z.abilityCd=3.3;
-    }else{
-     z.abilityCd=0.6;
-    }
-   }else if(def.ability==='dash'||def.ability==='leap'){
-    if(d<235&&d>55){
-     z.dashTimer=0.38;
-     addParticles(z.x,z.y,def.color,5,85,'spark');
-     z.abilityCd=2.8;
-    }else{
-     z.abilityCd=0.5;
-    }
-   }else if(def.ability==='scream'){
-    if(d<360){
-     particles.push({x:z.x,y:z.y,vx:0,vy:0,life:.32,max:.32,color:'#ffae42',size:68,kind:'ring',rot:0,vrot:0});
-     for(const oz of zombies){
-      if(Math.hypot(oz.x-z.x,oz.y-z.y)<180)oz.boostTimer=Math.max(oz.boostTimer||0,2.2);
-     }
-     z.abilityCd=4.8;
-    }else{
-     z.abilityCd=0.7;
-    }
-   }else if(def.ability==='heal'){
+   if(def.ability==='heal'){
     let healed=false;
     for(const oz of zombies){
      if(oz!==z&&oz.hp<oz.maxHp&&Math.hypot(oz.x-z.x,oz.y-z.y)<145){
@@ -4149,30 +4377,184 @@ function update(dt,now){
     }
     if(healed)particles.push({x:z.x,y:z.y,vx:0,vy:0,life:.3,max:.3,color:'#6eff9a',size:55,kind:'ring',rot:0,vrot:0});
     z.abilityCd=3.2;
-   }else if(def.ability==='summon'){
-    if(zombies.length<65&&d<460){
-     const ang=Math.random()*Math.PI*2;
-     const sx=Math.max(WALL_PAD+24,Math.min(WORLD_W-WALL_PAD-24,z.x+Math.cos(ang)*36));
-     const sy=Math.max(WALL_PAD+24,Math.min(WORLD_H-WALL_PAD-24,z.y+Math.sin(ang)*36));
-     if(!isInSafeZone(sx,sy,24)){
-      spawnZombie(Math.random()>0.5?'crawler':'walker',sx,sy);
-      particles.push({x:sx,y:sy,vx:0,vy:0,life:.3,max:.3,color:'#c26eff',size:26,kind:'ring',rot:0,vrot:0});
+   }else if(z.aggro&&canSee){
+    if(def.ability==='spit'||def.ability==='zap'||def.ability==='snipe'||def.ability==='acidBomb'){
+     const maxR=def.range||270;
+     if(d<=maxR&&!inSafe){
+      const ang=Math.atan2(dy,dx);
+      const isZap=def.ability==='zap';
+      const isSnipe=def.ability==='snipe';
+      const isFlask=def.ability==='acidBomb';
+      const pSpd=isSnipe?430:isZap?320:isFlask?220:235;
+      enemyProjectiles.push({
+       x:z.x+Math.cos(ang)*z.r,y:z.y+Math.sin(ang)*z.r,
+       vx:Math.cos(ang)*pSpd,vy:Math.sin(ang)*pSpd,
+       r:isSnipe?3.6:isZap?4.5:isFlask?7:6,
+       dmg:isSnipe?13:isZap?9:8,
+       life:isSnipe?1.15:isFlask?1.25:1.5,
+       kind:isSnipe?'snipe':isZap?'zap':isFlask?'acidBomb':'acid',
+       color:isSnipe?'#ff8838':isZap?'#ff526a':isFlask?'#a8ff44':'#98ff42'
+      });
+      if(z.type==='alpha'){
+       for(const off of [-0.18,0.18]){
+        enemyProjectiles.push({
+         x:z.x+Math.cos(ang+off)*z.r,y:z.y+Math.sin(ang+off)*z.r,
+         vx:Math.cos(ang+off)*245,vy:Math.sin(ang+off)*245,
+         r:6,dmg:9,life:1.5,kind:'acid',color:'#a8ff48'
+        });
+       }
+      }
+      z.abilityCd=z.type==='alpha'?2.6:isSnipe?3.1:2.8;
+     }else{
+      z.abilityCd=0.5;
      }
-     z.abilityCd=5.8;
-    }else{
-     z.abilityCd=1.0;
+    }else if(def.ability==='blink'){
+     if(d<310&&d>95&&!inSafe){
+      const ang=Math.atan2(dy,dx)+(Math.random()-.5)*0.55;
+      const distBlink=Math.min(110,d-55);
+      const tx=Math.max(WALL_PAD+24,Math.min(WORLD_W-WALL_PAD-24,z.x+Math.cos(ang)*distBlink));
+      const ty=Math.max(WALL_PAD+24,Math.min(WORLD_H-WALL_PAD-24,z.y+Math.sin(ang)*distBlink));
+      if(!isInSafeZone(tx,ty,22)&&!hasWallBetween(z.x,z.y,tx,ty)){
+       particles.push({x:z.x,y:z.y,vx:0,vy:0,life:.26,max:.26,color:'#d47eff',size:24,kind:'ring',rot:0,vrot:0});
+       z.x=tx;z.y=ty;
+       particles.push({x:z.x,y:z.y,vx:0,vy:0,life:.26,max:.26,color:'#e2a8ff',size:26,kind:'ring',rot:0,vrot:0});
+       addParticles(z.x,z.y,'#d47eff',6,95,'spark');
+      }
+      z.abilityCd=3.3;
+     }else{
+      z.abilityCd=0.6;
+     }
+    }else if(def.ability==='dash'||def.ability==='leap'){
+     if(d<235&&d>55){
+      z.dashTimer=0.38;
+      addParticles(z.x,z.y,def.color,5,85,'spark');
+      z.abilityCd=2.8;
+     }else{
+      z.abilityCd=0.5;
+     }
+    }else if(def.ability==='scream'){
+     if(d<360){
+      particles.push({x:z.x,y:z.y,vx:0,vy:0,life:.32,max:.32,color:'#ffae42',size:68,kind:'ring',rot:0,vrot:0});
+      for(const oz of zombies){
+       if(Math.hypot(oz.x-z.x,oz.y-z.y)<180){
+        oz.boostTimer=Math.max(oz.boostTimer||0,2.2);
+        if(!oz.aggro&&!inSafe){
+         oz.aggro=true;oz.aggroTimer=4.0;oz.lastSeenX=player.x;oz.lastSeenY=player.y;
+        }
+       }
+      }
+      z.abilityCd=4.8;
+     }else{
+      z.abilityCd=0.7;
+     }
+    }else if(def.ability==='summon'){
+     if(zombies.length<getMaxActiveZombies()&&d<460){
+      const ang=Math.random()*Math.PI*2;
+      const sx=Math.max(WALL_PAD+24,Math.min(WORLD_W-WALL_PAD-24,z.x+Math.cos(ang)*36));
+      const sy=Math.max(WALL_PAD+24,Math.min(WORLD_H-WALL_PAD-24,z.y+Math.sin(ang)*36));
+      if(!isInSafeZone(sx,sy,24)){
+       spawnZombie(Math.random()>0.5?'crawler':'walker',sx,sy,{aggro:true});
+       particles.push({x:sx,y:sy,vx:0,vy:0,life:.3,max:.3,color:'#c26eff',size:26,kind:'ring',rot:0,vrot:0});
+      }
+      z.abilityCd=5.8;
+     }else{
+      z.abilityCd=1.0;
+     }
     }
+   }else{
+    z.abilityCd=0.4;
    }
   }
 
-  // Ranged attackers pause slightly when in optimal range
-  const stopRange=(def.ability==='spit'||def.ability==='zap'||def.ability==='snipe'||def.ability==='acidBomb')&&!inSafe?(def.range||260)*0.68:0;
-  if(d>stopRange){
-   z.x+=dx/d*spd*dt;z.y+=dy/d*spd*dt;
+  // Movement: Aggro pursuit (or attacking locked doors) vs Calm wandering
+  let moveSpd=spd;
+  if(z.aggro){
+   const tx=canSee?player.x:(z.lastSeenX!==undefined?z.lastSeenX:player.x);
+   const ty=canSee?player.y:(z.lastSeenY!==undefined?z.lastSeenY:player.y);
+   const tdx=tx-z.x,tdy=ty-z.y,td=Math.hypot(tdx,tdy)||1;
+
+   // Check if a locked building door blocks the path right in front of the zombie
+   let doorTarget=null;
+   for(let bi=0;bi<buildings.length;bi++){
+    const b=buildings[bi];
+    if(!b.door||!b.door.locked)continue;
+    const dr=b.door.rect;
+    const nx=Math.max(dr.x,Math.min(z.x,dr.x+dr.w));
+    const ny=Math.max(dr.y,Math.min(z.y,dr.y+dr.h));
+    if(Math.hypot(z.x-nx,z.y-ny)<=z.r+16){
+     doorTarget=b;break;
+    }
+   }
+
+   if(doorTarget){
+    const dr=doorTarget.door;
+    z.angle=Math.atan2(dr.y-z.y,dr.x-z.x);
+    z.doorAtkCd=Math.max(0,(z.doorAtkCd||0)-dt);
+    if(z.doorAtkCd<=0){
+     z.doorAtkCd=0.85;
+     dr.hp-=Math.max(8,z.dmg||10);
+     dr.hit=0.18;
+     z.aggroTimer=Math.max(z.aggroTimer||0,3.2);
+     addParticles(dr.x,dr.y,'#ffc86b',6,105,'spark');
+     if(dr.hp<=0){
+      dr.locked=false;
+      dr.hp=0;
+      dr.reopenCd=2.0;
+      syncBuildingDoorWall(doorTarget);
+      addParticles(dr.x,dr.y,'#ffaa48',14,165,'spark');
+      particles.push({x:dr.x,y:dr.y,vx:0,vy:0,life:.32,max:.32,color:'#ffaa48',size:36,kind:'ring',rot:0,vrot:0});
+      addPopup(dr.x,dr.y-24,'💥 Дверь выломана!','#ff7b5c',13);
+      shake=Math.max(shake,5);
+     }
+    }
+    moveSpd=0;
+   }else{
+    if(!canSee){
+     z.aggroTimer=(z.aggroTimer||0)-dt;
+     if(z.aggroTimer<=0||td<20){
+      z.aggro=false;
+      z.aggroTimer=0;
+     }
+    }
+    const stopRange=canSee&&(def.ability==='spit'||def.ability==='zap'||def.ability==='snipe'||def.ability==='acidBomb')&&!inSafe?(def.range||260)*0.68:0;
+    if(td>stopRange&&z.aggro){
+     z.x+=tdx/td*spd*dt;z.y+=tdy/td*spd*dt;
+    }
+    z.angle=Math.atan2(tdy,tdx);
+   }
+  }else{
+   // Calm patrol / wandering when player is unseen
+   moveSpd=spd*0.42;
+   if(z.wanderPause>0){
+    z.wanderPause-=dt;
+    moveSpd=0;
+   }else{
+    z.wanderTimer=(z.wanderTimer||0)-dt;
+    if(z.wanderTimer<=0){
+     if(Math.random()<0.35){
+      z.wanderPause=0.6+Math.random()*1.4;
+      z.wanderTimer=1.5+Math.random()*2.5;
+     }else{
+      z.wanderAngle=(z.wanderAngle||0)+(Math.random()-.5)*1.9;
+      z.wanderTimer=1.6+Math.random()*2.8;
+     }
+    }
+    if(isInSafeZone(z.x+Math.cos(z.wanderAngle)*(z.r+24),z.y+Math.sin(z.wanderAngle)*(z.r+24),12)){
+     z.wanderAngle=Math.atan2(z.y-SAFE_ZONE.y,z.x-SAFE_ZONE.x)+(Math.random()-.5)*0.8;
+    }
+    if(moveSpd>0){
+     z.x+=Math.cos(z.wanderAngle)*moveSpd*dt;
+     z.y+=Math.sin(z.wanderAngle)*moveSpd*dt;
+    }
+   }
+   let diff=z.wanderAngle-z.angle;
+   while(diff>Math.PI)diff-=Math.PI*2;
+   while(diff<-Math.PI)diff+=Math.PI*2;
+   z.angle+=diff*Math.min(1,dt*4.5);
   }
+
   resolveObstacles(z,true);
-  z.angle=Math.atan2(player.y-z.y,player.x-z.x);
-  z.phase+=dt*(spd>85?9.5:spd<34?3.8:5.4);
+  z.phase+=dt*(moveSpd>85?9.5:moveSpd<34?3.8:5.4);
   z.hit=Math.max(0,z.hit-dt);
   if(Math.hypot(player.x-z.x,player.y-z.y)<player.r+z.r-3){
    const wasInv=player.inv>0;
@@ -4365,6 +4747,20 @@ function update(dt,now){
 
    score+=z.points;kills++;waveKills++;
    registerZombieKill(z.type);
+   // Zombies drop ground loot items (higher chance on elite / boss enemies)
+   const dropChance=def.isBossBar?0.68:0.25;
+   if(!isInSafeZone(z.x,z.y,8)&&Math.random()<dropChance){
+    const distObj=getDistrictAt(z.x,z.y);
+    const lt=pickLootForDistrict(distObj.id==='safe'?'suburb':distObj.id,!!def.isBossBar||Math.random()<0.35);
+    groundLoot.push({
+     buildingId:null,
+     x:z.x+(Math.random()-.5)*14,
+     y:z.y+(Math.random()-.5)*14,
+     typeId:lt.id,
+     pickupDelay:0.18,
+     bobPhase:Math.random()*6.28
+    });
+   }
    if(itemMods.vamp>0){
     player.vampKills=(player.vampKills||0)+1;
     if(player.vampKills>=5&&(player.vampCd||0)<=0&&health<maxHealth){
@@ -4400,7 +4796,7 @@ function update(dt,now){
    wave++;
    waveKills=0;
    waveGoal=Math.min(36,10+(wave-1)*4);
-   respawnBuildingLoot(5);
+   respawnBuildingLoot(8);
    updateUI();
    openWaveChoice(cleared);
    return;
@@ -4991,6 +5387,56 @@ function drawNpcTrader(npc,now){
  ctx.restore();
 }
 
+function drawBuildingDoors(now,viewX,viewY){
+ const minX=viewX-80,maxX=viewX+W+80,minY=viewY-80,maxY=viewY+H+80;
+ for(let i=0;i<buildings.length;i++){
+  const b=buildings[i];
+  const d=b.door;
+  if(!d||d.x<minX||d.x>maxX||d.y<minY||d.y>maxY)continue;
+  const dr=d.rect;
+  const horiz=(d.side==='N'||d.side==='S');
+  ctx.save();
+  if(d.locked){
+   const flash=d.hit>0;
+   ctx.fillStyle=flash?'#ffebc4':(b.isTent?'#6f5d42':'#614632');
+   ctx.strokeStyle=flash?'#ffffff':'#ffd678';
+   ctx.lineWidth=2.2;
+   ctx.beginPath();ctx.roundRect(dr.x,dr.y,dr.w,dr.h,3);ctx.fill();ctx.stroke();
+   // Steel locking bar across center
+   ctx.fillStyle='#aebec2';
+   if(horiz)ctx.fillRect(dr.x+8,dr.y+dr.h*0.32,dr.w-16,dr.h*0.36);
+   else ctx.fillRect(dr.x+dr.w*0.32,dr.y+8,dr.w*0.36,dr.h-16);
+   // Glowing lock badge
+   ctx.fillStyle='#1b221e';
+   ctx.beginPath();ctx.arc(d.x,d.y,7.5,0,Math.PI*2);ctx.fill();
+   ctx.strokeStyle='#ffd678';ctx.lineWidth=1.6;ctx.stroke();
+   ctx.fillStyle='#ffd678';
+   ctx.fillRect(d.x-3,d.y-1,6,5);
+   ctx.strokeRect(d.x-2,d.y-4.5,4,4);
+   // Door HP bar when damaged
+   if(d.hp<d.maxHp){
+    const bw=42,pct=Math.max(0,d.hp/d.maxHp);
+    ctx.fillStyle='rgba(10,14,14,0.88)';
+    ctx.beginPath();ctx.roundRect(d.x-bw/2,d.y-20,bw,5.5,2.5);ctx.fill();
+    ctx.fillStyle=pct>0.5?'#ffd678':'#ff5e5e';
+    ctx.beginPath();ctx.roundRect(d.x-bw/2+1,d.y-19,(bw-2)*pct,3.5,2);ctx.fill();
+   }
+  }else{
+   // Swung-open door leaf tucked neatly inside threshold
+   ctx.strokeStyle=d.reopenCd>0?'rgba(255,110,90,0.7)':'rgba(130,245,165,0.52)';
+   ctx.fillStyle=d.reopenCd>0?'rgba(140,45,35,0.55)':'rgba(98,74,50,0.75)';
+   ctx.lineWidth=1.5;
+   ctx.save();
+   if(d.side==='N'){ctx.translate(dr.x+4,dr.y+dr.h/2);ctx.rotate(1.32);ctx.fillRect(0,-3,dr.w*0.76,6);ctx.strokeRect(0,-3,dr.w*0.76,6);}
+   else if(d.side==='S'){ctx.translate(dr.x+4,dr.y+dr.h/2);ctx.rotate(-1.32);ctx.fillRect(0,-3,dr.w*0.76,6);ctx.strokeRect(0,-3,dr.w*0.76,6);}
+   else if(d.side==='W'){ctx.translate(dr.x+dr.w/2,dr.y+4);ctx.rotate(-0.26);ctx.fillRect(-3,0,6,dr.h*0.76);ctx.strokeRect(-3,0,6,dr.h*0.76);}
+   else{ctx.translate(dr.x+dr.w/2,dr.y+4);ctx.rotate(0.26);ctx.fillRect(-3,0,6,dr.h*0.76);ctx.strokeRect(-3,0,6,dr.h*0.76);}
+   ctx.restore();
+  }
+  ctx.restore();
+ }
+}
+
 function drawBuildingLoot(now,viewX,viewY){
  const minX=viewX-60,maxX=viewX+W+60,minY=viewY-60,maxY=viewY+H+60;
 
@@ -5467,7 +5913,7 @@ function drawZombie(z,now,targetCtx){
   c.restore();
  }
 
- // Status overlays: Burning & Cryo-Chilled
+ // Status overlays: Burning, Cryo-Chilled & Search alert
  if(!z.preview&&z.burnTimer>0){
   const fp=0.55+Math.sin(now*0.025+z.seed*12)*0.35;
   c.strokeStyle=`rgba(255,136,42,${fp.toFixed(2)})`;c.lineWidth=2.5;
@@ -5476,6 +5922,11 @@ function drawZombie(z,now,targetCtx){
  if(!z.preview&&z.chillTimer>0){
   c.strokeStyle='rgba(128,242,255,0.8)';c.lineWidth=2.2;
   c.setLineDash([4,4]);c.beginPath();c.arc(0,0,z.r+4,0,Math.PI*2);c.stroke();c.setLineDash([]);
+ }
+ if(!z.preview&&z.aggro&&z.aggroTimer>0&&z.aggroTimer<2.2){
+  c.textAlign='center';c.font='800 12px system-ui,sans-serif';
+  c.fillStyle='rgba(255,222,102,0.85)';
+  c.fillText('?',0,-z.r-(def.isBossBar?29:14));
  }
 
  // Health bar + archetype label for heavy / elite / damaged multi-HP zombies
@@ -6077,7 +6528,7 @@ function renderRadar(now){
    g.beginPath();g.arc(zx,zy,5.0,0,Math.PI*2);g.fill();
    continue;
   }
-  g.fillStyle=def.isBossBar?'#ff5ee0':z.speed>=80?'#ffd054':def.glow==='cyan'?'#66f0ff':'#ff4d58';
+  g.fillStyle=!z.aggro?'rgba(255,195,90,0.52)':(def.isBossBar?'#ff5ee0':z.speed>=80?'#ffd054':def.glow==='cyan'?'#66f0ff':'#ff4d58');
   g.beginPath();g.arc(zx,zy,def.isBossBar?4.2:2.8,0,Math.PI*2);g.fill();
  }
 
@@ -6285,6 +6736,7 @@ function render(now){
   if(b.x+b.w<viewX-60||b.x>viewX+W+60||b.y+b.h<viewY-60||b.y>viewY+H+60)continue;
   drawDynamicBuildingRoof(b,now);
  }
+ drawBuildingDoors(now,viewX,viewY);
 
  drawCanopies(now,viewX,viewY);
  drawEvacHelicopter(now,viewX,viewY);
@@ -6589,6 +7041,9 @@ if($('interactBtn'))$('interactBtn').addEventListener('click',()=>{
  else if(nearbyHeli)buyHelicopterAndEscape();
  else if(nearbyLootNode)openLootNode(nearbyLootNode);
 });
+if($('doorBtn'))$('doorBtn').addEventListener('click',()=>{
+ if(nearbyDoor)toggleBuildingDoor(nearbyDoor);
+});
 if($('npcClose'))$('npcClose').addEventListener('click',closeNpcDialog);
 canvas.addEventListener('pointerdown',e=>{
  if(!running||paused||!player)return;
@@ -6606,6 +7061,13 @@ canvas.addEventListener('pointerdown',e=>{
  if(evacHeli&&!evacHeli.bought&&Math.hypot(wx-evacHeli.x,wy-evacHeli.y)<=72&&Math.hypot(player.x-evacHeli.x,player.y-evacHeli.y)<=110){
   buyHelicopterAndEscape();
   return;
+ }
+ for(let i=0;i<buildings.length;i++){
+  const b=buildings[i];
+  if(b.door&&Math.hypot(wx-b.door.x,wy-b.door.y)<=32&&Math.hypot(player.x-b.door.x,player.y-b.door.y)<=76){
+   toggleBuildingDoor(b);
+   return;
+  }
  }
  for(let i=0;i<lootNodes.length;i++){
   const ln=lootNodes[i];
@@ -6731,6 +7193,10 @@ window.addEventListener('keydown',e=>{
   if(nearbyNpc)openNpcDialog(nearbyNpc);
   else if(nearbyHeli)buyHelicopterAndEscape();
   else if(nearbyLootNode)openLootNode(nearbyLootNode);
+  else if(nearbyDoor)toggleBuildingDoor(nearbyDoor);
+ }
+ if((e.code==='KeyF'||e.key==='f'||e.key==='F'||e.key==='а'||e.key==='А')&&running&&!paused){
+  if(nearbyDoor)toggleBuildingDoor(nearbyDoor);
  }
  const slotKeyIdx=['1','2','3','4','5','6','7','8','9','0','-'].indexOf(e.key);
  if(slotKeyIdx!==-1){
