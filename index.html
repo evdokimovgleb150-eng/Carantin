@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#0b1416">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>CARANTIN 4.2 — История и открытый мир</title>
+<title>CARANTIN 4.3 — История и открытый мир</title>
 <style>
 :root{
  --bg-dark:#081012;
@@ -133,6 +133,31 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  gap:3px;
  pointer-events:none;
 }
+#radarButton{
+ pointer-events:auto;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;
+ padding:3px;border-radius:12px;background:rgba(8,20,20,.8);
+ border:1px solid rgba(116,225,154,.55);color:#d9ffe2;
+ font-size:11px;font-weight:800;
+}
+#radarButton:focus-visible{outline:3px solid #ffe082;outline-offset:2px}
+#mapModal{
+ display:none;position:absolute;inset:0;z-index:1100;pointer-events:auto;
+ align-items:center;justify-content:center;padding:12px;
+ background:rgba(3,12,16,.93);
+}
+#mapPanel{
+ width:min(620px,100%);max-height:96dvh;display:flex;flex-direction:column;align-items:center;gap:8px;
+ padding:14px;border:1.5px solid #89e9ad;border-radius:18px;
+ background:#102328;box-shadow:0 15px 55px #000c;
+}
+#mapPanel h2{margin:0;font-size:22px}
+#expandedRadar{
+ width:min(100%,72dvh,540px);height:auto;aspect-ratio:1;
+ border:2px solid #7cdbac;border-radius:12px;background:#091717;
+}
+#mapLegend{font-size:14px;line-height:1.45;text-align:center;color:#dbefde}
+#mapClose{max-width:260px;margin:2px 0 0}
+@media(max-height:490px){#mapPanel{padding:7px;gap:4px}#expandedRadar{width:min(100%,55dvh,400px)}#mapPanel h2{font-size:17px}#mapLegend{font-size:12px}}
 #locBadge{
  font-size:9px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
  color:#9fd8bc;background:rgba(8,18,19,0.84);
@@ -902,6 +927,36 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
 @media(max-width:360px){
  .weapon{min-width:74px;padding:6px 7px}
 }
+/* Readability pass: fewer permanent controls, larger labels on both orientations. */
+.stat{font-size:clamp(12px,3.3vw,16px)}
+#threatBadge,#zoneBadge,#evacBadge{font-size:11.5px;line-height:1.3}
+#polygonBanner{font-size:13px;line-height:1.3}
+#missionBar{font-size:12.5px;white-space:normal;line-height:1.32}
+.mercPill,#locBadge{font-size:11px}
+.hudBtn{height:40px;font-size:14px;padding:0 12px}
+#shopButton,#storyBtn{font-size:14px;padding:0 12px}
+#pauseButton{width:auto;font-size:14px;padding:0 12px}
+#radar{width:78px;height:78px}
+.small{font-size:14px;line-height:1.4}
+.modeBtn{font-size:13.5px}.modeBtn small{font-size:11px}
+.diffBtn{font-size:13px}.diffBtn small{font-size:11px}
+.storyBody,.itemDesc,.npcOfferDesc,.shopSub{font-size:13.5px;line-height:1.43}
+.storyHead{font-size:15px}.storyBadge,.storyReward{font-size:12px}
+.codexDesc{font-size:13px}.codexStat{font-size:11px}
+.ctrlCard{font-size:12px}.ctrlCard b{font-size:12px}
+#dlgText{font-size:16px;line-height:1.5}
+#travelSay{font-size:15px}
+#interactBtn,#doorBtn,#vehBtn,#quickUseBtn,#nitroBtn,#turretBtn{font-size:14px}
+#pauseScreen .box{width:min(460px,100%)}
+#pauseScreen .boxFooter{max-height:calc(94dvh - 80px);overflow-y:auto;touch-action:pan-y;padding:2px 3px 6px}
+#pauseScreen .boxFooter .mainbtn{font-size:14.5px;padding:10px 7px;margin-top:8px;letter-spacing:0}
+@media(max-height:560px){
+ .hudBtn,#shopButton,#storyBtn,#pauseButton{height:34px;font-size:12.5px;padding:0 8px}
+ #radar{width:68px;height:68px}
+ #missionBar{font-size:11.5px}
+ #threatBadge,#zoneBadge,#evacBadge{font-size:10.5px}
+ #interactBtn,#doorBtn,#vehBtn,#quickUseBtn,#nitroBtn,#turretBtn{font-size:13px}
+}
 </style>
 </head>
 <body>
@@ -937,16 +992,15 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
     </div>
     <div id="hudBtns">
      <button type="button" class="hudBtn" id="storyBtn" aria-label="Сюжет и отряд" title="КПК: Сюжет и отряд [Q]">📜 КПК</button>
-     <button type="button" class="hudBtn" id="codexButton" aria-label="Индекс зомби">🧟<span id="codexBadge">0/43</span></button>
-     <button type="button" class="hudBtn" id="shopButton">МАГАЗИН<span id="shopBadge"></span></button>
-     <button type="button" class="hudBtn" id="muteButton" aria-label="Звук" title="Включить/выключить звук [M]">🔊</button>
-     <button type="button" class="hudBtn" id="fsButton" aria-label="Горизонтальный полноэкранный режим" title="Полный экран / Горизонтально">⛶</button>
-     <button type="button" class="hudBtn" id="pauseButton" aria-label="Пауза">Ⅱ</button>
+     <button type="button" class="hudBtn" id="shopButton">🏪 МАГАЗИН<span id="shopBadge"></span></button>
+     <button type="button" class="hudBtn" id="pauseButton" aria-label="Пауза">⏸ ПАУЗА</button>
     </div>
    </div>
   </div>
   <div id="radarSlot">
-   <canvas id="radar" width="136" height="136" aria-hidden="true"></canvas>
+   <button type="button" id="radarButton" aria-label="Увеличить карту" aria-haspopup="dialog" aria-expanded="false" title="Нажми, чтобы открыть карту">
+    <canvas id="radar" width="136" height="136" aria-hidden="true"></canvas><span>⌕ КАРТА</span>
+   </button>
    <div id="locBadge">Сектор 1</div>
   </div>
  </div>
@@ -984,6 +1038,15 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  </div>
 </div>
 
+<div id="mapModal" role="dialog" aria-modal="true" aria-label="Карта города">
+ <div id="mapPanel">
+  <h2>🗺️ КАРТА ГОРОДА</h2>
+  <canvas id="expandedRadar" width="544" height="544" aria-label="Карта районов и текущего положения"></canvas>
+  <div id="mapLegend">🟢 Игрок · 🔴 Заражённые · 🟡 Цель · 🔵 База<br>Нажми «Закрыть», чтобы продолжить игру.</div>
+  <button type="button" class="mainbtn" id="mapClose">ЗАКРЫТЬ КАРТУ</button>
+ </div>
+</div>
+
 <div id="overlay">
  <div class="box">
   <div class="hazardStrip"></div>
@@ -1002,7 +1065,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
     <button type="button" class="diffBtn" data-diff="nightmare"><span>🔴 Кошмар</span><small>1.68× HP · +65% 🪙</small></button>
    </div>
    <div class="controlsGrid">
-    <div class="ctrlCard"><b>📱 Горизонт. сенсор</b>Левый стик — шаг / руль<br>Правый стик — прицел и огонь<br>Кнопки 🚗 / 🔥 Нитро / 🤖 Турель</div>
+    <div class="ctrlCard"><b>📱 Сенсор</b>Левый стик — движение, правый — огонь<br>Нажми на радар — крупная карта<br>Редкие команды — в паузе → «Ещё»</div>
     <div class="ctrlCard"><b>⌨️ Клавиатура + Мышь</b>WASD + ЛКМ · Колесо — пушки<br>E Диалог/Лут/КПП · G Авто · Shift Нитро · T Турель</div>
    </div>
   </div>
@@ -1089,14 +1152,23 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    </div>
    <p class="small" id="pauseSaveInfo" role="status"></p>
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-    <button type="button" class="mainbtn secondary" id="pauseShop" style="font-size:12.5px;padding:10px 8px">🏪 МАГАЗИН</button>
-    <button type="button" class="mainbtn secondary" id="pauseMute" style="font-size:12.5px;padding:10px 8px">🔊 ЗВУК: ВКЛ</button>
+    <button type="button" class="mainbtn secondary" id="pauseMenu">🏠 ГЛАВНОЕ МЕНЮ</button>
+    <button type="button" class="mainbtn secondary" id="pauseMore" aria-expanded="false" aria-controls="pauseExtras">⚙️ ЕЩЁ</button>
    </div>
-   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-    <button type="button" class="mainbtn secondary" id="pauseCodex" style="font-size:12.5px;padding:10px 8px">🧟 ИНДЕКС</button>
-    <button type="button" class="mainbtn secondary" id="pauseAch" style="font-size:12.5px;padding:10px 8px">🏆 ТРОФЕИ</button>
+   <div id="pauseExtras" style="display:none">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+     <button type="button" class="mainbtn secondary" id="pauseShop">🏪 МАГАЗИН</button>
+     <button type="button" class="mainbtn secondary" id="pauseMute">🔊 ЗВУК: ВКЛ</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+     <button type="button" class="mainbtn secondary" id="pauseCodex">🧟 ИНДЕКС</button>
+     <button type="button" class="mainbtn secondary" id="pauseAch">🏆 ТРОФЕИ</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+     <button type="button" class="mainbtn secondary" id="pauseFullscreen">⛶ ПОЛНЫЙ ЭКРАН</button>
+     <button type="button" class="mainbtn secondary" id="pauseRestart">🔄 НОВЫЙ ЗАБЕГ</button>
+    </div>
    </div>
-   <button type="button" class="mainbtn secondary" id="pauseRestart" style="background:linear-gradient(180deg,#703636,#421c1c);border-color:rgba(255,120,120,0.45);font-size:13px;padding:10px 12px">🔄 НОВЫЙ ЗАБЕГ</button>
   </div>
  </div>
 </div>
@@ -1201,8 +1273,11 @@ const canvas=document.getElementById('game');
 const ctx=canvas.getContext('2d');
 const radarCanvas=document.getElementById('radar');
 const radarCtx=radarCanvas.getContext('2d');
+const expandedRadarCtx=document.getElementById('expandedRadar').getContext('2d');
 const uiEl=document.getElementById('ui');
 const $=id=>document.getElementById(id);
+// Result screens replace the overlay; keep the original start menu for Pause → Menu.
+const initialMenuHtml=$('overlay').innerHTML;
 
 // Large Multi-District Quarantine City dimensions
 const WORLD_W=3600;
@@ -9000,9 +9075,12 @@ function drawScreenVignette(now){
  }
 }
 
-function renderRadar(now){
+function renderRadar(now,g=radarCtx,scale=1){
+ // Draw the same world at higher canvas resolution in the full-screen map.
+ // Logical radar coordinates stay identical, so markers remain easy to see.
  const rw=radarCanvas.width,rh=radarCanvas.height;
- const g=radarCtx;
+ g.save();
+ g.setTransform(scale,0,0,scale,0,0);
  g.clearRect(0,0,rw,rh);
 
  const sx=rw/WORLD_W,sy=rh/WORLD_H;
@@ -9136,6 +9214,7 @@ function renderRadar(now){
   g.fillStyle='#5cff3a';
   g.beginPath();g.arc(px,py,4.5,0,Math.PI*2);g.fill();
  }
+ g.restore();
 }
 
 function render(now){
@@ -9371,6 +9450,7 @@ function render(now){
  ctx.restore();
 
  renderRadar(now);
+ if($('mapModal').style.display==='flex')renderRadar(now,expandedRadarCtx,4);
 }
 
 function getUpgradeLevel(key){
@@ -9470,19 +9550,58 @@ function openShop(){
  renderShop();
 }
 function closeShop(){$('shop').style.display='none';paused=false;last=performance.now()}
+function openMap(){
+ if(!running||paused||waveChoosing||activeNpc)return;
+ paused=true;stopAllControls();
+ $('mapModal').style.display='flex';
+ $('radarButton').setAttribute('aria-expanded','true');
+ renderRadar(performance.now(),expandedRadarCtx,4);
+ if(typeof $('mapClose').focus==='function')$('mapClose').focus();
+}
+function closeMap(){
+ if($('mapModal').style.display!=='flex')return;
+ $('mapModal').style.display='none';
+ $('radarButton').setAttribute('aria-expanded','false');
+ stopAllControls();
+ if(typeof $('radarButton').focus==='function')$('radarButton').focus();
+ if(running){paused=false;last=performance.now();}
+}
+function resetPauseMenu(){
+ const b=$('pauseMenu');
+ b.dataset.confirm='';b.textContent='🏠 ГЛАВНОЕ МЕНЮ';
+}
+function returnToMenu(){
+ if(!running||$('pauseScreen').style.display!=='flex')return;
+ stopAllControls();running=false;paused=false;waveChoosing=false;activeNpc=null;
+ campaignReset();
+ for(const id of ['pauseScreen','waveModal','npcModal','shop','bagModal','storyModal',
+                  'codexModal','achModal','dialogueOverlay','travelOverlay','mapModal']){
+  if($(id))$(id).style.display='none';
+ }
+ $('bossBanner').style.display='none';
+ uiEl.style.transform='';
+ $('overlay').innerHTML=initialMenuHtml;
+ $('overlay').style.display='flex';
+ setGameMode(gameMode);setDifficulty(currentDifficulty);
+ updateAchBadges();updateCodexBadge();refreshSaveInfo();syncMuteUI();
+ last=performance.now();
+}
 function pauseGame(){
  if(!running||waveChoosing||activeNpc)return;
+ resetPauseMenu();
+ $('pauseExtras').style.display='none';
+ $('pauseMore').textContent='⚙️ ЕЩЁ';$('pauseMore').setAttribute('aria-expanded','false');
  if($('bagModal'))$('bagModal').style.display='none';
  if($('storyModal'))$('storyModal').style.display='none';
  if($('achModal'))$('achModal').style.display='none';
  paused=true;stopAllControls();
  const d=getDifficulty();
- if($('pauseDiffInfo'))$('pauseDiffInfo').innerHTML=`Кампания: сектор <b>${campaignStage+1}/4</b> · <b style="color:${d.color}">${d.icon} ${d.name}</b> · Счёт <b>${score}</b>`;
+ if($('pauseDiffInfo'))$('pauseDiffInfo').innerHTML=`${gameMode==='campaign'?`Кампания: сектор <b>${campaignStage+1}/4</b>`:`Открытый мир: волна <b>${wave}</b>`} · <b style="color:${d.color}">${d.icon} ${d.name}</b> · Счёт <b>${score}</b>`;
  $('pauseScreen').style.display='flex';
  refreshSaveInfo();
  if(gameMode==='free'&&$('pauseSaveInfo'))$('pauseSaveInfo').textContent='Сохраняется только сюжетная кампания';
 }
-function resumeGame(){paused=false;$('pauseScreen').style.display='none';last=performance.now()}
+function resumeGame(){resetPauseMenu();paused=false;$('pauseScreen').style.display='none';last=performance.now()}
 
 const HOME_LABELS={
  suburb:'🏘️ Жилой квартал',
@@ -9664,7 +9783,23 @@ function toggleLandscapeFullscreen(){
 $('shopButton').addEventListener('click',openShop);
 $('shopClose').addEventListener('click',closeShop);
 $('pauseButton').addEventListener('click',pauseGame);
+$('radarButton').addEventListener('click',openMap);
+$('mapClose').addEventListener('click',closeMap);
+$('mapModal').addEventListener('click',e=>{if(e.target===$('mapModal'))closeMap();});
 $('resume').addEventListener('click',resumeGame);
+$('pauseMore').addEventListener('click',()=>{
+ const extra=$('pauseExtras'),open=extra.style.display!=='block';
+ extra.style.display=open?'block':'none';
+ $('pauseMore').textContent=open?'⚙️ СВЕРНУТЬ':'⚙️ ЕЩЁ';
+ $('pauseMore').setAttribute('aria-expanded',String(open));
+});
+$('pauseMenu').addEventListener('click',()=>{
+ const btn=$('pauseMenu');
+ if(btn.dataset.confirm==='1'){returnToMenu();return;}
+ btn.dataset.confirm='1';btn.textContent='⚠️ ПОДТВЕРДИТЬ ВЫХОД';
+ $('pauseSaveInfo').textContent='Несохранённый прогресс пропадёт. Сохранение кампании останется.';
+});
+$('pauseFullscreen').addEventListener('click',toggleLandscapeFullscreen);
 $('pauseShop').addEventListener('click',()=>{$('pauseScreen').style.display='none';$('shop').style.display='flex';renderShop()});
 if($('muteButton'))$('muteButton').addEventListener('click',toggleMute);
 if($('pauseMute'))$('pauseMute').addEventListener('click',toggleMute);
@@ -9915,6 +10050,7 @@ window.addEventListener('keydown',e=>{
   else openCodex(paused&&running?'pause':running?'game':'overlay');
  }
  if(e.key==='Escape'){
+  if($('mapModal').style.display==='flex'){closeMap();return;}
   if($('dialogueOverlay').style.display==='flex'){campaignSkipDialogue();return;}
   if($('travelOverlay').style.display==='flex'){campaignArrive();return;}
   if($('achModal')&&$('achModal').style.display==='flex'){closeAchModal();return;}
