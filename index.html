@@ -112,7 +112,7 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  z-index:20;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
  max-width:92vw;
 }
-#interactBtn,#doorBtn{
+#interactBtn,#doorBtn,#vehBtn,#quickUseBtn{
  display:none;pointer-events:auto;
  padding:9px 18px;border-radius:999px;
  background:linear-gradient(180deg,#2d88b8,#195273);
@@ -131,6 +131,45 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  border-color:#ffd678;color:#fff8e6;
  box-shadow:0 6px 24px rgba(0,0,0,0.6),0 0 16px rgba(255,196,74,0.35);
 }
+#vehBtn{
+ background:linear-gradient(180deg,#c98c24,#82540d);
+ border-color:#ffe082;color:#fff9eb;
+ box-shadow:0 6px 24px rgba(0,0,0,0.6),0 0 16px rgba(255,204,78,0.38);
+}
+#vehBtn.inCar{
+ background:linear-gradient(180deg,#445f75,#243747);
+ border-color:#98dcff;color:#effaff;
+}
+#quickUseBtn{
+ background:linear-gradient(180deg,#298c50,#185430);
+ border-color:#7cffaa;color:#ecfff2;
+ box-shadow:0 6px 24px rgba(0,0,0,0.6),0 0 16px rgba(92,255,138,0.35);
+}
+#storyBtn{
+ padding:0 9px;color:#ffdca8;border-color:rgba(255,198,96,0.48);
+ display:inline-flex;align-items:center;gap:4px;
+}
+#missionBar{
+ display:none;pointer-events:auto;cursor:pointer;
+ margin-top:3px;padding:3px 9px;border-radius:8px;
+ background:rgba(9,20,22,0.88);
+ border:1px solid rgba(255,202,94,0.45);
+ color:#f7e4b2;font-size:10.5px;font-weight:700;letter-spacing:.2px;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+ box-shadow:0 3px 10px rgba(0,0,0,0.45);
+}
+#missionBar b{color:#7cff96}
+#squadBar{
+ display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;
+}
+.mercPill{
+ display:inline-flex;align-items:center;gap:4px;
+ font-size:10px;font-weight:800;color:#dff8ff;
+ background:rgba(12,28,36,0.86);
+ border:1px solid rgba(98,215,255,0.42);
+ border-radius:6px;padding:1px 6px;
+}
+.mercPill.dead{opacity:.5;border-color:rgba(255,100,110,0.4);color:#ffb0b8}
 #bossBanner{
  display:none;
  position:absolute;top:calc(max(8px,env(safe-area-inset-top)) + 98px);left:50%;transform:translateX(-50%);
@@ -155,7 +194,7 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  box-shadow:0 0 10px rgba(255,75,105,0.6);
  transition:width .1s ease;
 }
-#interactBtn.show,#doorBtn.show{display:inline-flex;align-items:center;gap:6px}
+#interactBtn.show,#doorBtn.show,#vehBtn.show,#quickUseBtn.show{display:inline-flex;align-items:center;gap:6px}
 @keyframes pulseInteract{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
 
 .hudBtn{
@@ -321,14 +360,36 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  border-radius:6px;padding:1px 5px;
 }
 
-#overlay,#shop,#pauseScreen,#waveModal,#npcModal,#codexModal,#bagModal{
+#overlay,#shop,#pauseScreen,#waveModal,#npcModal,#codexModal,#bagModal,#storyModal{
  position:absolute;inset:0;z-index:1000;
  display:flex;align-items:center;justify-content:center;padding:12px;
  background:radial-gradient(circle at 50% 40%,rgba(11,26,23,0.72),rgba(4,9,10,0.88));
  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
  pointer-events:auto;
 }
-#shop,#pauseScreen,#waveModal,#npcModal,#codexModal,#bagModal{display:none}
+#shop,#pauseScreen,#waveModal,#npcModal,#codexModal,#bagModal,#storyModal{display:none}
+.storyCard{
+ padding:10px 11px;border-radius:13px;text-align:left;
+ background:rgba(8,18,20,0.86);
+ border:1.5px solid rgba(114,175,142,0.32);
+ margin-bottom:8px;
+}
+.storyCard.active{
+ border-color:rgba(255,204,88,0.78);
+ background:linear-gradient(135deg,rgba(42,35,14,0.88),rgba(14,22,22,0.92));
+}
+.storyCard.done{
+ border-color:rgba(102,255,142,0.45);
+ background:rgba(12,28,20,0.78);
+ opacity:.85;
+}
+.storyHead{display:flex;justify-content:space-between;align-items:center;gap:6px;font-weight:800;font-size:13.5px;color:#f3faf4}
+.storyBadge{font-size:10px;padding:2px 7px;border-radius:999px;font-weight:800}
+.storyBadge.active{background:rgba(255,198,74,0.22);color:#ffe28a;border:1px solid rgba(255,198,74,0.45)}
+.storyBadge.done{background:rgba(92,255,130,0.18);color:#8bffaa}
+.storyBadge.lock{background:rgba(120,145,145,0.16);color:#8aa4a0}
+.storyBody{font-size:11.5px;color:#b8d2c4;margin-top:4px;line-height:1.36}
+.storyReward{font-size:11px;color:#ffd878;margin-top:5px;font-weight:700}
 .box.codexBox{width:min(620px,100%)}
 .codexProgBar{
  height:7px;border-radius:99px;overflow:hidden;margin:6px 0 8px;
@@ -548,7 +609,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  .weapon svg{width:26px;height:12px}
  #weaponInfo{bottom:182px;font-size:11px}
  #actionBar{bottom:204px}
- #interactBtn,#doorBtn{padding:7px 14px;font-size:12px}
+ #interactBtn,#doorBtn,#vehBtn,#quickUseBtn{padding:7px 14px;font-size:12px}
  #radar{width:54px;height:54px;top:calc(max(8px,env(safe-area-inset-top)) + 84px)}
  .box{padding:12px 14px}
  .emblem{width:46px;height:46px;margin-bottom:6px}
@@ -600,7 +661,9 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  .weapon svg{width:24px;height:12px}
  #weaponInfo{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 44px);font-size:10.5px}
  #actionBar{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 66px)}
- #interactBtn,#doorBtn{padding:6px 13px;font-size:11.5px}
+ #interactBtn,#doorBtn,#vehBtn,#quickUseBtn{padding:6px 13px;font-size:11.5px}
+ #storyBtn{padding:0 7px}
+ #missionBar{font-size:9.5px;padding:2px 6px}
  #bossBanner{top:calc(max(8px,env(safe-area-inset-top)) + 56px);width:min(280px,46vw)}
 }
 @media(max-height:430px){
@@ -637,8 +700,11 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
     <div id="evacBadge">🚁 ЭВАК: 0/2000 🪙</div>
    </div>
    <div id="activeItems"></div>
+   <div id="squadBar"></div>
+   <div id="missionBar" title="Открыть сюжет и вылазки [Q]"></div>
   </div>
-  <button type="button" class="hudBtn" id="codexButton" aria-label="Индекс зомби">🧟<span id="codexBadge">0/42</span></button>
+  <button type="button" class="hudBtn" id="storyBtn" aria-label="Сюжет, вылазки и отряд" title="КПК: Сюжет и Вылазки [Q]">📜 КПК</button>
+  <button type="button" class="hudBtn" id="codexButton" aria-label="Индекс зомби">🧟<span id="codexBadge">0/43</span></button>
   <button type="button" class="hudBtn" id="shopButton">МАГАЗИН<span id="shopBadge"></span></button>
   <button type="button" class="hudBtn" id="fsButton" aria-label="Горизонтальный полноэкранный режим" title="Полный экран / Горизонтально">⛶</button>
   <button type="button" class="hudBtn" id="pauseButton" aria-label="Пауза">Ⅱ</button>
@@ -654,6 +720,8 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  <div id="actionBar">
   <button type="button" id="interactBtn"></button>
   <button type="button" id="doorBtn"></button>
+  <button type="button" id="vehBtn"></button>
+  <button type="button" id="quickUseBtn"></button>
  </div>
  <div id="weaponInfo">Пистолет · ручной прицел</div>
  <div id="weaponBar"></div>
@@ -680,15 +748,15 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    <img class="emblem" src="./icon-192.png" alt="CARANTIN">
    <h1>CARA<span class="titleAccent">NTIN</span></h1>
    <div class="titleSlash"></div>
-   <p>Огромный город с 4 районами и Безопасной зоной в центре. Заходи в разные здания, собирай лут, продавай его скупщику — накопи <b style="color:#ffe082">2000 🪙</b>, найди эвакуационный <b style="color:#7cff8c">вертолёт 🚁</b> на окраине карты и улети в убежище!</p>
+   <p>Продолжение «Протокол Зачистки»: <b style="color:#ffd878">5-главный сюжет</b> от Командира «Шрама», <b style="color:#8be6ff">управляемые машины</b>, <b style="color:#7cff9c">наёмники</b> в отряд, <b style="color:#ff9e66">городские вылазки</b> и редкие расходники. Пройди кампанию или накопи <b style="color:#ffe082">2000 🪙</b> для эвакуации на <b style="color:#7cff8c">вертолёте 🚁</b>!</p>
    <div class="controlsGrid">
-    <div class="ctrlCard"><b>📱 Горизонт. сенсор</b>Левый стик — движение<br>Правый стик — прицел и огонь<br>Кнопки 🚪 / 🔍 — дверь и лут</div>
-    <div class="ctrlCard"><b>⌨️ Клавиатура + Мышь</b>WASD — шаг · Мышь/ЛКМ — огонь<br>1–9, 0 — оружие · E — Лут/NPC · F — Дверь · I — Индекс</div>
+    <div class="ctrlCard"><b>📱 Горизонт. сенсор</b>Левый стик — шаг / руль<br>Правый стик — прицел и огонь<br>Кнопки 🚗 / 🚪 / 🔍 / 📜 КПК</div>
+    <div class="ctrlCard"><b>⌨️ Клавиатура + Мышь</b>WASD — шаг/руль · ЛКМ — огонь<br>E — Лут/NPC · F — Дверь · G — Авто · Q — КПК · H — Аптечка</div>
    </div>
   </div>
   <div class="boxFooter">
    <button type="button" class="mainbtn" id="start">НАЧАТЬ ИГРУ</button>
-   <button type="button" class="mainbtn secondary" id="startCodex">🧟 ИНДЕКС ЗОМБИ (<span id="startCodexCount">0</span>/42)</button>
+   <button type="button" class="mainbtn secondary" id="startCodex">🧟 ИНДЕКС ЗОМБИ (<span id="startCodexCount">0</span>/43)</button>
   </div>
  </div>
 </div>
@@ -769,10 +837,10 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   <div class="hazardStrip"></div>
   <div class="boxBody">
    <h2>🧟 ИНДЕКС ЗОМБИ</h2>
-   <p class="small" style="margin:2px 0 4px">Открыто разновидностей: <b id="codexProgressText" style="color:#7cff8c">0 / 42</b></p>
+   <p class="small" style="margin:2px 0 4px">Открыто разновидностей: <b id="codexProgressText" style="color:#7cff8c">0 / 43</b></p>
    <div class="codexProgBar"><div class="codexProgFill" id="codexProgFill"></div></div>
    <div class="codexFilters" id="codexFilters">
-    <button type="button" class="codexTab active" data-filter="all">Все (42)</button>
+    <button type="button" class="codexTab active" data-filter="all">Все (43)</button>
     <button type="button" class="codexTab" data-filter="seen">Открыты</button>
     <button type="button" class="codexTab" data-filter="suburb">🏘️ Город</button>
     <button type="button" class="codexTab" data-filter="chem">☣️ Химзона</button>
@@ -784,6 +852,25 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   </div>
   <div class="boxFooter">
    <button type="button" class="mainbtn" id="codexClose">ЗАКРЫТЬ</button>
+  </div>
+ </div>
+</div>
+
+<div id="storyModal">
+ <div class="box codexBox">
+  <div class="hazardStrip"></div>
+  <div class="boxBody">
+   <h2>🎖️ КПК КОМАНДИРА «ШРАМ»</h2>
+   <p class="small" id="storySubtitle" style="margin:2px 0 8px">Канал связи: <b style="color:#7cff8c">АКТИВЕН</b> · Монеты: <b id="storyMoney" style="color:#ffe082">0</b> 🪙</p>
+   <div class="codexFilters" id="storyTabs">
+    <button type="button" class="codexTab active" data-tab="story">📖 Сюжет</button>
+    <button type="button" class="codexTab" data-tab="expeditions">🎯 Вылазки</button>
+    <button type="button" class="codexTab" data-tab="squad">👥 Наёмники</button>
+   </div>
+   <div id="storyContent"></div>
+  </div>
+  <div class="boxFooter">
+   <button type="button" class="mainbtn" id="storyClose">ЗАКРЫТЬ</button>
   </div>
  </div>
 </div>
@@ -852,6 +939,16 @@ const NPCS=[
   tableX:1945,tableY:1706,
   color:'#5fd6c5',hood:'#2a4745',visor:'#72ff9f',
   say:'Ранен? Залатай броню и заряди энергощит — купол восстановит силы, пока ты на базе.'
+ },
+ {
+  id:'commander',
+  name:'Командир «ШРАМ»',
+  short:'ШРАМ',
+  role:'Сюжет, вылазки и наёмники',
+  x:1640,y:1855,
+  tableX:1640,tableY:1816,
+  color:'#e8a93e',hood:'#323b2a',visor:'#ffd85c',
+  say:'Связь восстановлена не полностью. Бери вылазки, нанимай бойцов в отряд и зачисти город от Патриарха-0!'
  }
 ];
 
@@ -868,7 +965,20 @@ const LOOT_TYPES={
  isotope:{id:'isotope',name:'Изотопный контейнер',icon:'☢️',value:38,rarity:'epic',districts:['chem']},
  ammoBox:{id:'ammoBox',name:'Патронный ящик',icon:'🔫',value:14,rarity:'common',districts:['military']},
  optics:{id:'optics',name:'Оптика прицела',icon:'🎯',value:25,rarity:'rare',districts:['military']},
- cipher:{id:'cipher',name:'Шифр-модуль',icon:'💾',value:45,rarity:'epic',districts:['military']}
+ cipher:{id:'cipher',name:'Шифр-модуль',icon:'💾',value:45,rarity:'epic',districts:['military']},
+ // Sequel expansion loot & usable field consumables
+ fuelCan:{id:'fuelCan',name:'Канистра топлива',icon:'⛽',value:20,rarity:'common',districts:['suburb','chem','military']},
+ scrap:{id:'scrap',name:'Автозапчасти',icon:'⚙️',value:16,rarity:'common',districts:['suburb','military']},
+ dogtag:{id:'dogtag',name:'Жетон бойца',icon:'🪖',value:28,rarity:'rare',districts:['military']},
+ blueprint:{id:'blueprint',name:'Секретные чертежи',icon:'📜',value:36,rarity:'rare',districts:['chem','military']},
+ blackbox:{id:'blackbox',name:'Чёрный ящик',icon:'⬛',value:65,rarity:'epic',districts:['military','suburb']},
+ omegaSerum:{id:'omegaSerum',name:'Сыворотка «ОМЕГА»',icon:'🧬',value:78,rarity:'epic',districts:['hospital','chem']},
+ quarantineCase:{id:'quarantineCase',name:'Карантинный кейс',icon:'💎',value:95,rarity:'epic',districts:['military','chem','hospital']},
+ medkit:{id:'medkit',name:'Полевая аптечка',icon:'🚑',value:24,rarity:'rare',usable:'heal',useLabel:'+50❤️',districts:['hospital','suburb']},
+ repairKit:{id:'repairKit',name:'Ремкомплект авто',icon:'🔧',value:26,rarity:'rare',usable:'repair',useLabel:'Чин авто',districts:['suburb','military']},
+ adrenaline:{id:'adrenaline',name:'Стимулятор «Турбо»',icon:'⚡',value:30,rarity:'rare',usable:'stim',useLabel:'Турбо 18с',districts:['hospital','chem']},
+ armorPlate:{id:'armorPlate',name:'Бронепластина',icon:'🦺',value:28,rarity:'rare',usable:'armor',useLabel:'+45🛡️',districts:['military']},
+ fragPack:{id:'fragPack',name:'Связка гранат',icon:'💣',value:32,rarity:'epic',usable:'frag',useLabel:'Взрыв!',districts:['military','chem']}
 };
 const LOOT_KEYS=Object.keys(LOOT_TYPES);
 const BASE_LOOT_CAP=20;
@@ -876,6 +986,94 @@ const MAX_ACTIVE_ZOMBIES_CAP=26;
 function getMaxActiveZombies(){
  return Math.min(MAX_ACTIVE_ZOMBIES_CAP,12+(wave-1)*3);
 }
+
+const VEHICLE_TYPES={
+ sedan:{id:'sedan',name:'Седан «Волга-М»',maxHp:180,maxSpd:365,accel:470,turnSpd:4.2,mass:1.05,armor:0.08,bodyCol:'#48706b',trimCol:'#94bab3',len:62,wid:32,regen:0,siren:false},
+ police:{id:'police',name:'Патруль ДПС',maxHp:230,maxSpd:405,accel:525,turnSpd:4.5,mass:1.2,armor:0.16,bodyCol:'#243b59',trimCol:'#e9eff7',len:64,wid:33,regen:0,siren:true},
+ ambulance:{id:'ambulance',name:'Скорая помощь',maxHp:280,maxSpd:335,accel:405,turnSpd:3.7,mass:1.42,armor:0.22,bodyCol:'#dde8e6',trimCol:'#d63c46',len:72,wid:36,regen:4.0,siren:true},
+ armored:{id:'armored',name:'Броневик «Тигр»',maxHp:440,maxSpd:310,accel:375,turnSpd:3.2,mass:1.95,armor:0.45,bodyCol:'#4c573b',trimCol:'#94a36e',len:76,wid:38,regen:0,siren:false}
+};
+
+const MERC_TYPES={
+ assault:{id:'assault',name:'Боец «ГРОМ»',role:'Штурмовик',price:90,maxHp:150,speed:186,dmg:0.75,delay:0.18,range:345,color:'#5684a8',vest:'#283c4c',weaponCol:'#a6b8bc',desc:'Скорострельный автомат. Прикрывает отряд в ближнем и среднем бою.'},
+ sniper:{id:'sniper',name:'Снайпер «СОКОЛ»',role:'Дальнобой',price:135,maxHp:120,speed:176,dmg:2.9,delay:0.95,range:490,pierce:1,color:'#4c7a52',vest:'#273d2a',weaponCol:'#7cff9a',desc:'Пробивная винтовка дальнего действия. Снимает элитных мутантов.'},
+ pyro:{id:'pyro',name:'Пиромант «ИСКРА»',role:'Огнемётчик',price:165,maxHp:185,speed:172,dmg:0.44,delay:0.13,range:220,burn:2.6,armor:0.25,color:'#bf5c32',vest:'#4a2618',weaponCol:'#ff9638',desc:'Струя напалма поджигает толпы. Повышенная броня (25%).'},
+ medic:{id:'medic',name:'Саппорт «АНГЕЛ»',role:'Полевой медик',price:145,maxHp:140,speed:190,dmg:0.58,delay:0.22,range:315,healPulse:9,color:'#4eb8b0',vest:'#224a48',weaponCol:'#80f6ff',desc:'Отстреливается из ПП и регулярно лечит тебя и союзников в отряде.'}
+};
+const MAX_MERCS=2;
+
+const EXPEDITION_TYPES={
+ airdrop:{id:'airdrop',name:'Военный авиагруз',icon:'📦',desc:'Доберись до сброшенного контейнера и удерживай точку 10с под натиском заражённых.',rewardMoney:[85,125],bonusLoot:3,holdTime:10},
+ nest:{id:'nest',name:'Гнездо мутантов',icon:'☣️',desc:'Уничтожь пульсирующий био-кокон в заражённом квартале и перебей охрану.',rewardMoney:[100,145],bonusLoot:2,nestHp:240},
+ rescue:{id:'rescue',name:'Спасение выжившего',icon:'🆘',desc:'Прорвись к точке сигнала у здания и удерживай маяк 6с для эвакуации учёного.',rewardMoney:[95,135],bonusLoot:2,holdTime:6},
+ bounty:{id:'bounty',name:'Охота на Альфа-цель',icon:'🎯',desc:'Выследи и ликвидируй особо опасного элитного мутанта в районе.',rewardMoney:[130,180],bonusLoot:2}
+};
+
+const STORY_CHAPTERS=[
+ {
+  id:0,title:'Глава 1: Чёрная зона',
+  brief:'«Связь с центром оборвана. Зачищай здания и тащи хабар — собери 4 предмета лута или обыщи 2 ящика в городе.»',
+  goalText:'Собери 4 лута или открой 2 ящика',
+  rewardText:'+80 🪙 и Полевая аптечка 🚑',
+  check:()=>storyStats.lootCollected>=4||storyStats.cratesOpened>=2,
+  progress:()=>`${Math.min(4,storyStats.lootCollected)}/4 лут`,
+  grant:()=>{
+   money+=80;
+   addLootToBagOrDrop(LOOT_TYPES.medkit,player.x,player.y);
+  }
+ },
+ {
+  id:1,title:'Глава 2: На колёсах',
+  brief:'«Пешком по проспектам не прорваться. Сядь в любую машину на дороге [G] и сбей 5 заражённых бампером!»',
+  goalText:'Сбей 5 зомби машиной',
+  rewardText:'+110 🪙, Ремкомплект 🔧 и Стимулятор ⚡',
+  check:()=>storyStats.roadKills>=5,
+  progress:()=>`${Math.min(5,storyStats.roadKills)}/5 авто`,
+  grant:()=>{
+   money+=110;
+   addLootToBagOrDrop(LOOT_TYPES.repairKit,player.x,player.y);
+   addLootToBagOrDrop(LOOT_TYPES.adrenaline,player.x,player.y);
+  }
+ },
+ {
+  id:2,title:'Глава 3: Отряд зачистки',
+  brief:'«Одному город не удержать. Найми бойца в отряд (через КПК на базе или у меня) и выполни 1 городскую вылазку!»',
+  goalText:'Найми 1 наёмника и пройди 1 вылазку',
+  rewardText:'+150 🪙, Бронепластина 🦺 и Гранаты 💣',
+  check:()=>mercenaries.length>=1&&storyStats.expeditionsDone>=1,
+  progress:()=>`Бойцы:${mercenaries.length>=1?'✓':'0/1'} · Вылазка:${Math.min(1,storyStats.expeditionsDone)}/1`,
+  grant:()=>{
+   money+=150;
+   addLootToBagOrDrop(LOOT_TYPES.armorPlate,player.x,player.y);
+   addLootToBagOrDrop(LOOT_TYPES.fragPack,player.x,player.y);
+  }
+ },
+ {
+  id:3,title:'Глава 4: Протокол «ОМЕГА»',
+  brief:'«Мы перехватили источник заразы! Выполни суммарно 2 вылазки и доведи счётчик фрагов до 25 зомби.»',
+  goalText:'Всего 2 вылазки и 25+ убийств',
+  rewardText:'+220 🪙 и СКИДКА эвакуации до 1200 🪙!',
+  check:()=>storyStats.expeditionsDone>=2&&kills>=25,
+  progress:()=>`Выл:${Math.min(2,storyStats.expeditionsDone)}/2 · Фраги:${Math.min(25,kills)}/25`,
+  grant:()=>{
+   money+=220;
+   heliDiscount=Math.max(heliDiscount,800);
+  }
+ },
+ {
+  id:4,title:'Глава 5: Рассвет над карантином',
+  brief:'«На сектор вышел первоисточник штамма — ПАТРИАРХ-0! Ликвидируй его на карте (или выкупи вертолёт эвакуации)!»',
+  goalText:'Уничтожь босса Патриарх-0',
+  rewardText:'+400 🪙, 💎 Кейс и БЕСПЛАТНЫЙ ВЕРТОЛЁТ 🚁!',
+  check:()=>storyStats.patriarchKilled,
+  progress:()=>storyStats.patriarchKilled?'УБИТ ✓':(storyStats.patriarchSpawned?'НА КАРТЕ 💀':'ВЫХОДИТ...'),
+  grant:()=>{
+   money+=400;
+   heliDiscount=HELI_PRICE;
+   addLootToBagOrDrop(LOOT_TYPES.quarantineCase,player.x,player.y);
+  }
+ }
+];
 
 // Cached full-world ground canvas (built once, copied per visible viewport slice)
 const groundCanvas=document.createElement('canvas');
@@ -923,6 +1121,9 @@ const glows={
 };
 
 const HELI_PRICE=2000;
+function getHeliPrice(){
+ return Math.max(0,HELI_PRICE-(heliDiscount||0));
+}
 const HELI_SPOTS=[
  {id:'nw',x:190,y:1510,dir:0.35,label:'Северо-Западный край'},
  {id:'ne',x:3410,y:890,dir:2.62,label:'Северо-Восточный край'},
@@ -940,6 +1141,10 @@ let W=0,H=0,DPR=1;
 let player=null,zombies=[],bullets=[],enemyProjectiles=[],hazardZones=[],particles=[],popups=[],decals=[],lightningBolts=[],railBeams=[];
 let lamps=[],toxicPools=[],canopies=[],obstacles=[],ambientSpores=[],puddles=[],beacons=[],radarBuildings=[],rainDrops=[],mistPatches=[];
 let buildings=[],wallRects=[],lootNodes=[],groundLoot=[],lootBag=[],nearbyLootNode=null,nearbyDoor=null,lootFullToastCd=0,lootRespawnTimer=0;
+let vehicles=[],nearbyVehicle=null,mercenaries=[];
+let activeExpedition=null,availableExpeditions=[],storyTab='story';
+let storyStep=0,storyCompleted=false,heliDiscount=0;
+let storyStats={lootCollected:0,cratesOpened:0,roadKills:0,expeditionsDone:0,patriarchSpawned:false,patriarchKilled:false};
 let evacHeli=null,nearbyHeli=false,evacReadyShown=false;
 let cam={x:WORLD_W/2,y:WORLD_H/2};
 let score=0,money=0,health=100,maxHealth=100,shieldHp=0,kills=0;
@@ -961,7 +1166,8 @@ const SPEED_STEP=0.12;
 const MAX_SPEED_MULT=1.85;
 const DAMAGE_STEP=0.35;
 function getPlayerSpeedMult(){
- return Math.min(MAX_SPEED_MULT,upgrades.speed+((itemMods.speedMult||1)-1));
+ const stim=(player&&player.stimTimer>0)?0.35:0;
+ return Math.min(MAX_SPEED_MULT+0.25,upgrades.speed+((itemMods.speedMult||1)-1)+stim);
 }
 let ownedItems={},itemMods={};
 let bestScore=0;
@@ -1073,7 +1279,8 @@ const ZOMBIE_TYPES={
  sniper:{name:'Мёртвый стрелок',r:15,hp:2.8,speed:46,dmg:14,color:'#647558',coat:'#2c3825',eye:'#ff7436',points:36,minWave:3,armor:0.15,gear:'sniper',glow:'amber',ability:'snipe',range:370,home:'military',desc:'Держит дистанцию и стреляет быстрыми прицельными трассерами.',districts:{suburb:3,chem:4,hospital:3,military:12}},
  behemoth:{name:'Бегемот-мутант',r:26,hp:10.5,speed:30,dmg:25,color:'#66735b',coat:'#2d3328',eye:'#ffe252',points:72,minWave:4,armor:0.30,gear:'behemoth',glow:'amber',ability:'scream',isBossBar:true,home:'military',desc:'Костяно-панцирный исполин с 30% брони и боевым рёвом, ускоряющим стаю.',districts:{suburb:2,chem:6,hospital:3,military:9}},
  phantom:{name:'Фантом карантина',r:14,hp:3.2,speed:72,dmg:16,color:'#5e5285',coat:'#1c162e',eye:'#e18aff',points:42,minWave:4,gear:'phantom',glow:'cyan',alpha:0.42,ability:'blink',isBossBar:true,home:'chem',desc:'Призрачный мутант: телепортируется короткими скачками сквозь тьму.',districts:{suburb:5,chem:7,hospital:6,military:6}},
- overlord:{name:'Владыка Карантина',r:32,hp:24.0,speed:46,dmg:54,color:'#8c2136',coat:'#210912',eye:'#ff2e4d',points:250,minWave:5,armor:0.35,gear:'overlord',glow:'red',ability:'dash',isBossBar:true,isWaveBoss:true,home:'military',desc:'Колоссальный босс каждые 5 волн: огромный урон, 35% брони и сокрушительные рывки.',districts:{suburb:0,chem:0,hospital:0,military:0}}
+ overlord:{name:'Владыка Карантина',r:32,hp:24.0,speed:46,dmg:54,color:'#8c2136',coat:'#210912',eye:'#ff2e4d',points:250,minWave:5,armor:0.35,gear:'overlord',glow:'red',ability:'dash',isBossBar:true,isWaveBoss:true,home:'military',desc:'Колоссальный босс каждые 5 волн: огромный урон, 35% брони и сокрушительные рывки.',districts:{suburb:0,chem:0,hospital:0,military:0}},
+ patriarch:{name:'Патриарх-0 (Босс сюжета)',r:34,hp:38.0,speed:54,dmg:42,color:'#a83c20',coat:'#29120b',eye:'#fff066',points:500,minWave:5,armor:0.35,gear:'overlord',glow:'amber',ability:'spit',range:320,isBossBar:true,isStoryBoss:true,home:'military',desc:'Финальный сюжетный мутант 5-й главы. Его ликвидация даёт бесплатную эвакуацию на вертолёте!',districts:{suburb:0,chem:0,hospital:0,military:0}}
 };
 const ZOMBIE_KEYS=Object.keys(ZOMBIE_TYPES);
 
@@ -2002,10 +2209,11 @@ function drawTradeCounter(g,cx,cy,kind){
  const bg=g.createLinearGradient(0,-12,0,12);
  if(kind==='armorer'){bg.addColorStop(0,'#5d4a35');bg.addColorStop(1,'#382c1f')}
  else if(kind==='trader'){bg.addColorStop(0,'#63502b');bg.addColorStop(1,'#3a2d14')}
+ else if(kind==='commander'){bg.addColorStop(0,'#454f34');bg.addColorStop(1,'#272e1c')}
  else{bg.addColorStop(0,'#3b5a5c');bg.addColorStop(1,'#24393b')}
  g.fillStyle=bg;
  g.beginPath();g.roundRect(-38,-12,76,24,4);g.fill();
- g.strokeStyle=kind==='armorer'?'#c9913d':kind==='trader'?'#ffd254':'#62dcd0';
+ g.strokeStyle=kind==='armorer'?'#c9913d':kind==='trader'?'#ffd254':kind==='commander'?'#e8b848':'#62dcd0';
  g.lineWidth=2;g.stroke();
  if(kind==='armorer'){
   g.fillStyle='#1b2224';g.fillRect(-28,-5,24,6);g.fillRect(-22,-7,16,3);
@@ -2019,6 +2227,15 @@ function drawTradeCounter(g,cx,cy,kind){
   g.beginPath();g.moveTo(8,-4);g.lineTo(24,-4);g.moveTo(16,-7);g.lineTo(16,5);g.stroke();
   g.fillStyle='#ffcb48';
   g.beginPath();g.arc(9,2,3.5,0,Math.PI*2);g.arc(23,2,3.5,0,Math.PI*2);g.fill();
+ }else if(kind==='commander'){
+  // Tactical city map & field radio station
+  g.fillStyle='#dce4cf';g.beginPath();g.roundRect(-29,-8,32,16,2);g.fill();
+  g.strokeStyle='#5a7048';g.lineWidth=1.2;g.strokeRect(-26,-5,26,10);
+  g.fillStyle='#e5483a';g.beginPath();g.arc(-18,0,2.3,0,Math.PI*2);g.arc(-9,-2,2.1,0,Math.PI*2);g.fill();
+  g.fillStyle='#20292b';g.beginPath();g.roundRect(10,-7,19,14,2.5);g.fill();
+  g.fillStyle='#72ff8c';g.fillRect(13,-4,7,4);
+  g.strokeStyle='#9cb5b0';g.lineWidth=1.5;
+  g.beginPath();g.moveTo(26,-6);g.lineTo(31,-14);g.stroke();
  }else{
   g.fillStyle='#eef5f2';g.beginPath();g.roundRect(-27,-7,22,14,2.5);g.fill();
   g.fillStyle='#d13b40';g.fillRect(-18,-5,4,10);g.fillRect(-21,-2,10,4);
@@ -2760,6 +2977,7 @@ function openLootNode(node){
  if(!node||node.opened)return;
  node.opened=true;
  node.progress=1;
+ storyStats.cratesOpened=(storyStats.cratesOpened||0)+1;
  const b=node.buildingId?buildings.find(x=>x.id===node.buildingId):null;
  const tx=b?b.cx:(player?player.x:node.x),ty=b?b.cy:(player?player.y:node.y);
  const dirX=tx-node.x,dirY=ty-node.y;
@@ -2782,6 +3000,134 @@ function openLootNode(node){
  particles.push({x:node.x,y:node.y,vx:0,vy:0,life:.26,max:.26,color:'#ffe37d',size:20,kind:'ring',rot:0,vrot:0});
  addPopup(node.x,node.y-18,'📦 Обыскано!','#ffe484',12);
  nearbyLootNode=null;
+ updateStoryProgress();
+}
+
+function addLootToBagOrDrop(lt,dropX,dropY){
+ if(!lt)return;
+ storyStats.lootCollected=(storyStats.lootCollected||0)+1;
+ if(lootBag.length<getLootCapacity()){
+  lootBag.push(lt);
+  addPopup(player?player.x:dropX,(player?player.y:dropY)-26,`+${lt.icon} ${lt.name}`,'#9effa8',12);
+ }else{
+  groundLoot.push({
+   buildingId:null,
+   x:(dropX||player.x)+(Math.random()-.5)*22,
+   y:(dropY||player.y)+(Math.random()-.5)*22,
+   typeId:lt.id,
+   pickupDelay:0.15,
+   bobPhase:Math.random()*6.28
+  });
+ }
+ updateUI();
+}
+
+function useLootItem(itemId){
+ if(!running||!player)return false;
+ const idx=lootBag.findIndex(it=>it.id===itemId);
+ if(idx<0)return false;
+ const item=lootBag[idx];
+ if(!item||!item.usable)return false;
+
+ if(item.usable==='heal'){
+  const injuredMerc=mercenaries.some(m=>m.hp<m.maxHp);
+  if(health>=maxHealth&&!injuredMerc){
+   addPopup(player.x,player.y-30,'❤️ Здоровье уже полное!','#ffd078',12);
+   return false;
+  }
+  lootBag.splice(idx,1);
+  health=Math.min(maxHealth,health+50);
+  for(const m of mercenaries)m.hp=Math.min(m.maxHp,m.hp+35);
+  addParticles(player.x,player.y,'#6bff88',12,110,'spark');
+  addPopup(player.x,player.y-32,'🚑 +50 ❤️','#7cff96',14);
+ }else if(item.usable==='repair'){
+  let targetV=player.inVehicle||null;
+  if(!targetV){
+   let bestD=125;
+   for(const v of vehicles){
+    const d=Math.hypot(player.x-v.x,player.y-v.y);
+    if(d<bestD&&(v.broken||v.hp<v.maxHp)){bestD=d;targetV=v;}
+   }
+  }
+  if(!targetV||(targetV.hp>=targetV.maxHp&&!targetV.broken)){
+   addPopup(player.x,player.y-30,'🚗 Подойди к повреждённой машине!','#ffd078',12);
+   return false;
+  }
+  lootBag.splice(idx,1);
+  targetV.broken=false;
+  targetV.hp=Math.min(targetV.maxHp,targetV.hp+180);
+  addParticles(targetV.x,targetV.y,'#ffe078',14,135,'spark');
+  addPopup(targetV.x,targetV.y-32,`🔧 ${targetV.def.name}: +180 HP`,'#ffe484',13);
+ }else if(item.usable==='stim'){
+  lootBag.splice(idx,1);
+  player.stimTimer=18;
+  health=Math.min(maxHealth,health+15);
+  addParticles(player.x,player.y,'#6cf2ff',14,130,'spark');
+  addPopup(player.x,player.y-32,'⚡ СТИМУЛЯТОР 18с (+35% скорость/огонь)!','#7cf4ff',13);
+ }else if(item.usable==='armor'){
+  if(shieldHp>=80){
+   addPopup(player.x,player.y-30,'🛡️ Щит уже на максимуме!','#ffd078',12);
+   return false;
+  }
+  lootBag.splice(idx,1);
+  shieldHp=Math.min(80,shieldHp+45);
+  addParticles(player.x,player.y,'#72e8ff',12,125,'spark');
+  addPopup(player.x,player.y-32,`🦺 Щит +45 (${Math.ceil(shieldHp)}🛡️)`,'#72e8ff',13);
+ }else if(item.usable==='frag'){
+  if(isInSafeZone(player.x,player.y,-4)){
+   addPopup(player.x,player.y-30,'🛡️ На базе гранаты запрещены!','#ffd078',12);
+   return false;
+  }
+  lootBag.splice(idx,1);
+  const rad=168;
+  const dmg=15*upgrades.damage*itemMods.dmgMult;
+  for(const z of zombies){
+   const d=Math.hypot(z.x-player.x,z.y-player.y);
+   if(d<=rad+z.r){
+    applyDamageToZombie(z,dmg*(1-Math.min(0.45,d/(rad*1.5))),Math.atan2(z.y-player.y,z.x-player.x));
+   }
+  }
+  if(activeExpedition&&activeExpedition.type==='nest'&&activeExpedition.hp>0){
+   if(Math.hypot(activeExpedition.x-player.x,activeExpedition.y-player.y)<=rad+30){
+    damageExpeditionNest(dmg*2.2);
+   }
+  }
+  particles.push({x:player.x,y:player.y,vx:0,vy:0,life:.38,max:.38,color:'#ff7c32',size:rad*0.72,kind:'ring',rot:0,vrot:0});
+  addParticles(player.x,player.y,'#ffaa48',24,220,'spark');
+  addParticles(player.x,player.y,'rgba(170,175,180,0.6)',8,95,'smoke');
+  shake=Math.max(shake,14);
+  addPopup(player.x,player.y-34,'💣 БАБАХ!','#ff9e52',15);
+  closeBagModal();
+ }
+ updateUI();
+ if($('bagModal')&&$('bagModal').style.display==='flex')renderBagModal();
+ return true;
+}
+
+function getQuickAidAction(){
+ if(!running||!player)return null;
+ const hasRepair=lootBag.some(it=>it.id==='repairKit');
+ if(hasRepair){
+  let v=player.inVehicle||nearbyVehicle;
+  if(v&&(v.broken||v.hp<v.maxHp*0.92)){
+   return {id:'repairKit',label:'🔧 Чин авто [H]'};
+  }
+ }
+ if(health<=maxHealth*0.78&&lootBag.some(it=>it.id==='medkit')){
+  return {id:'medkit',label:'🚑 Аптечка +50❤️ [H]'};
+ }
+ if(shieldHp<=15&&lootBag.some(it=>it.id==='armorPlate')){
+  return {id:'armorPlate',label:'🦺 Бронепластина [H]'};
+ }
+ return null;
+}
+
+function useQuickAid(){
+ const act=getQuickAidAction();
+ if(act)return useLootItem(act.id);
+ if(lootBag.some(it=>it.id==='adrenaline'))return useLootItem('adrenaline');
+ if(lootBag.some(it=>it.id==='medkit'))return useLootItem('medkit');
+ return false;
 }
 
 function sellAllLoot(){
@@ -2859,7 +3205,17 @@ function renderBagModal(){
  for(const g of groups){
   const row=document.createElement('div');
   row.className=`npcOffer lootRarity-${g.item.rarity||'common'}`;
-  row.innerHTML=`<div class="npcOfferInfo"><div class="npcOfferName">${g.item.icon} ${g.item.name} ×${g.count}</div><div class="npcOfferDesc">${g.unitPrice} 🪙 за шт. · Итого ${g.totalPrice} 🪙</div></div>`;
+  const useSub=g.item.usable?` · <b>Расходник: ${g.item.useLabel}</b>`:'';
+  row.innerHTML=`<div class="npcOfferInfo"><div class="npcOfferName">${g.item.icon} ${g.item.name} ×${g.count}</div><div class="npcOfferDesc">${g.unitPrice} 🪙 за шт. · Итого ${g.totalPrice} 🪙${useSub}</div></div>`;
+  if(g.item.usable){
+   const ub=document.createElement('button');
+   ub.type='button';
+   ub.className='buybtn';
+   ub.style.background='linear-gradient(180deg,#2d9652,#1a5e32)';
+   ub.textContent=`${g.item.useLabel}`;
+   ub.addEventListener('click',()=>useLootItem(g.item.id));
+   row.appendChild(ub);
+  }
   if(inSafe){
    const b=document.createElement('button');
    b.type='button';
@@ -2873,7 +3229,7 @@ function renderBagModal(){
 }
 
 function openBagModal(){
- if(!running||waveChoosing||activeNpc)return;
+ if(!running||waveChoosing||activeNpc||($('storyModal')&&$('storyModal').style.display==='flex'))return;
  paused=true;
  stopAllControls();
  renderBagModal();
@@ -2882,7 +3238,7 @@ function openBagModal(){
 
 function closeBagModal(){
  $('bagModal').style.display='none';
- if(running&&!waveChoosing&&!activeNpc&&$('shop').style.display!=='flex'&&$('pauseScreen').style.display!=='flex'){
+ if(running&&!waveChoosing&&!activeNpc&&$('shop').style.display!=='flex'&&$('pauseScreen').style.display!=='flex'&&(!$('storyModal')||$('storyModal').style.display!=='flex')){
   paused=false;last=performance.now();
  }
 }
@@ -2959,22 +3315,25 @@ function updateUI(){
  }
  $('threatBadge').textContent=`ВОЛНА ${wave} · ${waveKills}/${waveGoal} 🧟`;
  const eb=$('evacBadge');
+ const heliCost=getHeliPrice();
  if(eb){
   if(evacHeli&&evacHeli.bought){
    eb.textContent='🚁 ЭВАКУАЦИЯ!';
    eb.classList.add('ready');
-  }else if(money>=HELI_PRICE){
-   eb.textContent=`🚁 ВЕРТОЛЁТ ГОТОВ! (${HELI_PRICE} 🪙)`;
+  }else if(money>=heliCost){
+   eb.textContent=heliCost===0?'🚁 БЕСПЛАТНЫЙ ЭВАК!':`🚁 ВЕРТОЛЁТ ГОТОВ! (${heliCost} 🪙)`;
    eb.classList.add('ready');
    if(!evacReadyShown&&running&&evacHeli){
     evacReadyShown=true;
-    if(player)addPopup(player.x,player.y-46,`🚁 ${HELI_PRICE} 🪙 НАБРАНО! ЛЕТИ: ${evacHeli.label}`,'#8bff98',13);
+    if(player)addPopup(player.x,player.y-46,`🚁 ЭВАКУАЦИЯ ДОСТУПНА (${heliCost} 🪙)! ЛЕТИ: ${evacHeli.label}`,'#8bff98',13);
    }
   }else{
-   eb.textContent=`🚁 ЭВАК: ${money}/${HELI_PRICE} 🪙`;
+   eb.textContent=`🚁 ЭВАК: ${money}/${heliCost} 🪙`;
    eb.classList.remove('ready');
   }
  }
+ if($('storyMoney'))$('storyMoney').textContent=money;
+ updateSquadAndMissionUI();
  updateZoneUI();
  updateShopBadge();
 }
@@ -3008,8 +3367,1008 @@ function selectWeapon(name){
  $('weaponInfo').textContent=`${w.name} · ${modeTxt}`;
 }
 
+// ================== WORLD SPOT HELPER ==================
+function findFreeWorldSpot(districtId,pad=42,minFromPlayer=0){
+ const bounds={
+  suburb:{xMin:180,xMax:1620,yMin:180,yMax:1620},
+  chem:{xMin:1980,xMax:3420,yMin:180,yMax:1620},
+  hospital:{xMin:180,xMax:1620,yMin:1980,yMax:3420},
+  military:{xMin:1980,xMax:3420,yMin:1980,yMax:3420}
+ };
+ const b=bounds[districtId]||bounds.suburb;
+ for(let att=0;att<90;att++){
+  const sx=b.xMin+Math.random()*(b.xMax-b.xMin);
+  const sy=b.yMin+Math.random()*(b.yMax-b.yMin);
+  if(isInSafeZone(sx,sy,85))continue;
+  if(isNearAnyBuilding(sx,sy,pad))continue;
+  if(isNearAnyHeliSpot(sx,sy,85))continue;
+  if(minFromPlayer>0&&player&&Math.hypot(sx-player.x,sy-player.y)<minFromPlayer)continue;
+  let blocked=false;
+  for(let i=0;i<wallRects.length;i++){
+   if(circleOverlapsRect(sx,sy,pad*0.7,wallRects[i])){blocked=true;break;}
+  }
+  if(blocked)continue;
+  for(let i=0;i<obstacles.length;i++){
+   if(Math.hypot(sx-obstacles[i].x,sy-obstacles[i].y)<obstacles[i].r+pad*0.75){blocked=true;break;}
+  }
+  if(!blocked)return {x:sx,y:sy};
+ }
+ // Fallback along outer avenues
+ const fx=districtId==='chem'||districtId==='military'?2950:650;
+ const fy=districtId==='hospital'||districtId==='military'?2950:650;
+ return {x:fx,y:fy};
+}
+
+// ================== DRIVABLE VEHICLES ==================
+function resolveVehiclePosition(v){
+ const r=v.def.wid*0.46;
+ const halfSpan=v.def.len*0.26;
+ const c=Math.cos(v.angle),s=Math.sin(v.angle);
+ let totalPushX=0,totalPushY=0,hitHeavy=false;
+
+ const points=[
+  {x:v.x+c*halfSpan,y:v.y+s*halfSpan,r},
+  {x:v.x-c*halfSpan,y:v.y-s*halfSpan,r}
+ ];
+
+ for(const pt of points){
+  const startX=pt.x,startY=pt.y;
+  // Keep vehicles outside the central Safe Zone dome
+  const sdx=pt.x-SAFE_ZONE.x,sdy=pt.y-SAFE_ZONE.y;
+  const sd=Math.hypot(sdx,sdy);
+  const safeLimit=SAFE_ZONE.r+pt.r+12;
+  if(sd<safeLimit){
+   const nx=sd>0.001?sdx/sd:0,ny=sd>0.001?sdy/sd:1;
+   pt.x=SAFE_ZONE.x+nx*safeLimit;
+   pt.y=SAFE_ZONE.y+ny*safeLimit;
+  }
+  for(let i=0;i<wallRects.length;i++){
+   if(resolveCircleRect(pt,wallRects[i]))hitHeavy=true;
+  }
+  for(let i=0;i<obstacles.length;i++){
+   const ob=obstacles[i];
+   const minD=pt.r+ob.r;
+   const dx=pt.x-ob.x,dy=pt.y-ob.y;
+   if(Math.abs(dx)>=minD||Math.abs(dy)>=minD)continue;
+   const d=Math.hypot(dx,dy);
+   if(d<minD){
+    const nx=d>0.001?dx/d:1,ny=d>0.001?dy/d:0;
+    pt.x=ob.x+nx*minD;pt.y=ob.y+ny*minD;
+    hitHeavy=true;
+   }
+  }
+  const px=pt.x-startX,py=pt.y-startY;
+  totalPushX+=px;totalPushY+=py;
+ }
+
+ if(totalPushX!==0||totalPushY!==0){
+  // Apply stronger correction so neither end embeds into walls
+  v.x+=totalPushX*0.65;
+  v.y+=totalPushY*0.65;
+  const spd=Math.hypot(v.vx,v.vy);
+  if(hitHeavy&&spd>145){
+   const nx=totalPushX/(Math.hypot(totalPushX,totalPushY)||1);
+   const ny=totalPushY/(Math.hypot(totalPushX,totalPushY)||1);
+   const dot=v.vx*nx+v.vy*ny;
+   if(dot<0){
+    v.vx-=dot*nx*1.25;
+    v.vy-=dot*ny*1.25;
+    v.vx*=0.65;v.vy*=0.65;
+    addParticles(v.x-nx*20,v.y-ny*20,'#ffd87a',6,110,'spark');
+   }
+  }else if(hitHeavy){
+   v.vx*=0.72;v.vy*=0.72;
+  }
+ }
+ const minB=WALL_PAD+r+6,maxBX=WORLD_W-WALL_PAD-r-6,maxBY=WORLD_H-WALL_PAD-r-6;
+ if(v.x<minB){v.x=minB;v.vx=Math.max(0,v.vx)}
+ if(v.x>maxBX){v.x=maxBX;v.vx=Math.min(0,v.vx)}
+ if(v.y<minB){v.y=minB;v.vy=Math.max(0,v.vy)}
+ if(v.y>maxBY){v.y=maxBY;v.vy=Math.min(0,v.vy)}
+}
+
+function initVehicles(){
+ vehicles=[];
+ const specs=[
+  {type:'sedan',x:1725,y:1475,angle:0},
+  {type:'police',x:1260,y:1800,angle:Math.PI},
+  {type:'sedan',x:650,y:1150,angle:-Math.PI/2},
+  {type:'ambulance',x:1080,y:2410,angle:Math.PI/2},
+  {type:'police',x:2460,y:650,angle:0},
+  {type:'ambulance',x:1855,y:2320,angle:Math.PI/2},
+  {type:'armored',x:2410,y:1800,angle:0},
+  {type:'armored',x:2950,y:2420,angle:-Math.PI/2}
+ ];
+ for(let i=0;i<specs.length;i++){
+  const sp=specs[i],def=VEHICLE_TYPES[sp.type]||VEHICLE_TYPES.sedan;
+  let vx=sp.x,vy=sp.y;
+  // Nudge spawn clear of static obstacles or buildings
+  for(let a=0;a<24;a++){
+   const rad=a===0?0:(28+a*8);
+   const ang=a*0.9;
+   const tx=sp.x+Math.cos(ang)*rad,ty=sp.y+Math.sin(ang)*rad;
+   if(isInSafeZone(tx,ty,42)||isNearAnyBuilding(tx,ty,34)||isNearAnyHeliSpot(tx,ty,70))continue;
+   let bad=false;
+   for(const w of wallRects){if(circleOverlapsRect(tx,ty,32,w)){bad=true;break;}}
+   if(!bad)for(const ob of obstacles){if(Math.hypot(tx-ob.x,ty-ob.y)<ob.r+30){bad=true;break;}}
+   if(!bad){vx=tx;vy=ty;break;}
+  }
+  vehicles.push({
+   id:`veh-${i}`,
+   type:sp.type,def,
+   x:vx,y:vy,angle:sp.angle,
+   vx:0,vy:0,steer:0,
+   hp:def.maxHp,maxHp:def.maxHp,
+   broken:false,hit:0,ramCd:0,tireCd:0,doorAtkCd:0
+  });
+ }
+}
+
+function enterVehicle(v){
+ if(!running||!player||!v||player.inVehicle)return false;
+ if(v.broken){
+  if(lootBag.some(it=>it.id==='repairKit')){
+   useLootItem('repairKit');
+   if(v.broken)return false;
+  }else if(money>=25){
+   money-=25;
+   v.broken=false;v.hp=Math.round(v.maxHp*0.75);
+   addParticles(v.x,v.y,'#ffe078',14,135,'spark');
+   addPopup(v.x,v.y-30,'🔧 Починено за 25 🪙!','#ffe484',13);
+   updateUI();
+  }else{
+   addPopup(v.x,v.y-30,'🔧 Сломано! Нужен Ремкомплект или 25 🪙','#ff9678',12);
+   return false;
+  }
+ }
+ player.inVehicle=v;
+ player.x=v.x;player.y=v.y;
+ for(const m of mercenaries){
+  m.inVehicle=v;
+ }
+ addPopup(v.x,v.y-32,`🚗 ${v.def.name}`,'#8be6ff',12);
+ return true;
+}
+
+function exitVehicle(forced=false){
+ if(!player||!player.inVehicle)return false;
+ const v=player.inVehicle;
+ player.inVehicle=null;
+ const baseA=v.angle-Math.PI/2;
+ const candidates=[baseA,v.angle+Math.PI/2,v.angle+Math.PI,v.angle];
+ let placed=false;
+ for(const ang of candidates){
+  const ex=v.x+Math.cos(ang)*(v.def.wid*0.65+player.r+8);
+  const ey=v.y+Math.sin(ang)*(v.def.wid*0.65+player.r+8);
+  if(ex<WALL_PAD+20||ex>WORLD_W-WALL_PAD-20||ey<WALL_PAD+20||ey>WORLD_H-WALL_PAD-20)continue;
+  let blocked=false;
+  for(const w of wallRects){if(circleOverlapsRect(ex,ey,player.r+2,w)){blocked=true;break;}}
+  if(!blocked)for(const ob of obstacles){if(Math.hypot(ex-ob.x,ey-ob.y)<ob.r+player.r){blocked=true;break;}}
+  if(!blocked){player.x=ex;player.y=ey;placed=true;break;}
+ }
+ if(!placed){
+  player.x=v.x;player.y=v.y;
+  resolveObstacles(player,false);
+ }
+ for(let i=0;i<mercenaries.length;i++){
+  const m=mercenaries[i];
+  m.inVehicle=null;
+  const ma=v.angle+(i===0?Math.PI*0.72:-Math.PI*0.72);
+  m.x=player.x+Math.cos(ma)*30;
+  m.y=player.y+Math.sin(ma)*30;
+  resolveObstacles(m,false);
+ }
+ if(forced){
+  player.inv=Math.max(player.inv,1.25);
+  addPopup(player.x,player.y-34,'💥 Машина заглохла!','#ff7868',14);
+ }
+ return true;
+}
+
+function updateVehicles(dt,now){
+ if(!player)return;
+ let carKilledAny=false;
+ for(const v of vehicles){
+  v.hit=Math.max(0,(v.hit||0)-dt);
+  v.ramCd=Math.max(0,(v.ramCd||0)-dt);
+  v.tireCd=Math.max(0,(v.tireCd||0)-dt);
+
+  const isDriven=player.inVehicle===v&&!v.broken;
+  if(isDriven){
+   const moveMag=Math.hypot(joy.x,joy.y);
+   const stimMult=player.stimTimer>0?1.25:1.0;
+   if(moveMag>0.08){
+    const targetA=Math.atan2(joy.y,joy.x);
+    let diff=targetA-v.angle;
+    while(diff>Math.PI)diff-=Math.PI*2;
+    while(diff<-Math.PI)diff+=Math.PI*2;
+    v.steer=Math.max(-0.55,Math.min(0.55,diff));
+    v.angle+=diff*Math.min(1,dt*v.def.turnSpd*(0.65+0.35*moveMag));
+    const accel=v.def.accel*stimMult*moveMag;
+    v.vx+=Math.cos(targetA)*accel*dt;
+    v.vy+=Math.sin(targetA)*accel*dt;
+    const spd=Math.hypot(v.vx,v.vy);
+    const maxS=v.def.maxSpd*stimMult;
+    if(spd>maxS){v.vx=(v.vx/spd)*maxS;v.vy=(v.vy/spd)*maxS;}
+    if(spd>170&&Math.abs(diff)>0.45&&v.tireCd<=0){
+     v.tireCd=0.055;
+     addDecalSplat(v.x-Math.cos(v.angle)*18,v.y-Math.sin(v.angle)*18,'#0e1214',4,1);
+    }
+   }else{
+    v.steer*=Math.exp(-10*dt);
+    const fric=Math.exp(-3.4*dt);
+    v.vx*=fric;v.vy*=fric;
+   }
+   if(v.def.regen>0&&health<maxHealth){
+    player.carRegenAcc=(player.carRegenAcc||0)+v.def.regen*dt;
+    if(player.carRegenAcc>=1){
+     const h=Math.floor(player.carRegenAcc);
+     player.carRegenAcc-=h;
+     health=Math.min(maxHealth,health+h);
+     updateUI();
+    }
+   }
+  }else{
+   v.steer*=Math.exp(-10*dt);
+   const fric=Math.exp(-5.0*dt);
+   v.vx*=fric;v.vy*=fric;
+   if(Math.hypot(v.vx,v.vy)<4){v.vx=0;v.vy=0;}
+  }
+
+  if(v.vx!==0||v.vy!==0){
+   v.x+=v.vx*dt;v.y+=v.vy*dt;
+   resolveVehiclePosition(v);
+   if(isDriven){
+    player.x=v.x;player.y=v.y;
+    player.walkPhase+=dt*Math.hypot(v.vx,v.vy)*0.03;
+   }
+  }
+
+  // Ramming zombies & mutant nest when moving
+  const spd=Math.hypot(v.vx,v.vy);
+  if(isDriven&&spd>88){
+   const hitR=v.def.wid*0.56;
+   const c=Math.cos(v.angle),s=Math.sin(v.angle);
+   const frontX=v.x+c*(v.def.len*0.28),frontY=v.y+s*(v.def.len*0.28);
+   for(let i=zombies.length-1;i>=0;i--){
+    const z=zombies[i];
+    const d1=Math.hypot(z.x-frontX,z.y-frontY);
+    const d2=Math.hypot(z.x-v.x,z.y-v.y);
+    if(Math.min(d1,d2)<z.r+hitR){
+     if(z.carRamCd>0)continue;
+     z.carRamCd=0.22;
+     const ramDmg=(spd/78)*v.def.mass*2.25;
+     applyDamageToZombie(z,ramDmg,v.angle);
+     const kAng=Math.atan2(z.y-v.y,z.x-v.x);
+     z.x+=Math.cos(kAng)*28;z.y+=Math.sin(kAng)*28;
+     resolveObstacles(z,true);
+     addDirectionalBlood(z.x,z.y,v.angle,z.color,7,175);
+     addPopup(z.x,z.y-18,`💥 ${Math.round(ramDmg)}`,'#ffe078',12);
+     shake=Math.max(shake,4.8);
+     v.vx*=0.89;v.vy*=0.89;
+     const wear=(z.r>=22?7.0:2.6)*(1-(v.def.armor||0));
+     v.hp=Math.max(0,v.hp-wear);
+     v.hit=0.14;
+     if(z.hp<=0){z.killedByCar=true;carKilledAny=true;}
+     if(v.hp<=0){
+      v.broken=true;v.vx=0;v.vy=0;
+      addParticles(v.x,v.y,'#ff8c32',18,165,'spark');
+      exitVehicle(true);
+      break;
+     }
+    }
+   }
+   if(activeExpedition&&activeExpedition.type==='nest'&&activeExpedition.hp>0&&v.ramCd<=0){
+    if(Math.hypot(activeExpedition.x-frontX,activeExpedition.y-frontY)<hitR+32){
+     v.ramCd=0.45;
+     const ramDmg=(spd/70)*v.def.mass*5.0;
+     damageExpeditionNest(ramDmg);
+     v.vx*=-0.4;v.vy*=-0.4;
+     v.hp=Math.max(0,v.hp-8*(1-(v.def.armor||0)));
+    }
+   }
+  }
+  // Smoke when badly damaged
+  if((v.broken||v.hp<v.maxHp*0.35)&&Math.random()<dt*(v.broken?11:5)){
+   particles.push({x:v.x+Math.cos(v.angle)*18,y:v.y+Math.sin(v.angle)*18,vx:(Math.random()-.5)*18,vy:-18-Math.random()*20,life:.55,max:.55,color:v.broken?'rgba(35,38,40,0.72)':'rgba(130,138,142,0.45)',size:7+Math.random()*5,kind:'smoke',rot:0,vrot:0});
+  }
+ }
+ if(carKilledAny){
+  // Cleanup handled by resolveKills pass in update(), or trigger immediate check
+  for(const z of zombies){if(z.hp<=0&&z.killedByCar){storyStats.roadKills=(storyStats.roadKills||0)+1;z.killedByCarCounted=true;}}
+  updateStoryProgress();
+ }
+}
+
+function drawVehicles(now,viewX,viewY){
+ const minX=viewX-100,maxX=viewX+W+100,minY=viewY-100,maxY=viewY+H+100;
+ for(const v of vehicles){
+  if(v.x<minX||v.x>maxX||v.y<minY||v.y>maxY)continue;
+  const d=v.def;
+  const hw=d.len/2,hh=d.wid/2;
+  ctx.save();
+  ctx.translate(v.x,v.y);
+  ctx.rotate(v.angle);
+
+  // Ground shadow
+  ctx.fillStyle='rgba(0,0,0,0.48)';
+  ctx.beginPath();ctx.roundRect(-hw+4,-hh+5,d.len+2,d.wid+2,8);ctx.fill();
+
+  // Four tires (front tires turn slightly with steering)
+  const wheelCoords=[[hw*0.58,-hh-2],[hw*0.58,hh+2],[-hw*0.56,-hh-2],[-hw*0.56,hh+2]];
+  for(let wi=0;wi<4;wi++){
+   ctx.save();
+   ctx.translate(wheelCoords[wi][0],wheelCoords[wi][1]);
+   if(wi<2)ctx.rotate(v.steer*0.55);
+   ctx.fillStyle='#14181a';
+   ctx.beginPath();ctx.roundRect(-7,-3,14,6,2);ctx.fill();
+   ctx.restore();
+  }
+
+  // Chassis body
+  const col=v.hit>0?'#fff4cf':(v.broken?'#3c3a38':d.bodyCol);
+  ctx.fillStyle=col;
+  ctx.strokeStyle='#10181a';ctx.lineWidth=2;
+  ctx.beginPath();ctx.roundRect(-hw,-hh,d.len,d.wid,v.type==='armored'?5:8);ctx.fill();ctx.stroke();
+
+  // Roof & trim details
+  if(v.type==='police'){
+   ctx.fillStyle='#f0f5fa';
+   ctx.fillRect(-hw*0.32,-hh+3,d.len*0.42,d.wid-6);
+   // Police lightbar
+   const blink=Math.sin(now*0.015)>0;
+   ctx.fillStyle=blink?'#ff3b4f':'#3b9dff';
+   ctx.fillRect(-2,-hh+4,5,hh-5);
+   ctx.fillStyle=blink?'#3b9dff':'#ff3b4f';
+   ctx.fillRect(-2,1,5,hh-5);
+  }else if(v.type==='ambulance'){
+   ctx.fillStyle='#c9323c';
+   ctx.fillRect(-hw+2,-3,d.len-4,6);
+   ctx.fillStyle='#cf323a';
+   ctx.fillRect(-10,-3,12,6);ctx.fillRect(-7,-6,6,12);
+   const blink=Math.sin(now*0.014)>0;
+   ctx.fillStyle=blink?'#ff4455':'#52c8ff';
+   ctx.fillRect(hw*0.22,-hh+5,4,d.wid-10);
+  }else if(v.type==='armored'){
+   ctx.fillStyle='#343c28';ctx.strokeStyle='#8e9d68';ctx.lineWidth=1.4;
+   ctx.beginPath();ctx.roundRect(-hw*0.55,-hh+4,d.len*0.65,d.wid-8,3);ctx.fill();ctx.stroke();
+   // Roof turret hatch
+   ctx.fillStyle='#262d1e';ctx.beginPath();ctx.arc(-4,0,9,0,Math.PI*2);ctx.fill();ctx.stroke();
+  }else{
+   ctx.fillStyle=d.trimCol;
+   ctx.fillRect(-hw*0.45,-hh+4,d.len*0.52,d.wid-8);
+  }
+
+  // Windshield & rear glass
+  ctx.fillStyle='#192a34';
+  ctx.beginPath();ctx.roundRect(hw*0.24,-hh+4,9,d.wid-8,2);ctx.fill();
+  ctx.fillStyle='rgba(145,220,245,0.28)';
+  ctx.fillRect(hw*0.26,-hh+6,3,d.wid-12);
+  if(v.type!=='ambulance'){
+   ctx.fillStyle='#15232b';
+   ctx.beginPath();ctx.roundRect(-hw*0.62,-hh+5,7,d.wid-10,2);ctx.fill();
+  }
+
+  // Headlight lenses & taillights
+  const lightsOn=player&&player.inVehicle===v&&!v.broken;
+  ctx.fillStyle=lightsOn?'#fff9cc':'#a8a484';
+  ctx.fillRect(hw-3,-hh+4,3,5);ctx.fillRect(hw-3,hh-9,3,5);
+  ctx.fillStyle=lightsOn?'#ff4242':'#7a2626';
+  ctx.fillRect(-hw,-hh+4,3,5);ctx.fillRect(-hw,hh-9,3,5);
+
+  ctx.restore();
+
+  // Vehicle HP bar when damaged or nearby
+  if(v.hp<v.maxHp||v===nearbyVehicle||player?.inVehicle===v){
+   const bw=48,pct=Math.max(0,v.hp/v.maxHp);
+   ctx.save();
+   ctx.fillStyle='rgba(8,14,16,0.86)';
+   ctx.beginPath();ctx.roundRect(v.x-bw/2,v.y-hh-18,bw,6,3);ctx.fill();
+   ctx.fillStyle=v.broken?'#ff4d58':pct>0.5?'#72e8ff':pct>0.25?'#ffd054':'#ff5c5c';
+   ctx.beginPath();ctx.roundRect(v.x-bw/2+1,v.y-hh-17,(bw-2)*pct,4,2);ctx.fill();
+   ctx.restore();
+  }
+ }
+}
+
+// ================== MERCENARIES ==================
+function hireMercenary(typeId){
+ if(!running||!player)return false;
+ if(!isInSafeZone(player.x,player.y,15)){
+  addPopup(player.x,player.y-30,'🛡️ Нанимать бойцов можно только на базе!','#ffd078',13);
+  return false;
+ }
+ if(mercenaries.length>=MAX_MERCS){
+  addPopup(player.x,player.y-30,`Макс. в отряде: ${MAX_MERCS} бойца!`,'#ffd078',13);
+  return false;
+ }
+ const def=MERC_TYPES[typeId];
+ if(!def)return false;
+ if(money<def.price){
+  addPopup(player.x,player.y-30,`Нужно ${def.price} 🪙`,'#ff9078',13);
+  return false;
+ }
+ money-=def.price;
+ const idx=mercenaries.length;
+ const ang=player.angle+(idx===0?-2.1:2.1);
+ mercenaries.push({
+  id:`merc-${Date.now()}-${Math.random()}`,
+  type:typeId,def,
+  x:player.x+Math.cos(ang)*36,
+  y:player.y+Math.sin(ang)*36,
+  r:13,angle:player.angle,
+  hp:def.maxHp,maxHp:def.maxHp,
+  inv:0,fireCd:0.2,healCd:2.5,walkPhase:0,muzzleFlash:0,inVehicle:player.inVehicle||null
+ });
+ addParticles(player.x,player.y,'#72e8ff',12,120,'spark');
+ addPopup(player.x,player.y-36,`👥 Нанят: ${def.name}!`,'#7cff9c',14);
+ updateStoryProgress();
+ updateUI();
+ if($('storyModal').style.display==='flex')renderStoryModal();
+ return true;
+}
+
+function dismissMercenary(mercId){
+ const idx=mercenaries.findIndex(m=>m.id===mercId);
+ if(idx<0)return;
+ mercenaries.splice(idx,1);
+ updateUI();
+ if($('storyModal').style.display==='flex')renderStoryModal();
+}
+
+function healMercenaries(){
+ if(!mercenaries.length||!mercenaries.some(m=>m.hp<m.maxHp))return false;
+ if(money<25){
+  addPopup(player.x,player.y-30,'Нужно 25 🪙 для лечения отряда','#ff9078',12);
+  return false;
+ }
+ money-=25;
+ for(const m of mercenaries){m.hp=m.maxHp;}
+ addPopup(player.x,player.y-32,'💉 Отряд полностью вылечен!','#7cff9c',13);
+ updateUI();
+ if($('storyModal').style.display==='flex')renderStoryModal();
+ return true;
+}
+
+function updateMercenaries(dt,now){
+ if(!player||!mercenaries.length)return;
+ const inSafe=isInSafeZone(player.x,player.y,-4);
+ for(let i=mercenaries.length-1;i>=0;i--){
+  const m=mercenaries[i];
+  const def=m.def;
+  m.inv=Math.max(0,(m.inv||0)-dt);
+  m.fireCd=Math.max(0,(m.fireCd||0)-dt);
+  m.healCd=Math.max(0,(m.healCd||0)-dt);
+  m.muzzleFlash=Math.max(0,(m.muzzleFlash||0)-dt*18);
+
+  if(player.inVehicle){
+   m.inVehicle=player.inVehicle;
+   const side=(i===0?-1:1)*8;
+   m.x=player.inVehicle.x+Math.cos(player.inVehicle.angle+Math.PI/2)*side;
+   m.y=player.inVehicle.y+Math.sin(player.inVehicle.angle+Math.PI/2)*side;
+  }else{
+   m.inVehicle=null;
+   const slotAng=player.angle+(i===0?-2.25:2.25);
+   const goalX=player.x+Math.cos(slotAng)*46;
+   const goalY=player.y+Math.sin(slotAng)*46;
+   const dx=goalX-m.x,dy=goalY-m.y,d=Math.hypot(dx,dy);
+   if(d>14){
+    const spd=Math.min(def.speed*1.32,d*3.4);
+    m.x+=(dx/d)*spd*dt;m.y+=(dy/d)*spd*dt;
+    m.walkPhase+=dt*9;
+    resolveObstacles(m,false);
+   }
+   if(Math.hypot(player.x-m.x,player.y-m.y)>280){
+    m.x=goalX;m.y=goalY;resolveObstacles(m,false);
+   }
+  }
+
+  // Safe zone regen + Support Medic pulse
+  if(inSafe&&m.hp<m.maxHp){
+   m.hp=Math.min(m.maxHp,m.hp+12*dt);
+  }
+  if(def.healPulse&&m.healCd<=0){
+   const needHeal=health<maxHealth||mercenaries.some(om=>om.hp<om.maxHp);
+   if(needHeal){
+    m.healCd=5.5;
+    health=Math.min(maxHealth,health+def.healPulse);
+    for(const om of mercenaries)om.hp=Math.min(om.maxHp,om.hp+def.healPulse+3);
+    particles.push({x:m.x,y:m.y,vx:0,vy:0,life:.35,max:.35,color:'#6effb8',size:58,kind:'ring',rot:0,vrot:0});
+    addPopup(player.x,player.y-30,`💚 АНГЕЛ: +${def.healPulse}❤️`,'#7cffaa',11);
+    updateUI();
+   }else{
+    m.healCd=1.0;
+   }
+  }
+
+  // Target acquisition & firing
+  if(!inSafe){
+   let bestTarget=null,bestD=def.range;
+   for(const z of zombies){
+    const dz=Math.hypot(z.x-m.x,z.y-m.y);
+    if(dz<=bestD&&!hasWallBetween(m.x,m.y,z.x,z.y)){
+     bestD=dz;bestTarget=z;
+    }
+   }
+   let targetNest=false;
+   if(!bestTarget&&activeExpedition&&activeExpedition.type==='nest'&&activeExpedition.hp>0){
+    const dn=Math.hypot(activeExpedition.x-m.x,activeExpedition.y-m.y);
+    if(dn<=def.range&&!hasWallBetween(m.x,m.y,activeExpedition.x,activeExpedition.y)){
+     bestTarget=activeExpedition;targetNest=true;
+    }
+   }
+   if(bestTarget){
+    const ang=Math.atan2(bestTarget.y-m.y,bestTarget.x-m.x);
+    m.angle=ang;
+    if(m.fireCd<=0){
+     m.fireCd=def.delay;
+     m.muzzleFlash=1;
+     const mx=m.x+Math.cos(ang)*16,my=m.y+Math.sin(ang)*16;
+     const isPyro=m.type==='pyro',isSniper=m.type==='sniper';
+     bullets.push({
+      x:mx,y:my,px:mx,py:my,sx:mx,sy:my,
+      vx:Math.cos(ang)*(isSniper?760:isPyro?340:560),
+      vy:Math.sin(ang)*(isSniper?760:isPyro?340:560),
+      angle:ang,damage:def.dmg*(1+(upgrades.damage-1)*0.4),
+      crit:false,aoe:isPyro?24:0,
+      pierce:def.pierce||0,hitSet:def.pierce?new Set():null,
+      burn:def.burn||0,burnDps:0.42,
+      chill:0,flame:isPyro,rocket:false,bolt:isSniper,
+      fromMerc:true,kind:isPyro?'flamer':isSniper?'crossbow':'rifle',
+      life:def.range/(isSniper?760:isPyro?340:560)*1.1,
+      color:def.weaponCol
+     });
+     addParticles(mx,my,def.weaponCol,2,65,'spark');
+    }
+   }else{
+    m.angle=player.angle;
+   }
+  }else{
+   m.angle=player.angle;
+  }
+
+  // Zombie melee damage against foot mercenaries
+  if(!m.inVehicle&&!inSafe&&m.inv<=0){
+   for(const z of zombies){
+    if(Math.hypot(z.x-m.x,z.y-m.y)<z.r+m.r){
+     const dmg=Math.max(1,Math.round((z.dmg||10)*(1-(def.armor||0))));
+     m.hp-=dmg;m.inv=0.7;
+     addParticles(m.x,m.y,'#ff6b72',6,95,'blood');
+     updateSquadAndMissionUI();
+     break;
+    }
+   }
+  }
+  if(m.hp<=0){
+   addParticles(m.x,m.y,'#ff5260',14,140,'blood');
+   addPopup(m.x,m.y-24,`💀 ${def.name} пал!`,'#ff7b86',13);
+   mercenaries.splice(i,1);
+   updateUI();
+  }
+ }
+}
+
+function drawMercenaries(now){
+ for(const m of mercenaries){
+  if(m.inVehicle)continue;
+  const def=m.def;
+  ctx.save();
+  ctx.translate(m.x,m.y);
+  ctx.fillStyle='rgba(0,0,0,0.42)';
+  ctx.beginPath();ctx.ellipse(2,4,13,10,0,0,Math.PI*2);ctx.fill();
+
+  ctx.save();
+  ctx.rotate(m.angle);
+  // Tactical vest & shoulders
+  ctx.fillStyle=def.vest;
+  ctx.beginPath();ctx.ellipse(0,0,11,13,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#0d1619';ctx.lineWidth=1.5;ctx.stroke();
+  // Weapon barrel
+  ctx.fillStyle='#2a3538';
+  ctx.fillRect(6,-2.2,17,4.4);
+  ctx.fillStyle=def.weaponCol;
+  ctx.fillRect(14,-1.2,10,2.4);
+  if(m.muzzleFlash>0){
+   ctx.fillStyle=m.type==='pyro'?'#ff862b':'#ffe680';
+   ctx.beginPath();ctx.arc(25,0,5*m.muzzleFlash,0,Math.PI*2);ctx.fill();
+  }
+  // Helmet
+  ctx.fillStyle=def.color;
+  ctx.beginPath();ctx.arc(1,0,8.2,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#e8fbff';
+  ctx.fillRect(4,-3.5,3,7);
+  ctx.restore();
+
+  // HP bar & name tag
+  const bw=32,pct=Math.max(0,m.hp/m.maxHp);
+  ctx.fillStyle='rgba(8,14,16,0.85)';
+  ctx.fillRect(-bw/2,-22,bw,4.5);
+  ctx.fillStyle=pct>0.5?'#72f0ff':pct>0.25?'#ffd054':'#ff5c66';
+  ctx.fillRect(-bw/2+1,-21,(bw-2)*pct,2.5);
+  ctx.fillStyle='#d8f7ff';
+  ctx.font='700 9px system-ui,sans-serif';ctx.textAlign='center';
+  ctx.fillText(def.role.toUpperCase(),0,-26);
+  ctx.restore();
+ }
+}
+
+// ================== CITY EXPEDITIONS / RAIDS ==================
+function generateExpeditionOffers(){
+ availableExpeditions=[];
+ const distIds=['suburb','chem','hospital','military'];
+ const types=['airdrop','nest','rescue','bounty'];
+ for(let i=types.length-1;i>0;i--){
+  const j=Math.floor(Math.random()*(i+1));
+  [types[i],types[j]]=[types[j],types[i]];
+ }
+ for(let i=0;i<3;i++){
+  const tKey=types[i];
+  const dKey=distIds[(i+Math.floor(Math.random()*4))%4];
+  const def=EXPEDITION_TYPES[tKey];
+  const rewM=def.rewardMoney[0]+Math.floor(Math.random()*(def.rewardMoney[1]-def.rewardMoney[0]+1));
+  availableExpeditions.push({
+   id:`exp-${Date.now()}-${i}`,
+   type:tKey,
+   districtId:dKey,
+   districtName:DISTRICTS[dKey].short,
+   name:def.name,icon:def.icon,desc:def.desc,
+   rewardMoney:rewM,
+   bonusLoot:def.bonusLoot
+  });
+ }
+}
+
+function startExpedition(offerId){
+ if(!running||!player)return false;
+ if(activeExpedition){
+  addPopup(player.x,player.y-30,'Уже есть активная вылазка!','#ffd078',12);
+  return false;
+ }
+ const offer=availableExpeditions.find(o=>o.id===offerId);
+ if(!offer)return false;
+ let pos=findFreeWorldSpot(offer.districtId,42,420);
+ if(offer.type==='rescue'){
+  const distB=buildings.filter(b=>b.districtId===offer.districtId);
+  if(distB.length){
+   const rb=distB[Math.floor(Math.random()*distB.length)];
+   const sideX=rb.doorSide==='E'?36:rb.doorSide==='W'?-36:0;
+   const sideY=rb.doorSide==='S'?36:rb.doorSide==='N'?-36:0;
+   pos={x:rb.doorX+sideX,y:rb.doorY+sideY};
+  }
+ }
+ activeExpedition={
+  id:offer.id,type:offer.type,name:offer.name,icon:offer.icon,
+  districtId:offer.districtId,districtName:offer.districtName,
+  x:pos.x,y:pos.y,r:26,
+  progress:0,holdTime:EXPEDITION_TYPES[offer.type].holdTime||8,
+  hp:EXPEDITION_TYPES[offer.type].nestHp||240,
+  maxHp:EXPEDITION_TYPES[offer.type].nestHp||240,
+  rewardMoney:offer.rewardMoney,bonusLoot:offer.bonusLoot,
+  spawnGuardCd:0.5,targetSpawned:false
+ };
+ // Spawn initial guards / target depending on type
+ if(offer.type==='bounty'){
+  const pool=offer.districtId==='chem'?['electro','glowing','boomer']:
+             offer.districtId==='hospital'?['necromancer','plague','vampire']:
+             offer.districtId==='military'?['juggernaut','behemoth','alpha']:['riot','butcher','swat'];
+  const bType=pool[Math.floor(Math.random()*pool.length)];
+  const boss=spawnZombie(bType,pos.x,pos.y,{bypassCap:true,aggro:true});
+  if(boss){
+   boss.hp=Number((boss.hp*1.45).toFixed(1));
+   boss.maxHp=boss.hp;
+   boss.isBountyTarget=true;
+   boss.isWaveBoss=true;
+   activeExpedition.targetZombie=boss;
+  }
+  for(let k=0;k<2;k++){
+   spawnZombie(null,pos.x+(k?42:-42),pos.y+28,{bypassCap:true});
+  }
+  activeExpedition.targetSpawned=true;
+ }else if(offer.type==='nest'){
+  for(let k=0;k<3;k++){
+   const ang=k*(Math.PI*2/3);
+   spawnZombie(null,pos.x+Math.cos(ang)*52,pos.y+Math.sin(ang)*52,{bypassCap:true});
+  }
+ }
+ addPopup(player.x,player.y-38,`${offer.icon} Вылазка: ${offer.name} (${offer.districtName})`,'#ffd86b',14);
+ updateSquadAndMissionUI();
+ if($('storyModal').style.display==='flex')renderStoryModal();
+ return true;
+}
+
+function cancelExpedition(){
+ if(!activeExpedition)return;
+ activeExpedition=null;
+ addPopup(player.x,player.y-30,'Вылазка отменена','#ffaa78',12);
+ updateSquadAndMissionUI();
+ if($('storyModal').style.display==='flex')renderStoryModal();
+}
+
+function damageExpeditionNest(dmg){
+ if(!activeExpedition||activeExpedition.type!=='nest'||activeExpedition.hp<=0)return;
+ activeExpedition.hp-=dmg;
+ activeExpedition.hit=0.14;
+ addParticles(activeExpedition.x,activeExpedition.y,'#a4ff4a',5,110,'spark');
+ if(activeExpedition.hp<=0){
+  activeExpedition.hp=0;
+  completeExpedition();
+ }
+}
+
+function completeExpedition(){
+ if(!activeExpedition)return;
+ const ex=activeExpedition;
+ activeExpedition=null;
+ money+=ex.rewardMoney;
+ storyStats.expeditionsDone=(storyStats.expeditionsDone||0)+1;
+ particles.push({x:ex.x,y:ex.y,vx:0,vy:0,life:.42,max:.42,color:'#ffd859',size:68,kind:'ring',rot:0,vrot:0});
+ addParticles(ex.x,ex.y,'#ffe47a',22,190,'spark');
+ const rareChoices=[LOOT_TYPES.omegaSerum,LOOT_TYPES.blackbox,LOOT_TYPES.quarantineCase,LOOT_TYPES.medkit,LOOT_TYPES.repairKit,LOOT_TYPES.adrenaline,LOOT_TYPES.fragPack];
+ for(let i=0;i<(ex.bonusLoot||2);i++){
+  const lt=rareChoices[Math.floor(Math.random()*rareChoices.length)];
+  addLootToBagOrDrop(lt,ex.x,ex.y);
+ }
+ addPopup(player?player.x:ex.x,(player?player.y:ex.y)-42,`🏆 ВЫЛАЗКА ВЫПОЛНЕНА! +${ex.rewardMoney} 🪙`,'#ffe278',15);
+ generateExpeditionOffers();
+ updateStoryProgress();
+ updateUI();
+ if($('storyModal').style.display==='flex')renderStoryModal();
+}
+
+function updateExpedition(dt){
+ if(!activeExpedition||!player)return;
+ const ex=activeExpedition;
+ ex.hit=Math.max(0,(ex.hit||0)-dt);
+ if(ex.type==='airdrop'||ex.type==='rescue'){
+  const d=Math.hypot(player.x-ex.x,player.y-ex.y);
+  if(d<=95){
+   ex.progress=Math.min(1,ex.progress+dt/ex.holdTime);
+   ex.spawnGuardCd-=dt;
+   if(ex.spawnGuardCd<=0){
+    ex.spawnGuardCd=3.4;
+    if(zombies.length<getMaxActiveZombies()+3){
+     const a=Math.random()*Math.PI*2;
+     spawnZombie(null,ex.x+Math.cos(a)*260,ex.y+Math.sin(a)*260,{bypassCap:true,aggro:true});
+    }
+   }
+   if(ex.progress>=1)completeExpedition();
+  }
+ }else if(ex.type==='bounty'){
+  if(ex.targetSpawned&&(!ex.targetZombie||zombies.indexOf(ex.targetZombie)<0)){
+   completeExpedition();
+  }else if(ex.targetZombie){
+   ex.x=ex.targetZombie.x;ex.y=ex.targetZombie.y;
+  }
+ }
+}
+
+function drawExpeditionWorld(now){
+ if(!activeExpedition)return;
+ const ex=activeExpedition;
+ ctx.save();
+ ctx.translate(ex.x,ex.y);
+ const pulse=0.55+Math.sin(now*0.007)*0.35;
+ const col=ex.type==='nest'?'#9eff42':ex.type==='rescue'?'#66f0ff':ex.type==='bounty'?'#ff4d5a':'#ffd859';
+ ctx.strokeStyle=col;
+ ctx.lineWidth=2.4;
+ ctx.globalAlpha=pulse;
+ ctx.beginPath();ctx.arc(0,0,ex.type==='airdrop'||ex.type==='rescue'?92:38,0,Math.PI*2);ctx.stroke();
+ ctx.globalAlpha=1;
+
+ if(ex.type==='airdrop'){
+  ctx.fillStyle='#4f5e39';ctx.strokeStyle='#ffd859';ctx.lineWidth=2;
+  ctx.beginPath();ctx.roundRect(-18,-14,36,28,4);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#ffd859';ctx.fillRect(-10,-3,20,6);
+ }else if(ex.type==='nest'){
+  ctx.fillStyle=ex.hit>0?'#f6ffca':'#4d7822';
+  ctx.beginPath();ctx.arc(0,0,24+Math.sin(now*0.008)*2,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#b6ff52';ctx.lineWidth=2.5;ctx.stroke();
+  ctx.fillStyle='#c4ff58';
+  ctx.beginPath();ctx.arc(-7,-5,6,0,Math.PI*2);ctx.arc(8,6,5,0,Math.PI*2);ctx.fill();
+  const bw=48,pct=Math.max(0,ex.hp/ex.maxHp);
+  ctx.fillStyle='rgba(8,14,14,0.88)';ctx.fillRect(-bw/2,-36,bw,6);
+  ctx.fillStyle='#9cff4a';ctx.fillRect(-bw/2+1,-35,(bw-2)*pct,4);
+ }else if(ex.type==='rescue'){
+  ctx.fillStyle='#3d7282';ctx.beginPath();ctx.arc(0,0,13,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#9cfaff';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='#e6fbff';ctx.beginPath();ctx.arc(0,-2,7,0,Math.PI*2);ctx.fill();
+ }
+ if((ex.type==='airdrop'||ex.type==='rescue')&&ex.progress>0){
+  ctx.strokeStyle='#7cff96';ctx.lineWidth=4;
+  ctx.beginPath();ctx.arc(0,0,34,-Math.PI/2,-Math.PI/2+Math.PI*2*ex.progress);ctx.stroke();
+ }
+ ctx.fillStyle=col;ctx.font='800 11px system-ui,sans-serif';ctx.textAlign='center';
+ ctx.fillText(`${ex.icon} ${ex.name}`,0,-42);
+ ctx.restore();
+}
+
+// ================== STORY CAMPAIGN & PDA MODAL ==================
+function spawnStoryBoss(){
+ if(storyStats.patriarchSpawned||!player)return;
+ storyStats.patriarchSpawned=true;
+ const spot=findFreeWorldSpot('military',45,520);
+ const s=ZOMBIE_TYPES.patriarch;
+ registerZombieSighting('patriarch');
+ const maxHp=Number((s.hp+Math.max(0,wave-1)*3.5).toFixed(1));
+ const z={
+  x:spot.x,y:spot.y,type:'patriarch',def:s,r:s.r,hp:maxHp,maxHp,
+  speed:s.speed,dmg:s.dmg,armor:s.armor||0.35,color:s.color,points:s.points,
+  isWaveBoss:true,isStoryBoss:true,
+  phase:0,hit:0,abilityCd:1.5,dashTimer:0,boostTimer:0,trailCd:0.4,
+  aggro:true,aggroTimer:999,lastSeenX:player.x,lastSeenY:player.y,
+  alertFlash:1,doorAtkCd:0,wanderAngle:0,wanderTimer:2,wanderPause:0,angle:0,seed:0.5
+ };
+ zombies.push(z);
+ addPopup(player.x,player.y-52,'💀 В БЛОКПОСТЕ ВЫШЕЛ ПАТРИАРХ-0!','#ff6648',16);
+ updateBossBanner();
+}
+
+function updateStoryProgress(){
+ if(!running||storyCompleted)return;
+ while(storyStep<STORY_CHAPTERS.length){
+  const ch=STORY_CHAPTERS[storyStep];
+  if(!ch.check())break;
+  ch.grant();
+  addParticles(player.x,player.y,'#ffd859',20,165,'spark');
+  addPopup(player.x,player.y-46,`📖 ${ch.title} — ВЫПОЛНЕНА!`,'#ffe27a',15);
+  storyStep++;
+  if(storyStep===4&&!storyStats.patriarchSpawned){
+   spawnStoryBoss();
+  }
+  if(storyStep>=STORY_CHAPTERS.length){
+   storyCompleted=true;
+   addPopup(player.x,player.y-64,'🏆 КАМПАНИЯ ПРОЙДЕНА! ВЕРТОЛЁТ БЕСПЛАТЕН 🚁','#7cff96',16);
+  }
+ }
+ updateSquadAndMissionUI();
+}
+
+function updateSquadAndMissionUI(){
+ const sb=$('squadBar');
+ if(sb){
+  sb.innerHTML='';
+  for(const m of mercenaries){
+   const pill=document.createElement('span');
+   pill.className='mercPill';
+   pill.textContent=`👤 ${m.def.role}: ${Math.ceil(m.hp)}❤️`;
+   sb.appendChild(pill);
+  }
+ }
+ const mb=$('missionBar');
+ if(mb){
+  if(!running){mb.style.display='none';return;}
+  mb.style.display='block';
+  const parts=[];
+  if(storyCompleted){
+   parts.push('📖 <b>Кампания пройдена!</b> Эвакуация 0 🪙');
+  }else if(storyStep<STORY_CHAPTERS.length){
+   const ch=STORY_CHAPTERS[storyStep];
+   parts.push(`📖 Гл.${storyStep+1}: ${ch.goalText} (<b>${ch.progress()}</b>)`);
+  }
+  if(activeExpedition&&player){
+   const dist=Math.round(Math.hypot(activeExpedition.x-player.x,activeExpedition.y-player.y));
+   parts.push(`${activeExpedition.icon} ${activeExpedition.name} (${dist}м)`);
+  }
+  mb.innerHTML=parts.join(' · ');
+ }
+}
+
+function renderStoryModal(){
+ if($('storyMoney'))$('storyMoney').textContent=money;
+ const tabs=$('storyTabs')?.querySelectorAll('.codexTab')||[];
+ for(const t of tabs)t.classList.toggle('active',t.dataset.tab===storyTab);
+ const box=$('storyContent');
+ if(!box)return;
+ box.innerHTML='';
+
+ if(storyTab==='story'){
+  for(let i=0;i<STORY_CHAPTERS.length;i++){
+   const ch=STORY_CHAPTERS[i];
+   const isDone=i<storyStep||storyCompleted;
+   const isAct=i===storyStep&&!storyCompleted;
+   const card=document.createElement('div');
+   card.className='storyCard'+(isDone?' done':isAct?' active':'');
+   const badgeCls=isDone?'done':isAct?'active':'lock';
+   const badgeTxt=isDone?'ВЫПОЛНЕНО ✓':isAct?`В ПРОЦЕССЕ (${ch.progress()})`:'ЗАКРЫТО';
+   card.innerHTML=`
+    <div class="storyHead"><span>${ch.title}</span><span class="storyBadge ${badgeCls}">${badgeTxt}</span></div>
+    <div class="storyBody">${isDone||isAct?ch.brief:'Откроется после выполнения предыдущей главы.'}</div>
+    <div class="storyReward">Награда: ${ch.rewardText}</div>
+   `;
+   box.appendChild(card);
+  }
+ }else if(storyTab==='expeditions'){
+  if(activeExpedition){
+   const dist=player?Math.round(Math.hypot(activeExpedition.x-player.x,activeExpedition.y-player.y)):0;
+   const card=document.createElement('div');
+   card.className='storyCard active';
+   card.innerHTML=`
+    <div class="storyHead"><span>${activeExpedition.icon} ${activeExpedition.name}</span><span class="storyBadge active">${activeExpedition.districtName} · ${dist}м</span></div>
+    <div class="storyBody">Награда: <b style="color:#ffe082">+${activeExpedition.rewardMoney} 🪙</b> + редкий лут (${activeExpedition.bonusLoot} шт.). Ищи маркер вылазки на радаре!</div>
+   `;
+   const btn=document.createElement('button');
+   btn.type='button';btn.className='buybtn';btn.style.marginTop='8px';btn.style.background='linear-gradient(180deg,#8c3a3a,#572020)';
+   btn.textContent='ОТМЕНИТЬ ВЫЛАЗКУ';
+   btn.addEventListener('click',cancelExpedition);
+   card.appendChild(btn);
+   box.appendChild(card);
+  }else{
+   for(const off of availableExpeditions){
+    const row=document.createElement('div');
+    row.className='npcOffer';
+    row.innerHTML=`<div class="npcOfferInfo"><div class="npcOfferName">${off.icon} ${off.name} · <span style="color:#8be6ff">${off.districtName}</span></div><div class="npcOfferDesc">${off.desc}<br><b style="color:#ffe082">Награда: +${off.rewardMoney} 🪙 + ${off.bonusLoot} редких трофея</b></div></div>`;
+    const btn=document.createElement('button');
+    btn.type='button';btn.className='buybtn';
+    btn.textContent='ПРИНЯТЬ';
+    btn.addEventListener('click',()=>startExpedition(off.id));
+    row.appendChild(btn);
+    box.appendChild(row);
+   }
+  }
+ }else if(storyTab==='squad'){
+  const inSafe=player?isInSafeZone(player.x,player.y,15):false;
+  const infoP=document.createElement('p');
+  infoP.className='small';
+  infoP.style.marginBottom='8px';
+  infoP.innerHTML=`Отряд: <b>${mercenaries.length}/${MAX_MERCS}</b> · ${inSafe?'<span style="color:#7cff96">На базе: найм открыт!</span>':'<span style="color:#ffd078">Вернитесь в Сейф-зону для найма</span>'}`;
+  box.appendChild(infoP);
+
+  if(mercenaries.length){
+   for(const m of mercenaries){
+    const row=document.createElement('div');
+    row.className='npcOffer';
+    row.innerHTML=`<div class="npcOfferInfo"><div class="npcOfferName">👤 ${m.def.name} (${m.def.role})</div><div class="npcOfferDesc">Здоровье: ${Math.ceil(m.hp)}/${m.maxHp} ❤️ · В пути и в машине с тобой</div></div>`;
+    const b=document.createElement('button');
+    b.type='button';b.className='buybtn';b.style.background='linear-gradient(180deg,#6e3939,#452020)';
+    b.textContent='УВОЛИТЬ';
+    b.addEventListener('click',()=>dismissMercenary(m.id));
+    row.appendChild(b);
+    box.appendChild(row);
+   }
+   if(mercenaries.some(m=>m.hp<m.maxHp)){
+    const hb=document.createElement('button');
+    hb.type='button';hb.className='mainbtn';hb.style.marginBottom='10px';
+    hb.textContent='💉 ВЫЛЕЧИТЬ ОТРЯД (25 🪙)';
+    hb.addEventListener('click',healMercenaries);
+    box.appendChild(hb);
+   }
+  }
+
+  for(const k of Object.keys(MERC_TYPES)){
+   const md=MERC_TYPES[k];
+   const row=document.createElement('div');
+   row.className='npcOffer';
+   row.innerHTML=`<div class="npcOfferInfo"><div class="npcOfferName">${md.name} · ${md.role}</div><div class="npcOfferDesc">${md.desc}<br>HP: ${md.maxHp} · Дальность: ${md.range}</div></div>`;
+   const btn=document.createElement('button');
+   btn.type='button';
+   const canHire=inSafe&&mercenaries.length<MAX_MERCS&&money>=md.price;
+   btn.className='buybtn'+(canHire?'':' locked');
+   btn.textContent=`${md.price} 🪙`;
+   btn.addEventListener('click',()=>hireMercenary(k));
+   row.appendChild(btn);
+   box.appendChild(row);
+  }
+ }
+}
+
+function openStoryModal(defaultTab){
+ if(!running||waveChoosing||activeNpc||$('shop').style.display==='flex'||($('bagModal')&&$('bagModal').style.display==='flex')||$('codexModal').style.display==='flex')return;
+ if(defaultTab)storyTab=defaultTab;
+ paused=true;
+ stopAllControls();
+ renderStoryModal();
+ $('storyModal').style.display='flex';
+}
+
+function closeStoryModal(){
+ $('storyModal').style.display='none';
+ if(running&&!waveChoosing&&!activeNpc&&$('shop').style.display!=='flex'&&$('pauseScreen').style.display!=='flex'&&$('codexModal').style.display!=='flex'&&(!$('bagModal')||$('bagModal').style.display!=='flex')){
+  paused=false;last=performance.now();
+ }
+}
+
 function init(){
- player={x:SAFE_ZONE.x,y:SAFE_ZONE.y+115,r:15,speed:195,angle:-Math.PI/2,inv:0,walkPhase:0,recoil:0,muzzleFlash:0,moving:false,regenAcc:0,slowTimer:0,vampKills:0,vampCd:0};
+ player={x:SAFE_ZONE.x,y:SAFE_ZONE.y+115,r:15,speed:195,angle:-Math.PI/2,inv:0,walkPhase:0,recoil:0,muzzleFlash:0,moving:false,regenAcc:0,slowTimer:0,vampKills:0,vampCd:0,stimTimer:0,inVehicle:null,carRegenAcc:0};
  const c=clampCamera(player.x,player.y);
  cam.x=c.x;cam.y=c.y;
  zombies=[];bullets=[];enemyProjectiles=[];hazardZones=[];particles=[];popups=[];decals=[];lightningBolts=[];railBeams=[];
@@ -3020,7 +4379,10 @@ function init(){
  joy={x:0,y:0};touchJoy={x:0,y:0};aimJoy={x:0,y:0};aimTouchActive=false;mouseAim.down=false;keys.clear();
  weapon='pistol';
  unlockedWeapons=new Set(['pistol']);
- currentDistrict='safe';nearbyNpc=null;activeNpc=null;maxHpBuys=0;
+ currentDistrict='safe';nearbyNpc=null;activeNpc=null;maxHpBuys=0;nearbyVehicle=null;
+ mercenaries=[];activeExpedition=null;
+ storyStep=0;storyCompleted=false;heliDiscount=0;
+ storyStats={lootCollected:0,cratesOpened:0,roadKills:0,expeditionsDone:0,patriarchSpawned:false,patriarchKilled:false};
  shake=0;shakeTilt=0;hitKickX=0;hitKickY=0;hurtFlash=0;
  uiEl.style.transform='';
  upgrades={damage:1,speed:1,rate:1};
@@ -3035,11 +4397,16 @@ function init(){
  };
  nearbyHeli=false;evacReadyShown=false;
  initLootState();
+ initVehicles();
+ generateExpeditionOffers();
  $('waveModal').style.display='none';
  if($('npcModal'))$('npcModal').style.display='none';
  if($('bagModal'))$('bagModal').style.display='none';
+ if($('storyModal'))$('storyModal').style.display='none';
  if($('interactBtn'))$('interactBtn').style.display='none';
  if($('doorBtn'))$('doorBtn').style.display='none';
+ if($('vehBtn'))$('vehBtn').style.display='none';
+ if($('quickUseBtn'))$('quickUseBtn').style.display='none';
  $('joystickThumb').style.transform='translate(0px,0px)';
  if($('aimJoystickThumb'))$('aimJoystickThumb').style.transform='translate(0px,0px)';
  if($('aimJoystick'))$('aimJoystick').classList.remove('firing');
@@ -3147,8 +4514,10 @@ function pickZombieTypeForLocation(x,y){
  const pool=[];
  for(const k of ZOMBIE_KEYS){
   const def=ZOMBIE_TYPES[k];
+  if(def.isWaveBoss||def.isStoryBoss)continue;
   if(wave<(def.minWave||1))continue;
-  let w=(def.districts&&def.districts[dKey])||5;
+  let w=(def.districts&&def.districts[dKey]!==undefined)?def.districts[dKey]:5;
+  if(w<=0)continue;
   if(wave>=3&&def.minWave>=2)w*=1.25;
   if(wave>=4&&def.minWave>=3)w*=1.45;
   pool.push([k,w]);
@@ -3540,6 +4909,11 @@ function shoot(targetOrAngle,preferredTarget){
      if(isCrit)addPopup(z.x,z.y-12,'КРИТ!','#86ff78',11);
     }
    }
+   if(activeExpedition&&activeExpedition.type==='nest'&&activeExpedition.hp>0){
+    if(distToSegment(activeExpedition.x,activeExpedition.y,mx,my,ex,ey)<=activeExpedition.r+12){
+     damageExpeditionNest(dmg*2);
+    }
+   }
    railBeams.push({x1:mx,y1:my,x2:ex,y2:ey,life:0.24,max:0.24});
   }
   addParticles(mx,my,'#9cfcff',8,145,'spark');
@@ -3615,6 +4989,10 @@ function shoot(targetOrAngle,preferredTarget){
 
 function openNpcDialog(npc){
  if(!running||waveChoosing||!npc)return;
+ if(npc.id==='commander'){
+  openStoryModal('story');
+  return;
+ }
  activeNpc=npc;
  paused=true;
  stopAllControls();
@@ -3848,11 +5226,13 @@ function openWaveChoice(clearedWave){
 
 function buyHelicopterAndEscape(){
  if(!evacHeli||evacHeli.bought||!running||!player)return false;
- if(money<HELI_PRICE){
-  addPopup(player.x,player.y-36,`Нужно ${HELI_PRICE} 🪙 (не хватает ${HELI_PRICE-money})`,'#ffd078',13);
+ const heliCost=getHeliPrice();
+ if(money<heliCost){
+  addPopup(player.x,player.y-36,`Нужно ${heliCost} 🪙 (не хватает ${heliCost-money})`,'#ffd078',13);
   return false;
  }
- money-=HELI_PRICE;
+ if(player.inVehicle)exitVehicle(false);
+ money-=heliCost;
  evacHeli.bought=true;
  evacHeli.takeoff=true;
  evacHeli.timer=0;
@@ -3862,8 +5242,11 @@ function buyHelicopterAndEscape(){
  player.inv=999;
  if($('interactBtn')){$('interactBtn').style.display='none';$('interactBtn').classList.remove('evac')}
  if($('doorBtn')){$('doorBtn').style.display='none';$('doorBtn').classList.remove('locked')}
+ if($('vehBtn'))$('vehBtn').style.display='none';
+ if($('quickUseBtn'))$('quickUseBtn').style.display='none';
  if($('npcModal'))$('npcModal').style.display='none';
  if($('bagModal'))$('bagModal').style.display='none';
+ if($('storyModal'))$('storyModal').style.display='none';
  if($('shop'))$('shop').style.display='none';
  activeNpc=null;
  addParticles(evacHeli.x,evacHeli.y,'#9effa8',20,175,'spark');
@@ -3879,8 +5262,11 @@ function victoryEscape(){
  $('waveModal').style.display='none';
  if($('npcModal'))$('npcModal').style.display='none';
  if($('bagModal'))$('bagModal').style.display='none';
+ if($('storyModal'))$('storyModal').style.display='none';
  if($('interactBtn'))$('interactBtn').style.display='none';
  if($('doorBtn'))$('doorBtn').style.display='none';
+ if($('vehBtn'))$('vehBtn').style.display='none';
+ if($('quickUseBtn'))$('quickUseBtn').style.display='none';
  if($('bossBanner'))$('bossBanner').style.display='none';
  uiEl.style.transform='';
  score+=500;
@@ -3888,19 +5274,20 @@ function victoryEscape(){
   bestScore=score;
   try{localStorage.setItem('carantin_best',String(bestScore))}catch(_){}
  }
+ const heliCost=getHeliPrice();
  $('overlay').innerHTML=`
   <div class="box">
    <div class="hazardStrip"></div>
    <div class="boxBody">
     <h1 style="color:#80ff96">🚁 УБЕЖИЩЕ ДОСТИГНУТО!</h1>
     <div class="titleSlash"></div>
-    <p class="small">Вы выкупили эвакуационный вертолёт за <b style="color:#ffe082">${HELI_PRICE} 🪙</b> на точке «${evacHeli?evacHeli.label:'Окраина'}» и успешно покинули карантин! (+500 бонус)</p>
+    <p class="small">Вы выкупили эвакуационный вертолёт за <b style="color:#ffe082">${heliCost} 🪙</b> на точке «${evacHeli?evacHeli.label:'Окраина'}» ${storyCompleted?'и полностью завершили кампанию «Протокол Зачистки»!':'и успешно покинули карантин!'} (+500 бонус)</p>
     <div class="statsSummary">
      <div class="sumCard"><div class="k">Счёт</div><div class="v" style="color:#80ff96">${score}</div></div>
      <div class="sumCard"><div class="k">Волна / Убито</div><div class="v">${wave} · ${kills}</div></div>
      <div class="sumCard"><div class="k">Рекорд</div><div class="v" style="color:#ffe082">${bestScore}</div></div>
     </div>
-    <p class="small">Осталось монет: <b style="color:#ffe082">${money}</b> 🪙 · Индекс зомби: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
+    <p class="small">Вылазки: <b>${storyStats.expeditionsDone}</b> · Главы: <b>${Math.min(storyStep,5)}/5</b> · Индекс: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
    </div>
    <div class="boxFooter">
     <button type="button" class="mainbtn" id="restart">ИГРАТЬ СНОВА</button>
@@ -3916,8 +5303,11 @@ function gameOver(){
  $('waveModal').style.display='none';
  if($('npcModal'))$('npcModal').style.display='none';
  if($('bagModal'))$('bagModal').style.display='none';
+ if($('storyModal'))$('storyModal').style.display='none';
  if($('interactBtn'))$('interactBtn').style.display='none';
  if($('doorBtn'))$('doorBtn').style.display='none';
+ if($('vehBtn'))$('vehBtn').style.display='none';
+ if($('quickUseBtn'))$('quickUseBtn').style.display='none';
  uiEl.style.transform='';
  if(score>bestScore){
   bestScore=score;
@@ -3935,7 +5325,7 @@ function gameOver(){
      <div class="sumCard"><div class="k">Убито</div><div class="v">${kills}</div></div>
      <div class="sumCard"><div class="k">Рекорд</div><div class="v" style="color:#ffe082">${bestScore}</div></div>
     </div>
-    <p class="small">Монеты: <b style="color:#ffe082">${money}</b> 🪙 · В рюкзаке: <b>${lootBag.length}</b> 🎒 · Индекс: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
+    <p class="small">Монеты: <b style="color:#ffe082">${money}</b> 🪙 · Вылазки: <b>${storyStats.expeditionsDone}</b> · Индекс: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
    </div>
    <div class="boxFooter">
     <button type="button" class="mainbtn" id="restart">ИГРАТЬ СНОВА</button>
@@ -3953,7 +5343,9 @@ function startGame(){
  $('pauseScreen').style.display='none';
  $('codexModal').style.display='none';
  if($('bagModal'))$('bagModal').style.display='none';
+ if($('storyModal'))$('storyModal').style.display='none';
  running=true;paused=false;last=performance.now();
+ updateSquadAndMissionUI();
 }
 
 $('overlay').addEventListener('pointerup',e=>{
@@ -4094,20 +5486,67 @@ function update(dt,now){
 
  syncJoyInput();
  const moveMag=Math.hypot(joy.x,joy.y);
- player.moving=moveMag>0.06;
+ player.moving=!player.inVehicle&&moveMag>0.06;
  player.slowTimer=Math.max(0,(player.slowTimer||0)-dt);
- if(player.moving){
-  const slowMult=player.slowTimer>0?0.74:1;
-  const speedMult=getPlayerSpeedMult()*slowMult;
-  const spd=player.speed*speedMult;
-  player.x+=joy.x*spd*dt;
-  player.y+=joy.y*spd*dt;
-  resolveObstacles(player,false);
-  player.walkPhase+=dt*(8+speedMult*2.5)*Math.min(1,moveMag);
+ player.stimTimer=Math.max(0,(player.stimTimer||0)-dt);
+ if(player.inVehicle){
+  updateVehicles(dt,now);
+ }else{
+  updateVehicles(dt,now);
+  if(player.moving){
+   const slowMult=player.slowTimer>0?0.74:1;
+   const speedMult=getPlayerSpeedMult()*slowMult;
+   const spd=player.speed*speedMult;
+   player.x+=joy.x*spd*dt;
+   player.y+=joy.y*spd*dt;
+   resolveObstacles(player,false);
+   player.walkPhase+=dt*(8+speedMult*2.5)*Math.min(1,moveMag);
+  }
  }
 
  const inSafe=isInSafeZone(player.x,player.y,-4);
  updateZoneUI();
+
+ // Find nearby vehicle when on foot
+ nearbyVehicle=null;
+ if(!player.inVehicle){
+  let nearVD=86;
+  for(let i=0;i<vehicles.length;i++){
+   const d=Math.hypot(player.x-vehicles[i].x,player.y-vehicles[i].y);
+   if(d<nearVD){nearVD=d;nearbyVehicle=vehicles[i];}
+  }
+ }
+ const vb=$('vehBtn');
+ if(vb){
+  if(player.inVehicle){
+   vb.classList.add('inCar');
+   vb.textContent=`🚪 Выйти из авто (${Math.ceil(player.inVehicle.hp)}❤️) [G]`;
+   vb.style.display='inline-flex';
+  }else if(nearbyVehicle){
+   vb.classList.remove('inCar');
+   if(nearbyVehicle.broken){
+    const hasKit=lootBag.some(it=>it.id==='repairKit');
+    vb.textContent=hasKit?`🔧 Починить ремкомплектом [G]`:`🔧 Починить за 25 🪙 [G]`;
+   }else{
+    vb.textContent=`🚗 Сесть: ${nearbyVehicle.def.name} [G]`;
+   }
+   vb.style.display='inline-flex';
+  }else{
+   vb.classList.remove('inCar');
+   vb.style.display='none';
+  }
+ }
+
+ const qb=$('quickUseBtn');
+ const qAct=getQuickAidAction();
+ if(qb){
+  if(qAct){
+   qb.textContent=qAct.label;
+   qb.style.display='inline-flex';
+  }else{
+   qb.style.display='none';
+  }
+ }
 
  // Building roof transparency, door timers, interior guard wake-up, loot containers & pickups
  let nearDoor=null,nearDoorD=72;
@@ -4179,6 +5618,7 @@ function update(dt,now){
  nearbyLootNode=nearNode;
 
  const ib=$('interactBtn');
+ const heliCost=getHeliPrice();
  if(ib){
   if(nearbyNpc){
    ib.classList.remove('evac');
@@ -4187,12 +5627,12 @@ function update(dt,now){
     :`💬 Поговорить: ${nearbyNpc.short} [E]`;
    ib.style.display='block';
   }else if(nearbyHeli){
-   if(money>=HELI_PRICE){
+   if(money>=heliCost){
     ib.classList.add('evac');
-    ib.textContent=`🚁 КУПИТЬ ВЕРТОЛЁТ И УЛЕТЕТЬ (${HELI_PRICE} 🪙) [E]`;
+    ib.textContent=heliCost===0?`🚁 УЛЕТЕТЬ БЕСПЛАТНО! [E]`:`🚁 КУПИТЬ ВЕРТОЛЁТ И УЛЕТЕТЬ (${heliCost} 🪙) [E]`;
    }else{
     ib.classList.remove('evac');
-    ib.textContent=`🔒 Вертолёт: нужно ${HELI_PRICE} 🪙 (${money}/${HELI_PRICE})`;
+    ib.textContent=`🔒 Вертолёт: нужно ${heliCost} 🪙 (${money}/${heliCost})`;
    }
    ib.style.display='block';
   }else if(nearbyLootNode){
@@ -4234,9 +5674,11 @@ function update(dt,now){
    if(lootBag.length<cap){
     const lt=LOOT_TYPES[gl.typeId]||LOOT_TYPES.canned;
     lootBag.push(lt);
+    storyStats.lootCollected=(storyStats.lootCollected||0)+1;
     addParticles(gl.x,gl.y,'#8bff9c',7,95,'spark');
     addPopup(gl.x,gl.y-18,`+${lt.icon} ${lt.name} (${getLootSellPrice(lt)}🪙)`,'#9effa8',11);
     groundLoot.splice(i,1);
+    updateStoryProgress();
     updateUI();
    }else if(lootFullToastCd<=0){
     lootFullToastCd=1.8;
@@ -4313,8 +5755,12 @@ function update(dt,now){
  fireTimer-=dt;
  if(aim.fire&&fireTimer<=0){
   shoot(aim.angle);
-  fireTimer=weapons[weapon].delay/(upgrades.rate*(itemMods.rateMult||1));
+  const stimFire=player.stimTimer>0?1.35:1;
+  fireTimer=weapons[weapon].delay/(upgrades.rate*(itemMods.rateMult||1)*stimFire);
  }
+ updateMercenaries(dt,now);
+ updateExpedition(dt);
+ updateSquadAndMissionUI();
 
  for(const z of zombies){
   const def=z.def||ZOMBIE_TYPES.walker;
@@ -4556,15 +6002,33 @@ function update(dt,now){
   resolveObstacles(z,true);
   z.phase+=dt*(moveSpd>85?9.5:moveSpd<34?3.8:5.4);
   z.hit=Math.max(0,z.hit-dt);
-  if(Math.hypot(player.x-z.x,player.y-z.y)<player.r+z.r-3){
-   const wasInv=player.inv>0;
-   damagePlayer(z.dmg||10,z.x,z.y);
-   if(!wasInv&&def.ability==='chill'){
-    player.slowTimer=1.5;
-    addPopup(player.x,player.y-38,'❄️ ЗАМЕДЛЕН','#7be8ff',12);
-   }else if(!wasInv&&def.ability==='lifesteal'){
-    z.hp=Math.min(z.maxHp,z.hp+0.8);
-    addParticles(z.x,z.y,'#ff4a68',5,75,'blood');
+  z.carRamCd=Math.max(0,(z.carRamCd||0)-dt);
+  z.carBiteCd=Math.max(0,(z.carBiteCd||0)-dt);
+  const hitDist=(player.inVehicle?player.inVehicle.def.wid*0.62:player.r)+z.r-3;
+  if(Math.hypot(player.x-z.x,player.y-z.y)<hitDist){
+   if(player.inVehicle){
+    const v=player.inVehicle;
+    if(z.carBiteCd<=0){
+     z.carBiteCd=0.72;
+     const cDmg=Math.max(1,(z.dmg||10)*0.6*(1-(v.def.armor||0)));
+     v.hp=Math.max(0,v.hp-cDmg);v.hit=0.14;
+     addParticles(z.x,z.y,'#ffd87a',4,85,'spark');
+     if(v.hp<=0){
+      v.broken=true;v.vx=0;v.vy=0;
+      addParticles(v.x,v.y,'#ff8c32',18,165,'spark');
+      exitVehicle(true);
+     }
+    }
+   }else{
+    const wasInv=player.inv>0;
+    damagePlayer(z.dmg||10,z.x,z.y);
+    if(!wasInv&&def.ability==='chill'){
+     player.slowTimer=1.5;
+     addPopup(player.x,player.y-38,'❄️ ЗАМЕДЛЕН','#7be8ff',12);
+    }else if(!wasInv&&def.ability==='lifesteal'){
+     z.hp=Math.min(z.maxHp,z.hp+0.8);
+     addParticles(z.x,z.y,'#ff4a68',5,75,'blood');
+    }
    }
   }
  }
@@ -4579,8 +6043,15 @@ function update(dt,now){
    addParticles(ep.x,ep.y,'#74eeff',4,70,'spark');
    dead=true;
   }
-  if(!dead&&player&&Math.hypot(player.x-ep.x,player.y-ep.y)<player.r+ep.r){
-   damagePlayer(ep.dmg,ep.x,ep.y);
+  const hitR=player?(player.inVehicle?player.inVehicle.def.wid*0.56:player.r):15;
+  if(!dead&&player&&Math.hypot(player.x-ep.x,player.y-ep.y)<hitR+ep.r){
+   if(player.inVehicle){
+    const v=player.inVehicle;
+    v.hp=Math.max(0,v.hp-ep.dmg*0.6*(1-(v.def.armor||0)));v.hit=0.12;
+    if(v.hp<=0){v.broken=true;v.vx=0;v.vy=0;exitVehicle(true);}
+   }else{
+    damagePlayer(ep.dmg,ep.x,ep.y);
+   }
    addParticles(ep.x,ep.y,ep.color,5,90,'spark');
    dead=true;
   }
@@ -4609,7 +6080,7 @@ function update(dt,now){
   const hz=hazardZones[i];
   hz.life-=dt;hz.tick-=dt;
   if(hz.life<=0){hazardZones.splice(i,1);continue}
-  if(player&&!inSafe&&hz.tick<=0&&Math.hypot(player.x-hz.x,player.y-hz.y)<=hz.r+player.r*0.5){
+  if(player&&!player.inVehicle&&!inSafe&&hz.tick<=0&&Math.hypot(player.x-hz.x,player.y-hz.y)<=hz.r+player.r*0.5){
    hz.tick=0.65;
    damagePlayer(hz.kind==='fire'?6:5,hz.x,hz.y);
   }
@@ -4630,6 +6101,11 @@ function update(dt,now){
     if(b.chill>0){
      zz.chillTimer=Math.max(zz.chillTimer||0,b.chill);
     }
+   }
+  }
+  if(activeExpedition&&activeExpedition.type==='nest'&&activeExpedition.hp>0){
+   if(Math.hypot(activeExpedition.x-b.x,activeExpedition.y-b.y)<=b.aoe+activeExpedition.r){
+    damageExpeditionNest(b.damage*1.15);
    }
   }
   particles.push({x:b.x,y:b.y,vx:0,vy:0,life:b.rocket?.34:.24,max:b.rocket?.34:.24,color:col,size:b.aoe*(b.rocket?0.72:0.56),kind:'ring',rot:0,vrot:0});
@@ -4677,6 +6153,13 @@ function update(dt,now){
      hit=true;
      break;
     }
+   }
+  }
+  if(!hit&&activeExpedition&&activeExpedition.type==='nest'&&activeExpedition.hp>0){
+   if(Math.hypot(activeExpedition.x-b.x,activeExpedition.y-b.y)<activeExpedition.r+(b.aoe?9:5)){
+    if(b.aoe>0)triggerBulletAoe(b,true);
+    else damageExpeditionNest(b.damage);
+    hit=true;
    }
   }
   if(!hit){
@@ -4747,6 +6230,17 @@ function update(dt,now){
 
    score+=z.points;kills++;waveKills++;
    registerZombieKill(z.type);
+   if(z.killedByCar&&!z.killedByCarCounted){
+    storyStats.roadKills=(storyStats.roadKills||0)+1;
+    z.killedByCarCounted=true;
+   }
+   if(z.isStoryBoss||z.type==='patriarch'){
+    storyStats.patriarchKilled=true;
+   }
+   if(z.isBountyTarget&&activeExpedition&&activeExpedition.type==='bounty'){
+    activeExpedition.targetZombie=null;
+    completeExpedition();
+   }
    // Zombies drop ground loot items (higher chance on elite / boss enemies)
    const dropChance=def.isBossBar?0.68:0.25;
    if(!isInSafeZone(z.x,z.y,8)&&Math.random()<dropChance){
@@ -4791,6 +6285,7 @@ function update(dt,now){
  }
 
  if(killedAny){
+  updateStoryProgress();
   if(waveKills>=waveGoal&&!waveChoosing){
    const cleared=wave;
    wave++;
@@ -5131,7 +6626,8 @@ function drawEvacHelipad(now,viewX,viewY){
  if(!evacHeli)return;
  const px=evacHeli.padX,py=evacHeli.padY;
  if(px<viewX-150||px>viewX+W+150||py<viewY-150||py>viewY+H+150)return;
- const ready=money>=HELI_PRICE||evacHeli.bought;
+ const heliCost=getHeliPrice();
+ const ready=money>=heliCost||evacHeli.bought;
  const pulse=0.55+Math.sin(now*0.006)*0.35;
 
  ctx.save();
@@ -5171,7 +6667,8 @@ function drawEvacHelipad(now,viewX,viewY){
  if(!evacHeli.bought){
   ctx.fillStyle=ready?'rgba(140,255,165,0.92)':'rgba(255,214,102,0.85)';
   ctx.font='800 10.5px monospace';ctx.textAlign='center';
-  ctx.fillText(ready?'🚁 ЭВАК ГОТОВ [2000 🪙]':'🚁 ЭВАКУАЦИЯ · 2000 🪙',0,88);
+  const costTxt=heliCost===0?'БЕСПЛАТНО!':`${heliCost} 🪙`;
+  ctx.fillText(ready?`🚁 ЭВАК ГОТОВ [${costTxt}]`:`🚁 ЭВАКУАЦИЯ · ${costTxt}`,0,88);
  }
  ctx.restore();
 }
@@ -5271,40 +6768,52 @@ function drawEvacHelicopter(now,viewX,viewY){
  ctx.restore();
 }
 
-function drawHeliPointer(now){
- if(!running||!evacHeli||evacHeli.takeoff||!player)return;
+function drawWorldEdgePointer(tx,ty,label,bgCol,strokeCol,now){
  const viewX=cam.x-W/2,viewY=cam.y-H/2;
- if(evacHeli.x>=viewX+24&&evacHeli.x<=viewX+W-24&&evacHeli.y>=viewY+24&&evacHeli.y<=viewY+H-24)return;
- const dx=evacHeli.x-cam.x,dy=evacHeli.y-cam.y;
+ if(tx>=viewX+24&&tx<=viewX+W-24&&ty>=viewY+24&&ty<=viewY+H-24)return;
+ const dx=tx-cam.x,dy=ty-cam.y;
  const ang=Math.atan2(dy,dx);
  const padX=Math.max(46,W/2-38),padY=Math.max(46,H/2-52);
  const cos=Math.cos(ang),sin=Math.sin(ang);
  const scale=Math.min(Math.abs(cos)>0.001?padX/Math.abs(cos):9999,Math.abs(sin)>0.001?padY/Math.abs(sin):9999);
  const ix=W/2+cos*scale,iy=H/2+sin*scale;
- const distM=Math.round(Math.hypot(evacHeli.x-player.x,evacHeli.y-player.y)/10);
- const ready=money>=HELI_PRICE;
- const pulse=ready?(0.78+Math.sin(now*0.009)*0.22):0.72;
+ const distM=Math.round(Math.hypot(tx-player.x,ty-player.y)/10);
+ const pulse=0.78+Math.sin(now*0.009)*0.22;
 
  ctx.save();
  ctx.translate(ix,iy);
  ctx.globalAlpha=pulse;
- ctx.fillStyle=ready?'rgba(16,66,34,0.92)':'rgba(12,26,32,0.82)';
- ctx.strokeStyle=ready?'#7cff8c':'#ffd166';
+ ctx.fillStyle=bgCol;
+ ctx.strokeStyle=strokeCol;
  ctx.lineWidth=2;
- ctx.beginPath();ctx.roundRect(-28,-16,56,32,12);ctx.fill();ctx.stroke();
+ ctx.beginPath();ctx.roundRect(-30,-16,60,32,12);ctx.fill();ctx.stroke();
 
- // Directional arrow tip
  ctx.save();
  ctx.rotate(ang);
- ctx.fillStyle=ready?'#7cff8c':'#ffd166';
- ctx.beginPath();ctx.moveTo(35,0);ctx.lineTo(25,-6);ctx.lineTo(25,6);ctx.closePath();ctx.fill();
+ ctx.fillStyle=strokeCol;
+ ctx.beginPath();ctx.moveTo(37,0);ctx.lineTo(27,-6);ctx.lineTo(27,6);ctx.closePath();ctx.fill();
  ctx.restore();
 
  ctx.fillStyle='#ffffff';
  ctx.font='800 11px system-ui,sans-serif';
  ctx.textAlign='center';ctx.textBaseline='middle';
- ctx.fillText(`🚁 ${distM}м`,0,0);
+ ctx.fillText(`${label} ${distM}м`,0,0);
  ctx.restore();
+}
+
+function drawHeliPointer(now){
+ if(!running||!player)return;
+ if(evacHeli&&!evacHeli.takeoff){
+  const ready=money>=getHeliPrice();
+  drawWorldEdgePointer(evacHeli.x,evacHeli.y,'🚁',ready?'rgba(16,66,34,0.92)':'rgba(12,26,32,0.82)',ready?'#7cff8c':'#ffd166',now);
+ }
+ if(activeExpedition){
+  drawWorldEdgePointer(activeExpedition.x,activeExpedition.y,activeExpedition.icon||'🎯','rgba(44,30,10,0.9)','rgba(255,196,82,0.95)',now);
+ }
+ const pBoss=zombies.find(z=>z.isStoryBoss);
+ if(pBoss){
+  drawWorldEdgePointer(pBoss.x,pBoss.y,'💀','rgba(60,12,18,0.92)','#ff5a52',now);
+ }
 }
 
 function drawSafeZoneBarrier(now){
@@ -5525,7 +7034,7 @@ function drawBuildingLoot(now,viewX,viewY){
 }
 
 function drawPlayer(now){
- if(!player||(evacHeli&&evacHeli.takeoff))return;
+ if(!player||player.inVehicle||(evacHeli&&evacHeli.takeoff))return;
  ctx.save();
  ctx.translate(player.x,player.y);
 
@@ -6216,6 +7725,27 @@ function drawNightMask(now,viewX,viewY){
   lightCtx.restore();
  }
 
+ // Vehicle bright dual headlights beam in night mask
+ if(player&&player.inVehicle&&!player.inVehicle.broken){
+  const v=player.inVehicle;
+  lightCtx.save();
+  lightCtx.translate(v.x,v.y);
+  lightCtx.rotate(v.angle);
+  const hl=480;
+  const hg=lightCtx.createRadialGradient(v.def.len*0.45,0,22,v.def.len*0.45,0,hl);
+  hg.addColorStop(0,'rgba(255,255,255,1)');
+  hg.addColorStop(0.65,'rgba(255,255,255,0.82)');
+  hg.addColorStop(1,'rgba(255,255,255,0)');
+  lightCtx.globalAlpha=1;
+  lightCtx.fillStyle=hg;
+  lightCtx.beginPath();
+  lightCtx.moveTo(v.def.len*0.4,-6);
+  lightCtx.arc(v.def.len*0.4,0,hl,-0.48,0.48);
+  lightCtx.closePath();
+  lightCtx.fill();
+  lightCtx.restore();
+ }
+
  // Safe Zone plaza warm/cyan ambient cutout
  lightCtx.globalAlpha=0.72;
  lightCtx.drawImage(glows.cutSoft,SAFE_ZONE.x-SAFE_ZONE.r*1.08,SAFE_ZONE.y-SAFE_ZONE.r*1.08,SAFE_ZONE.r*2.16,SAFE_ZONE.r*2.16);
@@ -6316,7 +7846,7 @@ function drawWorldLights(now,viewX,viewY){
  }
 
  if(evacHeli){
-  const ready=money>=HELI_PRICE||evacHeli.bought;
+  const ready=money>=getHeliPrice()||evacHeli.bought;
   const pulse=0.4+Math.sin(now*0.008)*0.3;
   ctx.globalAlpha=pulse;
   ctx.drawImage(ready?glows.green:glows.amber,evacHeli.padX-85,evacHeli.padY-85,170,170);
@@ -6324,6 +7854,26 @@ function drawWorldLights(now,viewX,viewY){
    ctx.globalAlpha=0.55;
    ctx.drawImage(glows.cyan,evacHeli.x-90,evacHeli.y-90,180,180);
   }
+ }
+
+ // Driven vehicle headlights glow & flashing police/ambulance beacons
+ if(player&&player.inVehicle&&!player.inVehicle.broken){
+  const v=player.inVehicle;
+  ctx.save();
+  ctx.translate(v.x,v.y);
+  ctx.rotate(v.angle);
+  ctx.save();
+  ctx.translate(v.def.len*0.45,0);
+  ctx.scale(2.8,1.05);
+  ctx.globalAlpha=0.28;
+  ctx.drawImage(glows.warm,-20,-90,180,180);
+  ctx.restore();
+  if(v.def.siren){
+   const isRed=Math.sin(now*0.015)>0;
+   ctx.globalAlpha=0.42;
+   ctx.drawImage(isRed?glows.red:glows.blue,-44,-44,88,88);
+  }
+  ctx.restore();
  }
 
  if(player&&!(evacHeli&&evacHeli.takeoff)){
@@ -6485,15 +8035,38 @@ function renderRadar(now){
  g.lineWidth=1.5;
  g.stroke();
  for(const npc of NPCS){
-  g.fillStyle=npc.id==='armorer'?'#ffb84d':npc.id==='trader'?'#ffe766':'#62f5e6';
-  g.beginPath();g.arc(npc.x*sx,npc.y*sy,2.8,0,Math.PI*2);g.fill();
+  g.fillStyle=npc.id==='armorer'?'#ffb84d':npc.id==='trader'?'#ffe766':npc.id==='commander'?'#ffd85c':'#62f5e6';
+  g.beginPath();g.arc(npc.x*sx,npc.y*sy,npc.id==='commander'?3.2:2.8,0,Math.PI*2);g.fill();
+ }
+
+ // Drivable vehicles on radar
+ for(const v of vehicles){
+  g.fillStyle=v.broken?'rgba(140,120,110,0.45)':(player&&player.inVehicle===v)?'#ffffff':'rgba(120,220,255,0.78)';
+  g.fillRect(v.x*sx-1.8,v.y*sy-1.8,3.6,3.6);
+ }
+
+ // Mercenary allies on radar
+ for(const m of mercenaries){
+  if(m.inVehicle)continue;
+  g.fillStyle='#5cffdc';
+  g.beginPath();g.arc(m.x*sx,m.y*sy,2.4,0,Math.PI*2);g.fill();
+ }
+
+ // Active city expedition marker on radar
+ if(activeExpedition){
+  const ex=Math.max(5,Math.min(rw-5,activeExpedition.x*sx));
+  const ey=Math.max(5,Math.min(rh-5,activeExpedition.y*sy));
+  g.strokeStyle='#ffe17d';g.lineWidth=1.6;
+  g.beginPath();g.arc(ex,ey,4.5+Math.sin((now||0)*0.01)*1.6,0,Math.PI*2);g.stroke();
+  g.fillStyle='#ffaa38';
+  g.beginPath();g.arc(ex,ey,2.5,0,Math.PI*2);g.fill();
  }
 
  // Evacuation helicopter landing site on radar
  if(evacHeli){
   const hx=Math.max(6,Math.min(rw-6,evacHeli.padX*sx));
   const hy=Math.max(6,Math.min(rh-6,evacHeli.padY*sy));
-  const ready=money>=HELI_PRICE||evacHeli.bought;
+  const ready=money>=getHeliPrice()||evacHeli.bought;
   const pulse=ready?(4.8+Math.sin((now||0)*0.01)*1.8):4.2;
   g.strokeStyle=ready?'rgba(124,255,140,0.95)':'rgba(255,214,96,0.82)';
   g.lineWidth=1.6;
@@ -6583,8 +8156,10 @@ function render(now){
  }
  drawSafeZoneBarrier(now);
  drawEvacHelipad(now,viewX,viewY);
+ drawExpeditionWorld(now);
  drawTargetReticle(now);
  drawBuildingLoot(now,viewX,viewY);
+ drawVehicles(now,viewX,viewY);
 
  for(const p of particles){
   const t=Math.max(0,p.life/p.max);
@@ -6619,6 +8194,7 @@ function render(now){
   if(npc.x<viewX-80||npc.x>viewX+W+80||npc.y<viewY-80||npc.y>viewY+H+80)continue;
   drawNpcTrader(npc,now);
  }
+ drawMercenaries(now);
  drawPlayer(now);
 
  // Enemy ranged projectiles (spitter acid / cyborg shock / sniper tracer / chemist flask)
@@ -6837,9 +8413,9 @@ function renderShop(){
  }
 }
 
-function openShop(){if(!running||waveChoosing||activeNpc)return;if($('bagModal'))$('bagModal').style.display='none';paused=true;stopAllControls();$('shop').style.display='flex';renderShop()}
+function openShop(){if(!running||waveChoosing||activeNpc)return;if($('bagModal'))$('bagModal').style.display='none';if($('storyModal'))$('storyModal').style.display='none';paused=true;stopAllControls();$('shop').style.display='flex';renderShop()}
 function closeShop(){$('shop').style.display='none';paused=false;last=performance.now()}
-function pauseGame(){if(!running||waveChoosing||activeNpc)return;if($('bagModal'))$('bagModal').style.display='none';paused=true;stopAllControls();$('pauseScreen').style.display='flex'}
+function pauseGame(){if(!running||waveChoosing||activeNpc)return;if($('bagModal'))$('bagModal').style.display='none';if($('storyModal'))$('storyModal').style.display='none';paused=true;stopAllControls();$('pauseScreen').style.display='flex'}
 function resumeGame(){paused=false;$('pauseScreen').style.display='none';last=performance.now()}
 
 const HOME_LABELS={
@@ -6964,7 +8540,7 @@ function renderCodex(){
 }
 
 function openCodex(from){
- if(waveChoosing||activeNpc||$('shop').style.display==='flex'||($('bagModal')&&$('bagModal').style.display==='flex'))return;
+ if(waveChoosing||activeNpc||$('shop').style.display==='flex'||($('bagModal')&&$('bagModal').style.display==='flex')||($('storyModal')&&$('storyModal').style.display==='flex'))return;
  if(from==='pause'){
   codexReturnTo='pause';
   $('pauseScreen').style.display='none';
@@ -7036,6 +8612,21 @@ if($('codexFilters'))$('codexFilters').addEventListener('click',e=>{
 });
 if($('lootStatBtn'))$('lootStatBtn').addEventListener('click',openBagModal);
 if($('bagClose'))$('bagClose').addEventListener('click',closeBagModal);
+if($('storyBtn'))$('storyBtn').addEventListener('click',()=>openStoryModal());
+if($('missionBar'))$('missionBar').addEventListener('click',()=>openStoryModal());
+if($('storyClose'))$('storyClose').addEventListener('click',closeStoryModal);
+if($('storyTabs'))$('storyTabs').addEventListener('click',e=>{
+ const tab=e.target.closest('.codexTab');
+ if(!tab)return;
+ storyTab=tab.dataset.tab||'story';
+ renderStoryModal();
+});
+if($('vehBtn'))$('vehBtn').addEventListener('click',()=>{
+ if(!running||paused||!player)return;
+ if(player.inVehicle)exitVehicle(false);
+ else if(nearbyVehicle)enterVehicle(nearbyVehicle);
+});
+if($('quickUseBtn'))$('quickUseBtn').addEventListener('click',useQuickAid);
 if($('interactBtn'))$('interactBtn').addEventListener('click',()=>{
  if(nearbyNpc)openNpcDialog(nearbyNpc);
  else if(nearbyHeli)buyHelicopterAndEscape();
@@ -7056,6 +8647,14 @@ canvas.addEventListener('pointerdown',e=>{
   if(Math.hypot(wx-npc.x,wy-npc.y)<=40&&Math.hypot(player.x-npc.x,player.y-npc.y)<=110){
    openNpcDialog(npc);
    return;
+  }
+ }
+ if(!player.inVehicle){
+  for(const v of vehicles){
+   if(Math.hypot(wx-v.x,wy-v.y)<=42&&Math.hypot(player.x-v.x,player.y-v.y)<=95){
+    enterVehicle(v);
+    return;
+   }
   }
  }
  if(evacHeli&&!evacHeli.bought&&Math.hypot(wx-evacHeli.x,wy-evacHeli.y)<=72&&Math.hypot(player.x-evacHeli.x,player.y-evacHeli.y)<=110){
@@ -7198,16 +8797,28 @@ window.addEventListener('keydown',e=>{
  if((e.code==='KeyF'||e.key==='f'||e.key==='F'||e.key==='а'||e.key==='А')&&running&&!paused){
   if(nearbyDoor)toggleBuildingDoor(nearbyDoor);
  }
+ if((e.code==='KeyG'||e.key==='g'||e.key==='G'||e.key==='п'||e.key==='П')&&running&&!paused){
+  if(player&&player.inVehicle)exitVehicle(false);
+  else if(nearbyVehicle)enterVehicle(nearbyVehicle);
+ }
+ if((e.code==='KeyH'||e.key==='h'||e.key==='H'||e.key==='р'||e.key==='Р')&&running&&!paused){
+  useQuickAid();
+ }
+ if((e.code==='KeyQ'||e.key==='q'||e.key==='Q'||e.key==='й'||e.key==='Й')&&running&&!waveChoosing&&!activeNpc&&$('shop').style.display!=='flex'&&(!$('bagModal')||$('bagModal').style.display!=='flex')&&$('codexModal').style.display!=='flex'){
+  if($('storyModal')&&$('storyModal').style.display==='flex')closeStoryModal();
+  else openStoryModal();
+ }
  const slotKeyIdx=['1','2','3','4','5','6','7','8','9','0','-'].indexOf(e.key);
  if(slotKeyIdx!==-1){
   const unlocked=WEAPON_ORDER.filter(id=>unlockedWeapons.has(id));
   if(unlocked[slotKeyIdx])selectWeapon(unlocked[slotKeyIdx]);
  }
- if((e.code==='KeyI'||e.code==='KeyB')&&!waveChoosing&&!activeNpc&&$('shop').style.display!=='flex'&&(!$('bagModal')||$('bagModal').style.display!=='flex')){
+ if((e.code==='KeyI'||e.code==='KeyB')&&!waveChoosing&&!activeNpc&&$('shop').style.display!=='flex'&&(!$('bagModal')||$('bagModal').style.display!=='flex')&&(!$('storyModal')||$('storyModal').style.display!=='flex')){
   if($('codexModal').style.display==='flex')closeCodex();
   else openCodex(paused&&running?'pause':running?'game':'overlay');
  }
  if(e.key==='Escape'){
+  if($('storyModal')&&$('storyModal').style.display==='flex'){closeStoryModal();return;}
   if($('bagModal')&&$('bagModal').style.display==='flex'){closeBagModal();return;}
   if($('codexModal').style.display==='flex'){closeCodex();return;}
   if(running&&!waveChoosing){
