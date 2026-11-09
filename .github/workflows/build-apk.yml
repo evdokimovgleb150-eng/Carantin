@@ -1,0 +1,47 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - 'arena/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build & sign CARANTIN.apk
+        run: |
+          chmod +x android/build_apk.sh
+          ./android/build_apk.sh CARANTIN.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CARANTIN-apk
+          path: CARANTIN.apk
+          retention-days: 90
+
+      - name: Publish GitHub Release on main
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-github-release@v2
+        with:
+          tag_name: apk-latest
+          name: CARANTIN Android APK (v2.3)
+          body: |
+            Готовый установочный APK-файл для Android (горизонтальный режим, увеличенные джойстики движения и стрельбы, траектория прицеливания, офлайн-работа и 30 видов зомби).
+          files: CARANTIN.apk
+          make_latest: true
