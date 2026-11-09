@@ -33,8 +33,8 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
 
 #top{
  position:absolute;top:max(8px,env(safe-area-inset-top));left:8px;right:8px;
- display:grid;grid-template-columns:repeat(3,1fr);gap:7px;
- max-width:680px;margin:0 auto;
+ display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
+ max-width:720px;margin:0 auto;
 }
 .stat{
  background:var(--panel);
@@ -42,14 +42,22 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  border:1px solid var(--border);
  border-top-color:rgba(180,230,195,0.28);
  border-radius:12px;
- padding:7px 8px;
- display:flex;align-items:center;justify-content:center;gap:6px;
- font-size:clamp(12px,3.3vw,16px);font-weight:700;
+ padding:7px 6px;
+ display:flex;align-items:center;justify-content:center;gap:5px;
+ font-size:clamp(11px,3.1vw,15px);font-weight:700;
  font-variant-numeric:tabular-nums;
  box-shadow:0 4px 16px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.06);
 }
 .stat-hp{border-color:rgba(92,255,112,0.35)}
 .stat-score{border-color:rgba(130,210,160,0.3)}
+.stat-loot{
+ pointer-events:auto;cursor:pointer;
+ border-color:rgba(120,235,165,0.42);color:#ccfbe0;
+ transition:transform .08s ease,border-color .15s ease,box-shadow .15s ease;
+}
+.stat-loot:active{transform:scale(0.96)}
+.stat-loot.hasLoot{border-color:rgba(255,212,92,0.62);color:#fff0b5;box-shadow:0 4px 16px rgba(0,0,0,0.45),0 0 12px rgba(255,195,60,0.22)}
+.stat-loot.full{border-color:#ff7b54;color:#ffd0be;box-shadow:0 4px 16px rgba(0,0,0,0.45),0 0 14px rgba(255,110,60,0.36)}
 .stat-money{border-color:rgba(255,190,61,0.38);color:#ffe29a}
 
 #hudRow{
@@ -275,14 +283,14 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  border-radius:6px;padding:1px 5px;
 }
 
-#overlay,#shop,#pauseScreen,#waveModal,#npcModal,#codexModal{
+#overlay,#shop,#pauseScreen,#waveModal,#npcModal,#codexModal,#bagModal{
  position:absolute;inset:0;z-index:1000;
  display:flex;align-items:center;justify-content:center;padding:12px;
  background:radial-gradient(circle at 50% 40%,rgba(11,26,23,0.72),rgba(4,9,10,0.88));
  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
  pointer-events:auto;
 }
-#shop,#pauseScreen,#waveModal,#npcModal,#codexModal{display:none}
+#shop,#pauseScreen,#waveModal,#npcModal,#codexModal,#bagModal{display:none}
 .box.codexBox{width:min(620px,100%)}
 .codexProgBar{
  height:7px;border-radius:99px;overflow:hidden;margin:6px 0 8px;
@@ -334,7 +342,38 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer;color:var(--
  background:rgba(10,26,32,0.75);border:1px solid rgba(100,205,235,0.28);
  border-radius:10px;padding:8px 10px;margin:6px 0 8px;
 }
-#npcOffers{display:grid;gap:8px;margin-top:8px}
+#npcOffers,#bagItems{display:grid;gap:8px;margin-top:8px}
+.npcOffer{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;
+ background:rgba(8,17,18,0.78);
+ border:1px solid rgba(118,166,138,0.28);
+ border-radius:13px;padding:9px 11px;text-align:left;
+}
+.npcOfferInfo{flex:1;min-width:0}
+.npcOfferName{font-size:13.5px;font-weight:800;color:#eaf6ed}
+.npcOfferDesc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3}
+.buybtn.equipped{
+ background:linear-gradient(180deg,#2d6f49,#1d4a30);color:#c8ffd5;
+ border:1px solid rgba(108,255,140,0.45);box-shadow:none;
+}
+.sellBanner{
+ margin:8px 0 4px;padding:10px 11px;border-radius:13px;
+ background:linear-gradient(135deg,rgba(45,42,16,0.88),rgba(20,28,22,0.92));
+ border:1.5px solid rgba(255,198,66,0.52);
+ display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;
+}
+.sellBannerInfo{font-size:12px;color:#f5e5b0;line-height:1.35}
+.sellAllBtn{
+ flex:0 0 auto;padding:9px 12px;border:0;border-radius:10px;
+ font-weight:800;font-size:12.5px;letter-spacing:.3px;
+ background:linear-gradient(180deg,#ffcb4c,#c9841c);color:#1f1302;
+ box-shadow:0 4px 14px rgba(255,185,50,0.35);
+}
+.sellAllBtn:active{transform:scale(0.96)}
+.sellAllBtn:disabled{background:#253338;color:#7f9694;box-shadow:none;opacity:.72}
+.lootRarity-common{border-color:rgba(130,220,140,0.34)}
+.lootRarity-rare{border-color:rgba(95,220,255,0.44)}
+.lootRarity-epic{border-color:rgba(255,196,68,0.55);background:rgba(28,22,12,0.84)}
 .npcTag{font-size:10px;padding:1px 6px;border-radius:6px;background:rgba(92,255,58,0.16);color:#8bff74}
 #waveChoices{display:grid;gap:9px;margin-top:10px}
 .itemCard{
@@ -489,12 +528,12 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
 @media(orientation:landscape) and (max-height:560px){
  #top{
   left:max(8px,env(safe-area-inset-left));right:auto;margin:0;
-  width:clamp(184px,30vw,252px);gap:4px;
+  width:clamp(228px,37vw,316px);gap:4px;
  }
- .stat{padding:5px 4px;font-size:12px;border-radius:10px;gap:4px}
+ .stat{padding:5px 4px;font-size:11.5px;border-radius:10px;gap:3px}
  #hudRow{
   top:max(8px,env(safe-area-inset-top));margin:0;max-width:none;
-  left:calc(max(8px,env(safe-area-inset-left)) + clamp(190px,31vw,258px));
+  left:calc(max(8px,env(safe-area-inset-left)) + clamp(234px,38vw,324px));
   right:calc(max(8px,env(safe-area-inset-right)) + 64px);
   gap:5px;
  }
@@ -540,6 +579,7 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  <div id="top">
   <div class="stat stat-hp"><span>❤️</span><span id="health">100</span></div>
   <div class="stat stat-score"><span>🧟</span><span id="score">0</span></div>
+  <button type="button" class="stat stat-loot" id="lootStatBtn" aria-label="Рюкзак с лутом" title="Рюкзак с лутом"><span>🎒</span><span id="lootCount">0/12</span></button>
   <div class="stat stat-money"><span>🪙</span><span id="money">0</span></div>
  </div>
 
@@ -590,10 +630,10 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
    <img class="emblem" src="./icon-192.png" alt="CARANTIN">
    <h1>CARA<span class="titleAccent">NTIN</span></h1>
    <div class="titleSlash"></div>
-   <p>Огромный город с 4 районами и Безопасной зоной в центре. Зачищай волны, покупай новое оружие у NPC-торговцев и выживай.</p>
+   <p>Огромный город с 4 районами и Безопасной зоной в центре. Заходи в здания, собирай ценный лут, продавай его на базе скупщику и прокачивайся.</p>
    <div class="controlsGrid">
     <div class="ctrlCard"><b>📱 Горизонт. сенсор</b>Левый стик — движение<br>Правый стик — прицел и огонь<br>Кнопка ⛶ — полный экран</div>
-    <div class="ctrlCard"><b>⌨️ Клавиатура + Мышь</b>WASD — шаг · Мышь/ЛКМ — огонь<br>1–6 — оружие · E — NPC · I — Индекс</div>
+    <div class="ctrlCard"><b>⌨️ Клавиатура + Мышь</b>WASD — шаг · Мышь/ЛКМ — огонь<br>1–6 — оружие · E — Лут/NPC · I — Индекс</div>
    </div>
   </div>
   <div class="boxFooter">
@@ -635,10 +675,26 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
   <div class="boxBody">
    <h2>🏪 АРСЕНАЛ ЗОНЫ</h2>
    <p>Монеты: <b id="shopMoney" style="color:#ffe082">0</b> 🪙</p>
+   <div id="shopSellWrap"></div>
    <div id="shopItems"></div>
   </div>
   <div class="boxFooter">
    <button type="button" class="mainbtn" id="shopClose">ВЕРНУТЬСЯ В БОЙ</button>
+  </div>
+ </div>
+</div>
+
+<div id="bagModal">
+ <div class="box">
+  <div class="hazardStrip"></div>
+  <div class="boxBody">
+   <h2>🎒 РЮКЗАК</h2>
+   <p class="small" id="bagMeta">Заполнено: 0/12 · Стоимость: 0 🪙</p>
+   <div id="bagSellZone"></div>
+   <div id="bagItems"></div>
+  </div>
+  <div class="boxFooter">
+   <button type="button" class="mainbtn" id="bagClose">ЗАКРЫТЬ</button>
   </div>
  </div>
 </div>
@@ -697,11 +753,11 @@ const WALL_PAD=30;
 const SAFE_ZONE={x:WORLD_W/2,y:WORLD_H/2,r:270};
 
 const DISTRICTS={
- safe:{id:'safe',name:'🛡️ БЕЗОПАСНАЯ ЗОНА',short:'База',badge:'safe',coinBonus:0,color:'rgba(70,195,245,0.16)'},
- suburb:{id:'suburb',name:'🏘️ ЖИЛОЙ КВАРТАЛ',short:'Жилой',badge:'',coinBonus:0,color:'rgba(85,155,105,0.10)'},
- chem:{id:'chem',name:'☣️ ХИМЗОНА (+1🪙)',short:'Химзона',badge:'hazard',coinBonus:1,color:'rgba(140,210,55,0.10)'},
- hospital:{id:'hospital',name:'🏥 МЕДГОРОДОК',short:'Медгородок',badge:'',coinBonus:0,color:'rgba(95,180,195,0.10)'},
- military:{id:'military',name:'🪖 БЛОКПОСТ (+2🪙)',short:'Блокпост',badge:'mil',coinBonus:2,color:'rgba(215,145,55,0.10)'}
+ safe:{id:'safe',name:'🛡️ БЕЗОПАСНАЯ ЗОНА',short:'База',badge:'safe',color:'rgba(70,195,245,0.16)'},
+ suburb:{id:'suburb',name:'🏘️ ЖИЛОЙ КВАРТАЛ',short:'Жилой',badge:'',color:'rgba(85,155,105,0.10)'},
+ chem:{id:'chem',name:'☣️ ХИМЗОНА (ХИМ-ЛУТ)',short:'Химзона',badge:'hazard',color:'rgba(140,210,55,0.10)'},
+ hospital:{id:'hospital',name:'🏥 МЕДГОРОДОК (МЕД-ЛУТ)',short:'Медгородок',badge:'',color:'rgba(95,180,195,0.10)'},
+ military:{id:'military',name:'🪖 БЛОКПОСТ (ТОП-ЛУТ)',short:'Блокпост',badge:'mil',color:'rgba(215,145,55,0.10)'}
 };
 
 function isInSafeZone(x,y,pad=0){
@@ -722,22 +778,50 @@ const NPCS=[
   name:'Оружейник «ВЕКТОР»',
   short:'ВЕКТОР',
   role:'Оружие и боеприпасы',
-  x:1700,y:1735,
-  tableX:1700,tableY:1696,
+  x:1655,y:1745,
+  tableX:1655,tableY:1706,
   color:'#d98634',hood:'#2b3940',visor:'#ffbe44',
-  say:'Свежие стволы прямо со склада! Бери пушку помощнее — в Химзоне и на Блокпосте без неё туго.'
+  say:'Свежие стволы прямо со склада! Тащи хабар из зданий скупщику и бери пушку помощнее.'
+ },
+ {
+  id:'trader',
+  name:'Скупщик «БАРЫГА»',
+  short:'СКУПЩИК',
+  role:'Скупка лута из зданий',
+  x:1800,y:1715,
+  tableX:1800,tableY:1676,
+  color:'#f2b84b',hood:'#3b3022',visor:'#ffe678',
+  say:'Зашёл в здание и вынес добро? Забираю любой лут по честной цене — звонкой монетой!'
  },
  {
   id:'medic',
   name:'Полевой медик «ДОК»',
   short:'ДОК',
   role:'Лечение и энергощит',
-  x:1900,y:1735,
-  tableX:1900,tableY:1696,
+  x:1945,y:1745,
+  tableX:1945,tableY:1706,
   color:'#5fd6c5',hood:'#2a4745',visor:'#72ff9f',
   say:'Ранен? Залатай броню и заряди энергощит — купол восстановит силы, пока ты на базе.'
  }
 ];
+
+const LOOT_TYPES={
+ canned:{id:'canned',name:'Консервы',icon:'🥫',value:7,rarity:'common',districts:['suburb']},
+ battery:{id:'battery',name:'Батарейки',icon:'🔋',value:10,rarity:'common',districts:['suburb','chem']},
+ radio:{id:'radio',name:'Рация',icon:'📻',value:17,rarity:'rare',districts:['suburb','military']},
+ watch:{id:'watch',name:'Золотые часы',icon:'💍',value:28,rarity:'epic',districts:['suburb']},
+ bandage:{id:'bandage',name:'Стерильный бинт',icon:'🩹',value:9,rarity:'common',districts:['hospital','suburb']},
+ ampoule:{id:'ampoule',name:'Антивирус-ампула',icon:'💉',value:19,rarity:'rare',districts:['hospital']},
+ scanner:{id:'scanner',name:'Мед-сканер',icon:'🧬',value:32,rarity:'epic',districts:['hospital']},
+ reagent:{id:'reagent',name:'Пробирка реагента',icon:'🧪',value:12,rarity:'common',districts:['chem']},
+ filter:{id:'filter',name:'Фильтр-маска',icon:'😷',value:22,rarity:'rare',districts:['chem','hospital']},
+ isotope:{id:'isotope',name:'Изотопный контейнер',icon:'☢️',value:38,rarity:'epic',districts:['chem']},
+ ammoBox:{id:'ammoBox',name:'Патронный ящик',icon:'🔫',value:14,rarity:'common',districts:['military']},
+ optics:{id:'optics',name:'Оптика прицела',icon:'🎯',value:25,rarity:'rare',districts:['military']},
+ cipher:{id:'cipher',name:'Шифр-модуль',icon:'💾',value:45,rarity:'epic',districts:['military']}
+};
+const LOOT_KEYS=Object.keys(LOOT_TYPES);
+const BASE_LOOT_CAP=12;
 
 // Cached full-world ground canvas (built once, copied per visible viewport slice)
 const groundCanvas=document.createElement('canvas');
@@ -787,6 +871,7 @@ const glows={
 let W=0,H=0,DPR=1;
 let player=null,zombies=[],bullets=[],enemyProjectiles=[],hazardZones=[],particles=[],popups=[],decals=[],lightningBolts=[],railBeams=[];
 let lamps=[],toxicPools=[],canopies=[],obstacles=[],ambientSpores=[],puddles=[],beacons=[],radarBuildings=[],rainDrops=[],mistPatches=[];
+let buildings=[],wallRects=[],lootNodes=[],groundLoot=[],lootBag=[],nearbyLootNode=null,lootFullToastCd=0,lootRespawnTimer=0;
 let cam={x:WORLD_W/2,y:WORLD_H/2};
 let score=0,money=0,health=100,maxHealth=100,shieldHp=0,kills=0;
 let seenZombieTypes=new Set();
@@ -872,16 +957,16 @@ const ZOMBIE_TYPES={
  soldier:{name:'Солдат',r:16,hp:3.0,speed:64,dmg:14,color:'#698758',coat:'#3a4a31',eye:'#ffe252',points:26,minWave:1,armor:0.18,gear:'soldier',glow:'amber',home:'military',desc:'Бывший боец гарнизона: быстр и защищён бронёй (18%).',districts:{suburb:5,chem:5,hospital:5,military:16}},
  commando:{name:'Штурмовик',r:16,hp:3.8,speed:74,dmg:16,color:'#586d57',coat:'#1c2226',eye:'#ff5a52',points:34,minWave:2,armor:0.25,gear:'commando',glow:'red',ability:'dash',home:'military',desc:'Тактические рывки, мощный удар и 25% брони.',districts:{suburb:3,chem:4,hospital:4,military:14}},
  grenadier:{name:'Подрывник',r:17,hp:3.5,speed:50,dmg:15,color:'#74845a',coat:'#4a422b',eye:'#ff8836',points:35,minWave:2,gear:'grenadier',glow:'amber',onDeath:'fireBomb',home:'military',desc:'При смерти детонирует боезапас мощным огненным взрывом.',districts:{suburb:4,chem:4,hospital:4,military:12}},
- tank:{name:'Танк-мутант',r:23,hp:5.5,speed:28,dmg:20,color:'#7b648f',coat:'#4a375c',eye:'#ff6b8b',points:38,minWave:1,gear:'tank',glow:'red',isBossBar:true,coins:5,home:'military',desc:'Огромный мутант с толстой шкурой и богатой наградой.',districts:{suburb:5,chem:6,hospital:5,military:11}},
- juggernaut:{name:'Джаггернаут',r:25,hp:8.2,speed:24,dmg:24,color:'#68727d',coat:'#29323a',eye:'#ff4c58',points:55,minWave:3,armor:0.35,gear:'juggernaut',glow:'red',isBossBar:true,coins:6,home:'military',desc:'Бронированный титан (35% брони) сокрушительной массы.',districts:{suburb:2,chem:3,hospital:3,military:10}},
- cyborg:{name:'Киборг-одержимый',r:17,hp:4.5,speed:58,dmg:14,color:'#6d7d82',coat:'#232d33',eye:'#ff3b4f',points:40,minWave:3,armor:0.20,gear:'cyborg',glow:'cyan',ability:'zap',range:235,isBossBar:true,coins:4,home:'military',desc:'Стреляет плазменными зарядами из импланта; 20% брони.',districts:{suburb:2,chem:4,hospital:4,military:10}},
+ tank:{name:'Танк-мутант',r:23,hp:5.5,speed:28,dmg:20,color:'#7b648f',coat:'#4a375c',eye:'#ff6b8b',points:38,minWave:1,gear:'tank',glow:'red',isBossBar:true,home:'military',desc:'Огромный мутант с толстой шкурой и огромной массой.',districts:{suburb:5,chem:6,hospital:5,military:11}},
+ juggernaut:{name:'Джаггернаут',r:25,hp:8.2,speed:24,dmg:24,color:'#68727d',coat:'#29323a',eye:'#ff4c58',points:55,minWave:3,armor:0.35,gear:'juggernaut',glow:'red',isBossBar:true,home:'military',desc:'Бронированный титан (35% брони) сокрушительной массы.',districts:{suburb:2,chem:3,hospital:3,military:10}},
+ cyborg:{name:'Киборг-одержимый',r:17,hp:4.5,speed:58,dmg:14,color:'#6d7d82',coat:'#232d33',eye:'#ff3b4f',points:40,minWave:3,armor:0.20,gear:'cyborg',glow:'cyan',ability:'zap',range:235,isBossBar:true,home:'military',desc:'Стреляет плазменными зарядами из импланта; 20% брони.',districts:{suburb:2,chem:4,hospital:4,military:10}},
 
  hound:{name:'Зомби-пёс',r:12,hp:1.3,speed:118,dmg:10,color:'#9e5d48',coat:'#573329',eye:'#ff6248',points:22,minWave:1,gear:'hound',glow:'red',shape:'hound',home:'suburb',desc:'Самый быстрый мутант в зоне — настигает бегом.',districts:{suburb:10,chem:8,hospital:6,military:10}},
  leaper:{name:'Прыгун',r:14,hp:2.2,speed:76,dmg:14,color:'#a88954',coat:'#4c3c24',eye:'#ffea52',points:28,minWave:2,gear:'leaper',glow:'amber',ability:'leap',home:'military',desc:'Совершает резкие длинные прыжки прямо к цели.',districts:{suburb:7,chem:7,hospital:6,military:8}},
  frost:{name:'Крио-зомби',r:16,hp:3.1,speed:50,dmg:12,color:'#72c8e8',coat:'#285469',eye:'#e0fcff',points:30,minWave:2,gear:'frost',glow:'cyan',ability:'chill',home:'hospital',desc:'Замораживающая аура и удары временно замедляют бег.',districts:{suburb:3,chem:4,hospital:11,military:4}},
  pyro:{name:'Огнеходец',r:16,hp:3.3,speed:62,dmg:16,color:'#cc6836',coat:'#4f2414',eye:'#fff266',points:34,minWave:2,gear:'pyro',glow:'amber',trail:'fire',home:'chem',desc:'Пылает заживо, оставляя под ногами огненный след.',districts:{suburb:4,chem:8,hospital:3,military:7}},
- necromancer:{name:'Некро-реаниматор',r:17,hp:4.8,speed:38,dmg:12,color:'#745c96',coat:'#211730',eye:'#d26eff',points:48,minWave:3,gear:'necromancer',glow:'red',ability:'summon',isBossBar:true,coins:5,home:'hospital',desc:'Призывает новых ползунов прямо посреди схватки.',districts:{suburb:3,chem:4,hospital:5,military:4}},
- alpha:{name:'Альфа-титан',r:27,hp:11.0,speed:33,dmg:26,color:'#9c4658',coat:'#3b1822',eye:'#ffffff',points:80,minWave:3,armor:0.20,gear:'alpha',glow:'red',ability:'spit',range:300,isBossBar:true,coins:8,home:'military',desc:'Главный босс карантина: огромная броня, мощь и дальний плевок.',districts:{suburb:2,chem:3,hospital:3,military:4}}
+ necromancer:{name:'Некро-реаниматор',r:17,hp:4.8,speed:38,dmg:12,color:'#745c96',coat:'#211730',eye:'#d26eff',points:48,minWave:3,gear:'necromancer',glow:'red',ability:'summon',isBossBar:true,home:'hospital',desc:'Призывает новых ползунов прямо посреди схватки.',districts:{suburb:3,chem:4,hospital:5,military:4}},
+ alpha:{name:'Альфа-титан',r:27,hp:11.0,speed:33,dmg:26,color:'#9c4658',coat:'#3b1822',eye:'#ffffff',points:80,minWave:3,armor:0.20,gear:'alpha',glow:'red',ability:'spit',range:300,isBossBar:true,home:'military',desc:'Главный босс карантина: огромная броня, мощь и дальний плевок.',districts:{suburb:2,chem:3,hospital:3,military:4}}
 };
 const ZOMBIE_KEYS=Object.keys(ZOMBIE_TYPES);
 
@@ -980,9 +1065,10 @@ const ITEMS_POOL=[
   apply:()=>{itemMods.speedMult=Number((itemMods.speedMult+0.12).toFixed(2))}
  },
  {
-  id:'greed',icon:'🪙',name:'Трофейный подсумок',
-  desc:'+20 🪙 сразу и +1 монета за каждого зомби',
-  apply:()=>{money+=20;itemMods.coinBonus+=1}
+  id:'greed',icon:'🎒',name:'Экспедиционный рюкзак',
+  desc:'+4 слота рюкзака (до 24) и +25% к цене продажи лута',
+  available:()=>(ownedItems.greed||0)<3,
+  apply:()=>{itemMods.lootCapacity=(itemMods.lootCapacity||0)+4;itemMods.lootBonus=Number(((itemMods.lootBonus||0)+0.25).toFixed(2));addPopup(player.x,player.y-28,'+4 СЛОТА 🎒','#ffe17d',13)}
  },
  {
   id:'vamp',icon:'💉',name:'Стимулятор крови',
@@ -1042,138 +1128,307 @@ function addRectObstacle(cx,cy,w,h){
  }
 }
 
-function drawBuildingRoof(g,cx,cy,w,h,style,label,rng,hasBeacon=false){
- addRectObstacle(cx,cy,w,h);
- radarBuildings.push({x:cx-w/2,y:cy-h/2,w,h,style});
- g.save();
- g.translate(cx,cy);
-
- // Deep cast shadow toward SE (moonlight from NW)
- g.fillStyle='rgba(3,8,10,0.58)';
- g.beginPath();g.roundRect(-w/2+14,-h/2+16,w,h,8);g.fill();
- g.fillStyle='rgba(4,9,11,0.34)';
- g.beginPath();g.roundRect(-w/2+24,-h/2+28,w,h,10);g.fill();
-
- // Concrete base skirt
- g.fillStyle='#192425';
- g.beginPath();g.roundRect(-w/2,-h/2,w,h,6);g.fill();
-
- // Roof surface gradient
- const rg=g.createLinearGradient(-w/2,-h/2,w/2,h/2);
- if(style==='med'){
-  rg.addColorStop(0,'#3b4e4c');rg.addColorStop(1,'#243233');
- }else if(style==='tech'){
-  rg.addColorStop(0,'#39474e');rg.addColorStop(1,'#1f282e');
- }else{
-  rg.addColorStop(0,'#454944');rg.addColorStop(1,'#252a28');
- }
- g.fillStyle=rg;
- g.beginPath();g.roundRect(-w/2+5,-h/2+5,w-10,h-10,4);g.fill();
-
- // Corrugated roof seams
- g.strokeStyle='rgba(0,0,0,0.22)';g.lineWidth=1.4;
- for(let rx=-w/2+14;rx<w/2-10;rx+=14){
-  g.beginPath();g.moveTo(rx,-h/2+7);g.lineTo(rx,h/2-7);g.stroke();
- }
-
- // Moon rim-light along NW parapet edge
- g.strokeStyle='rgba(175,215,210,0.28)';g.lineWidth=2;
- g.beginPath();
- g.moveTo(-w/2+4,h/2-6);g.lineTo(-w/2+4,-h/2+4);g.lineTo(w/2-6,-h/2+4);
- g.stroke();
-
- // Parapet outline
- g.strokeStyle='#101819';g.lineWidth=2.5;
- g.beginPath();g.roundRect(-w/2+1,-h/2+1,w-2,h-2,5);g.stroke();
-
- // HVAC unit / roof vents
- const vx=-w*0.22,vy=-h*0.18;
- g.fillStyle='rgba(0,0,0,0.4)';g.fillRect(vx-13,vy-11,30,26);
- g.fillStyle='#596b6d';g.beginPath();g.roundRect(vx-15,vy-13,28,24,3);g.fill();
- g.strokeStyle='#222c2e';g.lineWidth=1.5;g.strokeRect(vx-15,vy-13,28,24);
- g.fillStyle='#1c2527';g.beginPath();g.arc(vx-1,vy-1,7.5,0,Math.PI*2);g.fill();
- g.strokeStyle='#7a8d8f';g.lineWidth=1.3;
- for(let b=0;b<3;b++){
-  const a=b*Math.PI/3;
-  g.beginPath();g.moveTo(vx-1-Math.cos(a)*6.5,vy-1-Math.sin(a)*6.5);g.lineTo(vx-1+Math.cos(a)*6.5,vy-1+Math.sin(a)*6.5);g.stroke();
- }
-
- // Pipes / conduit
- g.strokeStyle='#637574';g.lineWidth=3.5;
- g.beginPath();g.moveTo(vx+13,vy-2);g.lineTo(w*0.25,vy-2);g.lineTo(w*0.25,h*0.2);g.stroke();
-
- // Roof hatch
- g.fillStyle='#323f40';g.fillRect(w*0.12,-h*0.22,22,18);
- g.strokeStyle='#171f20';g.lineWidth=1.5;g.strokeRect(w*0.12,-h*0.22,22,18);
-
- // Stencil label or medical cross
- if(style==='med'){
-  g.fillStyle='rgba(235,245,240,0.18)';
-  g.beginPath();g.arc(0,h*0.14,18,0,Math.PI*2);g.fill();
-  g.fillStyle='rgba(218,58,64,0.72)';
-  g.fillRect(-4,h*0.14-12,8,24);
-  g.fillRect(-12,h*0.14-4,24,8);
- }else if(label){
-  g.fillStyle='rgba(235,190,62,0.52)';
-  g.font='800 10px monospace';
-  g.textAlign='center';
-  g.fillText(label,0,h*0.28);
- }
-
- // Emergency roof beacon
- if(hasBeacon){
-  const bx=w/2-12,by=-h/2+12;
-  beacons.push({x:cx+bx,y:cy+by,kind:'amber',phase:rng()*6.28});
-  g.fillStyle='#242c2d';g.beginPath();g.arc(bx,by,5,0,Math.PI*2);g.fill();
-  g.fillStyle='#ffbe44';g.beginPath();g.arc(bx,by,2.8,0,Math.PI*2);g.fill();
- }
- g.restore();
+function isPointInBuilding(x,y,b,pad=0){
+ return x>=b.x-pad&&x<=b.x+b.w+pad&&y>=b.y-pad&&y<=b.y+b.h+pad;
 }
 
-function drawQuarantineTent(g,cx,cy,w,h,angle,rng){
- addRectObstacle(cx,cy,w*0.86,h*0.86);
- radarBuildings.push({x:cx-w/2,y:cy-h/2,w,h,style:'tent'});
+function isNearAnyBuilding(x,y,pad=40){
+ for(let i=0;i<buildings.length;i++){
+  if(isPointInBuilding(x,y,buildings[i],pad))return true;
+ }
+ return false;
+}
+
+function getPlayerBuilding(){
+ if(!player)return null;
+ for(let i=0;i<buildings.length;i++){
+  if(isPointInBuilding(player.x,player.y,buildings[i],4))return buildings[i];
+ }
+ return null;
+}
+
+function resolveCircleRect(entity,rect){
+ const closestX=Math.max(rect.x,Math.min(entity.x,rect.x+rect.w));
+ const closestY=Math.max(rect.y,Math.min(entity.y,rect.y+rect.h));
+ const dx=entity.x-closestX;
+ const dy=entity.y-closestY;
+ const distSq=dx*dx+dy*dy;
+ if(distSq>=entity.r*entity.r)return false;
+ if(distSq>0.0001){
+  const d=Math.sqrt(distSq);
+  const push=entity.r-d;
+  entity.x+=(dx/d)*push;
+  entity.y+=(dy/d)*push;
+ }else{
+  const leftPen=entity.x-rect.x;
+  const rightPen=(rect.x+rect.w)-entity.x;
+  const topPen=entity.y-rect.y;
+  const botPen=(rect.y+rect.h)-entity.y;
+  const m=Math.min(leftPen,rightPen,topPen,botPen);
+  if(m===leftPen)entity.x=rect.x-entity.r;
+  else if(m===rightPen)entity.x=rect.x+rect.w+entity.r;
+  else if(m===topPen)entity.y=rect.y-entity.r;
+  else entity.y=rect.y+rect.h+entity.r;
+ }
+ return true;
+}
+
+function segmentIntersectsRect(x1,y1,x2,y2,r){
+ const dx=x2-x1,dy=y2-y1;
+ let tmin=0,tmax=1;
+ if(Math.abs(dx)<1e-8){
+  if(x1<r.x||x1>r.x+r.w)return null;
+ }else{
+  let tx1=(r.x-x1)/dx,tx2=(r.x+r.w-x1)/dx;
+  if(tx1>tx2){const tmp=tx1;tx1=tx2;tx2=tmp}
+  tmin=Math.max(tmin,tx1);tmax=Math.min(tmax,tx2);
+  if(tmin>tmax)return null;
+ }
+ if(Math.abs(dy)<1e-8){
+  if(y1<r.y||y1>r.y+r.h)return null;
+ }else{
+  let ty1=(r.y-y1)/dy,ty2=(r.y+r.h-y1)/dy;
+  if(ty1>ty2){const tmp=ty1;ty1=ty2;ty2=tmp}
+  tmin=Math.max(tmin,ty1);tmax=Math.min(tmax,ty2);
+  if(tmin>tmax)return null;
+ }
+ return tmin;
+}
+
+function addEnterableBuilding(g,cfg){
+ const {id,cx,cy,w,h,style,label,districtId,doorSide,isTent=false,hasBeacon=false,lootCount=3}=cfg;
+ const x=cx-w/2,y=cy-h/2;
+ const wallT=isTent?9:13;
+ const doorW=60;
+ const doorX=doorSide==='W'?x:(doorSide==='E'?x+w:cx);
+ const doorY=doorSide==='N'?y:(doorSide==='S'?y+h:cy);
+
+ // Build perimeter wall segments leaving an open 60px doorway
+ if(doorSide==='N'){
+  const segW=(w-doorW)/2;
+  wallRects.push({x,y,w:segW,h:wallT});
+  wallRects.push({x:x+w-segW,y,w:segW,h:wallT});
+ }else{
+  wallRects.push({x,y,w,h:wallT});
+ }
+ if(doorSide==='S'){
+  const segW=(w-doorW)/2;
+  wallRects.push({x,y:y+h-wallT,w:segW,h:wallT});
+  wallRects.push({x:x+w-segW,y:y+h-wallT,w:segW,h:wallT});
+ }else{
+  wallRects.push({x,y:y+h-wallT,w,h:wallT});
+ }
+ if(doorSide==='W'){
+  const segH=(h-doorW)/2-wallT;
+  if(segH>0){
+   wallRects.push({x,y:y+wallT,w:wallT,h:segH});
+   wallRects.push({x,y:y+h-wallT-segH,w:wallT,h:segH});
+  }
+ }else{
+  wallRects.push({x,y:y+wallT,w:wallT,h:h-wallT*2});
+ }
+ if(doorSide==='E'){
+  const segH=(h-doorW)/2-wallT;
+  if(segH>0){
+   wallRects.push({x:x+w-wallT,y:y+wallT,w:wallT,h:segH});
+   wallRects.push({x:x+w-wallT,y:y+h-wallT-segH,w:wallT,h:segH});
+  }
+ }else{
+  wallRects.push({x:x+w-wallT,y:y+wallT,w:wallT,h:h-wallT*2});
+ }
+
+ const b={
+  id,cx,cy,x,y,w,h,style,label,districtId,doorSide,doorX,doorY,doorW,
+  wallT,isTent,hasBeacon,lootCount,roofAlpha:1,guardSpawned:false
+ };
+ buildings.push(b);
+ radarBuildings.push({x,y,w,h,style,id,doorSide,doorX,doorY});
+
+ // Draw exterior entry step / welcome threshold mat + directional entry chevron
  g.save();
- g.translate(cx,cy);
- g.rotate(angle);
-
- // Cast shadow
- g.fillStyle='rgba(3,8,8,0.5)';
- g.beginPath();g.roundRect(-w/2+10,-h/2+12,w,h,8);g.fill();
-
- // Guy ropes & pegs
- g.strokeStyle='rgba(170,185,165,0.35)';g.lineWidth=1.2;
- for(const [rx,ry,ox,oy] of [[-w/2,-h/2,-8,-8],[w/2,-h/2,8,-8],[-w/2,h/2,-8,8],[w/2,h/2,8,8]]){
-  g.beginPath();g.moveTo(rx,ry);g.lineTo(rx+ox,ry+oy);g.stroke();
-  g.fillStyle='#556258';g.beginPath();g.arc(rx+ox,ry+oy,2,0,Math.PI*2);g.fill();
- }
-
- // Olive canvas body
- const tg=g.createLinearGradient(0,-h/2,0,h/2);
- tg.addColorStop(0,'#4f6346');
- tg.addColorStop(0.5,'#5e7552');
- tg.addColorStop(1,'#34442f');
- g.fillStyle=tg;
- g.beginPath();g.roundRect(-w/2,-h/2,w,h,7);g.fill();
- g.strokeStyle='#1c2619';g.lineWidth=2;g.stroke();
-
- // Ridge pole & canvas ribs
- g.strokeStyle='rgba(255,255,235,0.22)';g.lineWidth=2;
- g.beginPath();g.moveTo(-w/2+6,0);g.lineTo(w/2-6,0);g.stroke();
- g.strokeStyle='rgba(15,24,14,0.35)';g.lineWidth=1.5;
- for(let px=-w/2+20;px<w/2-12;px+=22){
-  g.beginPath();g.moveTo(px,-h/2+2);g.lineTo(px,h/2-2);g.stroke();
- }
-
- // Medical emblem on roof
- g.fillStyle='rgba(240,248,238,0.75)';
- g.beginPath();g.arc(0,0,12,0,Math.PI*2);g.fill();
- g.fillStyle='#c9383e';
- g.fillRect(-2.8,-8,5.6,16);g.fillRect(-8,-2.8,16,5.6);
-
- // Warm light leaking from tent entrance flap
- lamps.push({x:cx+Math.cos(angle)*(w/2+8),y:cy+Math.sin(angle)*(w/2+8),phase:rng()*10,soft:true});
+ g.translate(doorX,doorY);
+ const outAng=doorSide==='S'?Math.PI/2:doorSide==='N'?-Math.PI/2:doorSide==='E'?0:Math.PI;
+ g.rotate(outAng);
+ g.fillStyle='rgba(20,30,30,0.85)';
+ g.beginPath();g.roundRect(-6,-doorW/2-4,28,doorW+8,4);g.fill();
+ g.strokeStyle='rgba(128,238,165,0.45)';g.lineWidth=1.5;g.stroke();
+ g.fillStyle='rgba(95,255,145,0.32)';
+ g.beginPath();
+ g.moveTo(16,0);g.lineTo(7,-10);g.lineTo(7,-4);g.lineTo(1,-4);g.lineTo(1,4);g.lineTo(7,4);g.lineTo(7,10);
+ g.closePath();g.fill();
  g.restore();
+
+ // Draw interior floor & corner furniture onto static groundCanvas
+ g.save();
+ g.translate(x,y);
+ g.fillStyle='rgba(3,8,10,0.42)';
+ g.beginPath();g.roundRect(10,12,w,h,6);g.fill();
+
+ if(isTent){
+  g.fillStyle='#2b3024';
+  g.beginPath();g.roundRect(0,0,w,h,5);g.fill();
+  g.strokeStyle='rgba(14,18,12,0.55)';g.lineWidth=1;
+  for(let px=10;px<w-8;px+=14){g.beginPath();g.moveTo(px,8);g.lineTo(px,h-8);g.stroke()}
+  g.fillStyle='rgba(220,235,215,0.10)';
+  g.beginPath();g.arc(w/2,h/2,16,0,Math.PI*2);g.fill();
+ }else if(style==='med'){
+  g.fillStyle='#243b3e';
+  g.fillRect(0,0,w,h);
+  g.strokeStyle='rgba(130,205,210,0.16)';g.lineWidth=1;
+  for(let gx=wallT;gx<w-wallT;gx+=20){g.beginPath();g.moveTo(gx,wallT);g.lineTo(gx,h-wallT);g.stroke()}
+  for(let gy=wallT;gy<h-wallT;gy+=20){g.beginPath();g.moveTo(wallT,gy);g.lineTo(w-wallT,gy);g.stroke()}
+  g.fillStyle='rgba(235,245,242,0.10)';
+  g.fillRect(w/2-5,h/2-18,10,36);g.fillRect(w/2-18,h/2-5,36,10);
+ }else if(style==='tech'){
+  g.fillStyle='#202a30';
+  g.fillRect(0,0,w,h);
+  g.strokeStyle='rgba(120,175,195,0.14)';g.lineWidth=1;
+  for(let gx=wallT;gx<w-wallT;gx+=28){g.beginPath();g.moveTo(gx,wallT);g.lineTo(gx,h-wallT);g.stroke()}
+  for(let gy=wallT;gy<h-wallT;gy+=28){g.beginPath();g.moveTo(wallT,gy);g.lineTo(w-wallT,gy);g.stroke()}
+  g.strokeStyle='rgba(235,185,55,0.22)';g.lineWidth=3;
+  g.strokeRect(wallT+8,wallT+8,w-wallT*2-16,h-wallT*2-16);
+ }else{
+  g.fillStyle='#2f2720';
+  g.fillRect(0,0,w,h);
+  g.strokeStyle='rgba(18,14,10,0.38)';g.lineWidth=1;
+  for(let gy=wallT;gy<h-wallT;gy+=13){g.beginPath();g.moveTo(wallT,gy);g.lineTo(w-wallT,gy);g.stroke()}
+  // Central rug in residential house
+  g.fillStyle='rgba(120,66,52,0.42)';
+  g.beginPath();g.roundRect(w*0.30,h*0.32,w*0.40,h*0.36,4);g.fill();
+  g.strokeStyle='rgba(225,185,120,0.22)';g.lineWidth=1.2;g.stroke();
+ }
+
+ // Interior walls drawn on floor layer (matching wallRects)
+ g.fillStyle=isTent?'#47583f':'#354446';
+ g.strokeStyle='#101819';
+ g.lineWidth=1.5;
+ const drawWallSeg=(wx,wy,ww,wh)=>{
+  g.fillRect(wx,wy,ww,wh);
+  g.strokeRect(wx,wy,ww,wh);
+ };
+ if(doorSide==='N'){
+  const s=(w-doorW)/2;drawWallSeg(0,0,s,wallT);drawWallSeg(w-s,0,s,wallT);
+ }else drawWallSeg(0,0,w,wallT);
+ if(doorSide==='S'){
+  const s=(w-doorW)/2;drawWallSeg(0,h-wallT,s,wallT);drawWallSeg(w-s,h-wallT,s,wallT);
+ }else drawWallSeg(0,h-wallT,w,wallT);
+ if(doorSide==='W'){
+  const s=(h-doorW)/2-wallT;
+  if(s>0){drawWallSeg(0,wallT,wallT,s);drawWallSeg(0,h-wallT-s,wallT,s)}
+ }else drawWallSeg(0,wallT,wallT,h-wallT*2);
+ if(doorSide==='E'){
+  const s=(h-doorW)/2-wallT;
+  if(s>0){drawWallSeg(w-wallT,wallT,wallT,s);drawWallSeg(w-wallT,h-wallT-s,wallT,s)}
+ }else drawWallSeg(w-wallT,wallT,wallT,h-wallT*2);
+
+ // Open door frame hinges / glow threshold
+ g.fillStyle='rgba(125,255,155,0.24)';
+ if(doorSide==='N')g.fillRect(w/2-doorW/2,0,doorW,wallT);
+ if(doorSide==='S')g.fillRect(w/2-doorW/2,h-wallT,doorW,wallT);
+ if(doorSide==='W')g.fillRect(0,h/2-doorW/2,wallT,doorW);
+ if(doorSide==='E')g.fillRect(w-wallT,h/2-doorW/2,wallT,doorW);
+ g.restore();
+
+ // Doorway porch lamp + roof beacon
+ lamps.push({x:doorX,y:doorY,phase:(cx+cy)*0.01,soft:true});
+ if(hasBeacon){
+  beacons.push({x:x+w-12,y:y+12,kind:'amber',phase:(cx*0.013+cy*0.007)%6.28});
+ }
+}
+
+function drawDynamicBuildingRoof(b,now){
+ const {cx,cy,w,h,style,label,isTent,hasBeacon,doorSide}=b;
+ ctx.save();
+ ctx.globalAlpha=b.roofAlpha;
+ ctx.translate(cx,cy);
+
+ if(isTent){
+  const tg=ctx.createLinearGradient(0,-h/2,0,h/2);
+  tg.addColorStop(0,'#4f6346');tg.addColorStop(0.5,'#5e7552');tg.addColorStop(1,'#34442f');
+  ctx.fillStyle=tg;
+  ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,7);ctx.fill();
+  ctx.strokeStyle='#1c2619';ctx.lineWidth=2;ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,235,0.22)';ctx.lineWidth=2;
+  if(w>=h){
+   ctx.beginPath();ctx.moveTo(-w/2+6,0);ctx.lineTo(w/2-6,0);ctx.stroke();
+  }else{
+   ctx.beginPath();ctx.moveTo(0,-h/2+6);ctx.lineTo(0,h/2-6);ctx.stroke();
+  }
+  ctx.fillStyle='rgba(240,248,238,0.75)';
+  ctx.beginPath();ctx.arc(0,0,12,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#c9383e';
+  ctx.fillRect(-2.8,-8,5.6,16);ctx.fillRect(-8,-2.8,16,5.6);
+ }else{
+  ctx.fillStyle='#192425';
+  ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,6);ctx.fill();
+
+  const rg=ctx.createLinearGradient(-w/2,-h/2,w/2,h/2);
+  if(style==='med'){rg.addColorStop(0,'#3b4e4c');rg.addColorStop(1,'#243233')}
+  else if(style==='tech'){rg.addColorStop(0,'#39474e');rg.addColorStop(1,'#1f282e')}
+  else{rg.addColorStop(0,'#454944');rg.addColorStop(1,'#252a28')}
+  ctx.fillStyle=rg;
+  ctx.beginPath();ctx.roundRect(-w/2+5,-h/2+5,w-10,h-10,4);ctx.fill();
+
+  ctx.strokeStyle='rgba(0,0,0,0.22)';ctx.lineWidth=1.4;
+  for(let rx=-w/2+14;rx<w/2-10;rx+=14){
+   ctx.beginPath();ctx.moveTo(rx,-h/2+7);ctx.lineTo(rx,h/2-7);ctx.stroke();
+  }
+  ctx.strokeStyle='rgba(175,215,210,0.28)';ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(-w/2+4,h/2-6);ctx.lineTo(-w/2+4,-h/2+4);ctx.lineTo(w/2-6,-h/2+4);
+  ctx.stroke();
+
+  ctx.strokeStyle='#101819';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.roundRect(-w/2+1,-h/2+1,w-2,h-2,5);ctx.stroke();
+
+  const vx=-w*0.22,vy=-h*0.18;
+  ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(vx-13,vy-11,30,26);
+  ctx.fillStyle='#596b6d';ctx.beginPath();ctx.roundRect(vx-15,vy-13,28,24,3);ctx.fill();
+  ctx.strokeStyle='#222c2e';ctx.lineWidth=1.5;ctx.strokeRect(vx-15,vy-13,28,24);
+  ctx.fillStyle='#1c2527';ctx.beginPath();ctx.arc(vx-1,vy-1,7.5,0,Math.PI*2);ctx.fill();
+
+  ctx.fillStyle='#323f40';ctx.fillRect(w*0.12,-h*0.22,22,18);
+  ctx.strokeStyle='#171f20';ctx.lineWidth=1.5;ctx.strokeRect(w*0.12,-h*0.22,22,18);
+
+  if(style==='med'){
+   ctx.fillStyle='rgba(235,245,240,0.18)';
+   ctx.beginPath();ctx.arc(0,h*0.12,17,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='rgba(218,58,64,0.72)';
+   ctx.fillRect(-4,h*0.12-11,8,22);ctx.fillRect(-11,h*0.12-4,22,8);
+  }else if(label){
+   ctx.fillStyle='rgba(235,190,62,0.58)';
+   ctx.font='800 10px monospace';
+   ctx.textAlign='center';
+   ctx.fillText(label,0,h*0.28);
+  }
+  if(hasBeacon){
+   const bx=w/2-12,by=-h/2+12;
+   ctx.fillStyle='#242c2d';ctx.beginPath();ctx.arc(bx,by,5,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#ffbe44';ctx.beginPath();ctx.arc(bx,by,2.8,0,Math.PI*2);ctx.fill();
+  }
+ }
+
+ // Doorway canopy indicator + remaining loot badge on roof
+ let remaining=0;
+ for(let i=0;i<lootNodes.length;i++){if(lootNodes[i].buildingId===b.id&&!lootNodes[i].opened)remaining++}
+ for(let i=0;i<groundLoot.length;i++){if(groundLoot[i].buildingId===b.id)remaining++}
+ ctx.fillStyle=remaining>0?'rgba(18,38,28,0.88)':'rgba(20,28,30,0.72)';
+ ctx.beginPath();ctx.roundRect(-34,-12,68,20,7);ctx.fill();
+ ctx.strokeStyle=remaining>0?'rgba(115,255,140,0.75)':'rgba(130,160,155,0.3)';
+ ctx.lineWidth=1.4;ctx.stroke();
+ ctx.fillStyle=remaining>0?'#a2ffb5':'#8ba19c';
+ ctx.font='800 9.5px system-ui,sans-serif';
+ ctx.textAlign='center';
+ ctx.fillText(remaining>0?`📦 ЛУТ (${remaining})`:'ПУСТО',0,1);
+
+ // Subtle bright awning strip over doorway edge
+ ctx.fillStyle=remaining>0?'rgba(110,255,145,0.85)':'rgba(135,180,175,0.5)';
+ if(doorSide==='S')ctx.fillRect(-26,h/2-4,52,4);
+ else if(doorSide==='N')ctx.fillRect(-26,-h/2,52,4);
+ else if(doorSide==='E')ctx.fillRect(w/2-4,-26,4,52);
+ else if(doorSide==='W')ctx.fillRect(-w/2,-26,4,52);
+
+ ctx.restore();
 }
 
 function drawSandbags(g,cx,cy,angle,count=4){
@@ -1410,18 +1665,25 @@ function drawTradeCounter(g,cx,cy,kind){
  g.beginPath();g.roundRect(-36,-9,78,26,5);g.fill();
  const bg=g.createLinearGradient(0,-12,0,12);
  if(kind==='armorer'){bg.addColorStop(0,'#5d4a35');bg.addColorStop(1,'#382c1f')}
+ else if(kind==='trader'){bg.addColorStop(0,'#63502b');bg.addColorStop(1,'#3a2d14')}
  else{bg.addColorStop(0,'#3b5a5c');bg.addColorStop(1,'#24393b')}
  g.fillStyle=bg;
  g.beginPath();g.roundRect(-38,-12,76,24,4);g.fill();
- g.strokeStyle=kind==='armorer'?'#c9913d':'#62dcd0';
+ g.strokeStyle=kind==='armorer'?'#c9913d':kind==='trader'?'#ffd254':'#62dcd0';
  g.lineWidth=2;g.stroke();
  if(kind==='armorer'){
-  // Weapon rack silhouette & ammo box on counter
   g.fillStyle='#1b2224';g.fillRect(-28,-5,24,6);g.fillRect(-22,-7,16,3);
   g.fillStyle='#4f613f';g.fillRect(6,-6,16,12);
   g.fillStyle='#e5b14c';g.fillRect(10,-4,8,3);
+ }else if(kind==='trader'){
+  // Loot case & brass scale on trader counter
+  g.fillStyle='#2a241d';g.beginPath();g.roundRect(-27,-7,22,14,2.5);g.fill();
+  g.fillStyle='#ffd55a';g.fillRect(-23,-3,14,3);
+  g.strokeStyle='#ffe17d';g.lineWidth=1.6;
+  g.beginPath();g.moveTo(8,-4);g.lineTo(24,-4);g.moveTo(16,-7);g.lineTo(16,5);g.stroke();
+  g.fillStyle='#ffcb48';
+  g.beginPath();g.arc(9,2,3.5,0,Math.PI*2);g.arc(23,2,3.5,0,Math.PI*2);g.fill();
  }else{
-  // Medical box & cryo capsule on counter
   g.fillStyle='#eef5f2';g.beginPath();g.roundRect(-27,-7,22,14,2.5);g.fill();
   g.fillStyle='#d13b40';g.fillRect(-18,-5,4,10);g.fillRect(-21,-2,10,4);
   g.fillStyle='#5be8ff';g.beginPath();g.roundRect(6,-6,18,12,4);g.fill();
@@ -1479,10 +1741,11 @@ function drawSafeZoneGround(g){
  g.restore();
 
  // Trade counters & corner shield pylons inside Safe Zone
- drawTradeCounter(g,NPCS[0].tableX,NPCS[0].tableY,'armorer');
- drawTradeCounter(g,NPCS[1].tableX,NPCS[1].tableY,'medic');
- lamps.push({x:NPCS[0].tableX,y:NPCS[0].tableY,phase:0.4,soft:true});
- lamps.push({x:NPCS[1].tableX,y:NPCS[1].tableY,phase:2.1,soft:true});
+ for(let i=0;i<NPCS.length;i++){
+  const n=NPCS[i];
+  drawTradeCounter(g,n.tableX,n.tableY,n.id);
+  lamps.push({x:n.tableX,y:n.tableY,phase:0.4+i*1.3,soft:true});
+ }
 
  for(const [px,py] of [[-175,-175],[175,-175],[-175,175],[175,175]]){
   const ax=sx+px,ay=sy+py;
@@ -1515,7 +1778,7 @@ function buildWorldGround(){
  groundCanvas.height=WORLD_H;
  const g=groundCtx;
  const rng=makeRng(77193);
- lamps=[];toxicPools=[];canopies=[];obstacles=[];puddles=[];beacons=[];radarBuildings=[];
+ lamps=[];toxicPools=[];canopies=[];obstacles=[];puddles=[];beacons=[];radarBuildings=[];buildings=[];wallRects=[];
 
  // 1. Four District Ground Bases (NW Suburb, NE Chem, SW Hospital, SE Military)
  const halfW=WORLD_W/2,halfH=WORLD_H/2;
@@ -1613,18 +1876,7 @@ function buildWorldGround(){
   g.stroke();
  }
 
- // Wet rain puddles (skip inside Safe Zone)
- for(let i=0;i<74;i++){
-  const px=90+rng()*(WORLD_W-180),py=90+rng()*(WORLD_H-180);
-  if(isInSafeZone(px,py,45))continue;
-  const rx=18+rng()*26,ry=12+rng()*18,rot=rng()*Math.PI;
-  puddles.push({x:px,y:py,rx,ry,rot,phase:rng()*6.28});
-  g.save();g.translate(px,py);g.rotate(rot);
-  g.fillStyle='rgba(7,15,20,0.58)';
-  g.beginPath();g.ellipse(0,0,rx,ry,0,0,Math.PI*2);g.fill();
-  g.strokeStyle='rgba(72,118,132,0.18)';g.lineWidth=1.2;g.stroke();
-  g.restore();
- }
+ // Wet rain puddles are placed after enterable buildings (step 4c) to stay clear of interiors
 
  // 4. Road Markings, Crosswalks & Intersections
  for(const rx of ROADS){
@@ -1687,32 +1939,45 @@ function buildWorldGround(){
  // 4a. Central Safe Zone Plaza & NPC Outpost (at 1800, 1800)
  drawSafeZoneGround(g);
 
- // 4b. District Landmarks: Buildings, Chem Tanks, Helipads & Medical Tents
+ // 4b. Enterable Buildings, Chem Tanks, Helipads & Medical Tents across all 4 districts
  // NW: Residential Suburb
- drawBuildingRoof(g,1210,1175,180,124,'ind','RES-01',rng,false);
- drawBuildingRoof(g,315,1190,165,116,'ind','RES-02',rng,true);
- drawBuildingRoof(g,1210,305,172,116,'ind','APT-03',rng,false);
- drawQuarantineTent(g,310,315,118,74,0.12,rng);
+ addEnterableBuilding(g,{id:'RES-01',cx:1210,cy:1175,w:204,h:144,style:'ind',label:'RES-01',districtId:'suburb',doorSide:'S',hasBeacon:false,lootCount:3});
+ addEnterableBuilding(g,{id:'RES-02',cx:315,cy:1190,w:184,h:132,style:'ind',label:'RES-02',districtId:'suburb',doorSide:'E',hasBeacon:true,lootCount:3});
+ addEnterableBuilding(g,{id:'APT-03',cx:1210,cy:305,w:196,h:136,style:'ind',label:'APT-03',districtId:'suburb',doorSide:'S',hasBeacon:false,lootCount:3});
+ addEnterableBuilding(g,{id:'TENT-NW',cx:310,cy:315,w:148,h:96,style:'tent',label:'ЛАГЕРЬ-СЗ',districtId:'suburb',doorSide:'E',isTent:true,lootCount:2});
 
  // NE: Chemical Zone
- drawBuildingRoof(g,2390,1185,182,124,'tech','CHEM-A',rng,true);
- drawBuildingRoof(g,3290,1190,168,118,'ind','CHEM-B',rng,true);
+ addEnterableBuilding(g,{id:'CHEM-A',cx:2390,cy:1185,w:204,h:144,style:'tech',label:'CHEM-A',districtId:'chem',doorSide:'S',hasBeacon:true,lootCount:3});
+ addEnterableBuilding(g,{id:'CHEM-B',cx:3290,cy:1190,w:188,h:134,style:'tech',label:'CHEM-B',districtId:'chem',doorSide:'W',hasBeacon:true,lootCount:3});
  drawChemTank(g,2315,310,48,rng);
  drawChemTank(g,2455,310,48,rng);
  drawChemTank(g,3295,310,54,rng);
 
  // SW: Medical Campus
- drawBuildingRoof(g,1115,2410,174,122,'med','MED-A',rng,true);
- drawBuildingRoof(g,315,2410,168,118,'med','MED-B',rng,false);
+ addEnterableBuilding(g,{id:'MED-A',cx:1115,cy:2410,w:198,h:140,style:'med',label:'MED-A',districtId:'hospital',doorSide:'N',hasBeacon:true,lootCount:3});
+ addEnterableBuilding(g,{id:'MED-B',cx:315,cy:2410,w:186,h:134,style:'med',label:'MED-B',districtId:'hospital',doorSide:'E',hasBeacon:false,lootCount:3});
  drawHelipad(g,1395,2410,66,'med');
- drawQuarantineTent(g,1210,3285,124,78,0.06,rng);
- drawQuarantineTent(g,315,3285,122,76,-0.08,rng);
+ addEnterableBuilding(g,{id:'TENT-SW1',cx:1210,cy:3285,w:152,h:98,style:'tent',label:'МЕД-ЮЗ1',districtId:'hospital',doorSide:'N',isTent:true,lootCount:2});
+ addEnterableBuilding(g,{id:'TENT-SW2',cx:315,cy:3285,w:150,h:96,style:'tent',label:'МЕД-ЮЗ2',districtId:'hospital',doorSide:'N',isTent:true,lootCount:2});
 
  // SE: Military Outpost
- drawBuildingRoof(g,2410,2410,184,124,'tech','BASE-1',rng,true);
- drawBuildingRoof(g,3290,2410,170,120,'tech','MIL-02',rng,true);
+ addEnterableBuilding(g,{id:'BASE-1',cx:2410,cy:2410,w:206,h:144,style:'tech',label:'BASE-1',districtId:'military',doorSide:'N',hasBeacon:true,lootCount:3});
+ addEnterableBuilding(g,{id:'MIL-02',cx:3290,cy:2410,w:190,h:136,style:'tech',label:'MIL-02',districtId:'military',doorSide:'W',hasBeacon:true,lootCount:3});
  drawHelipad(g,2395,3295,72,'mil');
- drawQuarantineTent(g,3295,3295,120,76,Math.PI/2-0.06,rng);
+ addEnterableBuilding(g,{id:'TENT-SE',cx:3295,cy:3295,w:102,h:152,style:'tent',label:'ПОСТ-ЮВ',districtId:'military',doorSide:'W',isTent:true,lootCount:2});
+
+ // 4c. Wet rain puddles outside Safe Zone and outside Buildings
+ for(let i=0;i<74;i++){
+  const px=90+rng()*(WORLD_W-180),py=90+rng()*(WORLD_H-180);
+  if(isInSafeZone(px,py,45)||isNearAnyBuilding(px,py,38))continue;
+  const rx=18+rng()*26,ry=12+rng()*18,rot=rng()*Math.PI;
+  puddles.push({x:px,y:py,rx,ry,rot,phase:rng()*6.28});
+  g.save();g.translate(px,py);g.rotate(rot);
+  g.fillStyle='rgba(7,15,20,0.58)';
+  g.beginPath();g.ellipse(0,0,rx,ry,0,0,Math.PI*2);g.fill();
+  g.strokeStyle='rgba(72,118,132,0.18)';g.lineWidth=1.2;g.stroke();
+  g.restore();
+ }
 
  // 5. Wrecked Cars along roads & district approaches (all outside Safe Zone)
  const carSpots=[
@@ -1759,7 +2024,7 @@ function buildWorldGround(){
   const nCrates=2+Math.floor(rng()*3);
   for(let k=0;k<nCrates;k++){
    const kx=ax+(rng()-.5)*105,ky=ay+(rng()-.5)*105;
-   if(isOnRoad(kx,ky,22)||isInSafeZone(kx,ky,56))continue;
+   if(isOnRoad(kx,ky,22)||isInSafeZone(kx,ky,56)||isNearAnyBuilding(kx,ky,38))continue;
    let overlap=false;
    for(const ob of obstacles){if(Math.hypot(ob.x-kx,ob.y-ky)<ob.r+24){overlap=true;break}}
    if(overlap)continue;
@@ -1768,7 +2033,7 @@ function buildWorldGround(){
   const nBarrels=dist.id==='chem'?4:2+Math.floor(rng()*2);
   for(let k=0;k<nBarrels;k++){
    const bx=ax+(rng()-.5)*125,by=ay+(rng()-.5)*125;
-   if(isOnRoad(bx,by,20)||isInSafeZone(bx,by,56))continue;
+   if(isOnRoad(bx,by,20)||isInSafeZone(bx,by,56)||isNearAnyBuilding(bx,by,38))continue;
    let overlap=false;
    for(const ob of obstacles){if(Math.hypot(ob.x-bx,ob.y-by)<ob.r+22){overlap=true;break}}
    if(overlap)continue;
@@ -1783,7 +2048,7 @@ function buildWorldGround(){
  for(let i=0;i<135;i++){
   const tx=110+rng()*(WORLD_W-220);
   const ty=110+rng()*(WORLD_H-220);
-  if(isOnRoad(tx,ty,30)||isInSafeZone(tx,ty,64))continue;
+  if(isOnRoad(tx,ty,30)||isInSafeZone(tx,ty,64)||isNearAnyBuilding(tx,ty,44))continue;
   const dist=getDistrictAt(tx,ty);
   if((dist.id==='chem'||dist.id==='military')&&rng()>.35)continue;
   let nearProp=false;
@@ -1906,6 +2171,251 @@ function updateActiveItemsUI(){
  }
 }
 
+function getLootCapacity(){
+ return BASE_LOOT_CAP+(itemMods.lootCapacity||0);
+}
+
+function getLootSellPrice(item){
+ if(!item)return 0;
+ return Math.max(1,Math.round(item.value*(1+(itemMods.lootBonus||0))));
+}
+
+function getLootBagTotalValue(){
+ let sum=0;
+ for(let i=0;i<lootBag.length;i++)sum+=getLootSellPrice(lootBag[i]);
+ return sum;
+}
+
+function pickLootForDistrict(districtId,boostRarity=false){
+ const pool=[];
+ for(const k of LOOT_KEYS){
+  const lt=LOOT_TYPES[k];
+  const match=lt.districts.includes(districtId);
+  let w=match?10:1;
+  if(lt.rarity==='rare')w*=boostRarity?1.6:0.75;
+  if(lt.rarity==='epic')w*=boostRarity?1.4:0.35;
+  pool.push([lt,w]);
+ }
+ let tot=0;
+ for(const [,w] of pool)tot+=w;
+ let r=Math.random()*tot;
+ for(const [lt,w] of pool){
+  r-=w;
+  if(r<=0)return lt;
+ }
+ return LOOT_TYPES.canned;
+}
+
+function createLootNodesForBuilding(b){
+ const nodes=[];
+ const padX=Math.min(34,b.w*0.20),padY=Math.min(30,b.h*0.22);
+ // Pick interior corner/side positions away from the doorway
+ const spots=[
+  [b.x+padX,b.y+padY],
+  [b.x+b.w-padX,b.y+padY],
+  [b.x+padX,b.y+b.h-padY],
+  [b.x+b.w-padX,b.y+b.h-padY]
+ ];
+ const filtered=spots.filter(([sx,sy])=>Math.hypot(sx-b.doorX,sy-b.doorY)>46);
+ const useSpots=(filtered.length>=b.lootCount?filtered:spots).slice(0,b.lootCount);
+ const kinds=b.style==='med'?['med','med','crate']:b.style==='tech'?['tech','safe','crate']:b.isTent?['med','crate']:['crate','safe','drawer'];
+ for(let i=0;i<useSpots.length;i++){
+  nodes.push({
+   id:`${b.id}-L${i}`,
+   buildingId:b.id,
+   districtId:b.districtId,
+   x:useSpots[i][0],
+   y:useSpots[i][1],
+   r:14,
+   kind:kinds[i%kinds.length],
+   opened:false,
+   progress:0,
+   respawnWaves:0
+  });
+ }
+ return nodes;
+}
+
+function initLootState(){
+ lootNodes=[];
+ groundLoot=[];
+ lootBag=[];
+ nearbyLootNode=null;
+ lootFullToastCd=0;
+ lootRespawnTimer=0;
+ for(const b of buildings){
+  b.roofAlpha=1;
+  b.guardSpawned=false;
+  const created=createLootNodesForBuilding(b);
+  for(const n of created)lootNodes.push(n);
+  // Also place 1 loose floor item inside major buildings
+  if(!b.isTent){
+   const lt=pickLootForDistrict(b.districtId,false);
+   groundLoot.push({
+    buildingId:b.id,
+    x:b.cx+(Math.random()-.5)*28,
+    y:b.cy+(Math.random()-.5)*22,
+    typeId:lt.id,
+    pickupDelay:0,
+    bobPhase:Math.random()*6.28
+   });
+  }
+ }
+}
+
+function respawnBuildingLoot(limitCount=4){
+ let restored=0;
+ const candidates=buildings.filter(b=>!player||!isPointInBuilding(player.x,player.y,b,60));
+ for(let i=candidates.length-1;i>0;i--){
+  const j=Math.floor(Math.random()*(i+1));
+  [candidates[i],candidates[j]]=[candidates[j],candidates[i]];
+ }
+ for(const b of candidates){
+  if(restored>=limitCount)break;
+  const nodes=lootNodes.filter(n=>n.buildingId===b.id);
+  const allEmpty=nodes.every(n=>n.opened)&&!groundLoot.some(g=>g.buildingId===b.id);
+  if(!allEmpty)continue;
+  for(const n of nodes){
+   n.opened=false;
+   n.progress=0;
+  }
+  b.guardSpawned=false;
+  restored++;
+ }
+ return restored;
+}
+
+function openLootNode(node){
+ if(!node||node.opened)return;
+ node.opened=true;
+ node.progress=1;
+ const b=buildings.find(x=>x.id===node.buildingId);
+ const tx=b?b.cx:node.x,ty=b?b.cy:node.y;
+ const dirX=tx-node.x,dirY=ty-node.y;
+ const dirLen=Math.hypot(dirX,dirY)||1;
+ const dropCount=Math.random()<0.42?2:1;
+ for(let i=0;i<dropCount;i++){
+  const lt=pickLootForDistrict(node.districtId,i===1||Math.random()<0.35);
+  const ang=Math.atan2(dirY/dirLen,dirX/dirLen)+(i===0?0:(Math.random()-.5)*0.9);
+  const dist=18+i*12;
+  groundLoot.push({
+   buildingId:node.buildingId,
+   x:node.x+Math.cos(ang)*dist,
+   y:node.y+Math.sin(ang)*dist,
+   typeId:lt.id,
+   pickupDelay:0.22,
+   bobPhase:Math.random()*6.28
+  });
+ }
+ addParticles(node.x,node.y,'#ffd86b',9,115,'spark');
+ particles.push({x:node.x,y:node.y,vx:0,vy:0,life:.26,max:.26,color:'#ffe37d',size:20,kind:'ring',rot:0,vrot:0});
+ addPopup(node.x,node.y-18,'📦 Обыскано!','#ffe484',12);
+ nearbyLootNode=null;
+}
+
+function sellAllLoot(){
+ if(!player||!isInSafeZone(player.x,player.y,4)||!lootBag.length)return 0;
+ const total=getLootBagTotalValue();
+ const count=lootBag.length;
+ money+=total;
+ lootBag=[];
+ addParticles(player.x,player.y,'#ffd859',14,140,'spark');
+ addPopup(player.x,player.y-36,`+${total} 🪙 (${count} шт.)`,'#ffe17d',15);
+ updateUI();
+ if($('bagModal')&&$('bagModal').style.display==='flex')renderBagModal();
+ if($('shop')&&$('shop').style.display==='flex')renderShop();
+ if(activeNpc)renderNpcOffers();
+ return total;
+}
+
+function sellSingleLootType(typeId){
+ if(!player||!isInSafeZone(player.x,player.y,4))return 0;
+ const idx=lootBag.findIndex(it=>it.id===typeId);
+ if(idx<0)return 0;
+ const item=lootBag.splice(idx,1)[0];
+ const gain=getLootSellPrice(item);
+ money+=gain;
+ addParticles(player.x,player.y,'#ffd859',6,100,'spark');
+ addPopup(player.x,player.y-30,`+${gain} 🪙`,'#ffe17d',13);
+ updateUI();
+ if($('bagModal')&&$('bagModal').style.display==='flex')renderBagModal();
+ if($('shop')&&$('shop').style.display==='flex')renderShop();
+ if(activeNpc)renderNpcOffers();
+ return gain;
+}
+
+function getGroupedLoot(){
+ const map=new Map();
+ for(const item of lootBag){
+  let g=map.get(item.id);
+  if(!g){g={item,count:0,unitPrice:getLootSellPrice(item),totalPrice:0};map.set(item.id,g)}
+  g.count++;
+  g.totalPrice+=g.unitPrice;
+ }
+ return Array.from(map.values());
+}
+
+function renderSellBannerHtml(inSafe){
+ const total=getLootBagTotalValue();
+ const count=lootBag.length;
+ if(!count)return '';
+ const bonusPct=Math.round((itemMods.lootBonus||0)*100);
+ const bonusNote=bonusPct>0?` (бонус +${bonusPct}%)`:'';
+ if(inSafe){
+  return `<div class="sellBanner"><div class="sellBannerInfo"><b>🎒 Лут в рюкзаке: ${count} шт.</b><br>Стоимость сдачи: <b style="color:#ffe27a">${total} 🪙</b>${bonusNote}</div><button type="button" class="sellAllBtn" data-sell-all="1">ПРОДАТЬ (+${total} 🪙)</button></div>`;
+ }
+ return `<div class="sellBanner"><div class="sellBannerInfo"><b>🎒 Лут в рюкзаке: ${count} шт. (~${total} 🪙)</b><br><span style="color:#a9c8bd">Вернитесь в Безопасную зону (центр), чтобы продать скупщику.</span></div></div>`;
+}
+
+function renderBagModal(){
+ const cap=getLootCapacity();
+ const total=getLootBagTotalValue();
+ const inSafe=player?isInSafeZone(player.x,player.y,4):false;
+ if($('bagMeta'))$('bagMeta').innerHTML=`Заполнено: <b>${lootBag.length}/${cap}</b> · Оценка: <b style="color:#ffe082">${total} 🪙</b>`;
+ if($('bagSellZone')){
+  $('bagSellZone').innerHTML=renderSellBannerHtml(inSafe);
+  const btn=$('bagSellZone').querySelector('[data-sell-all]');
+  if(btn)btn.addEventListener('click',sellAllLoot);
+ }
+ const list=$('bagItems');
+ if(!list)return;
+ list.innerHTML='';
+ const groups=getGroupedLoot();
+ if(!groups.length){
+  list.innerHTML='<p class="small" style="padding:14px 8px">Рюкзак пуст. Заходите в здания в разных районах города, открывайте ящики и собирайте ценный лут!</p>';
+  return;
+ }
+ for(const g of groups){
+  const row=document.createElement('div');
+  row.className=`npcOffer lootRarity-${g.item.rarity||'common'}`;
+  row.innerHTML=`<div class="npcOfferInfo"><div class="npcOfferName">${g.item.icon} ${g.item.name} ×${g.count}</div><div class="npcOfferDesc">${g.unitPrice} 🪙 за шт. · Итого ${g.totalPrice} 🪙</div></div>`;
+  if(inSafe){
+   const b=document.createElement('button');
+   b.type='button';
+   b.className='buybtn';
+   b.textContent=`Продать 1 (+${g.unitPrice} 🪙)`;
+   b.addEventListener('click',()=>sellSingleLootType(g.item.id));
+   row.appendChild(b);
+  }
+  list.appendChild(row);
+ }
+}
+
+function openBagModal(){
+ if(!running||waveChoosing||activeNpc)return;
+ paused=true;
+ stopAllControls();
+ renderBagModal();
+ $('bagModal').style.display='flex';
+}
+
+function closeBagModal(){
+ $('bagModal').style.display='none';
+ if(running&&!waveChoosing&&!activeNpc&&$('shop').style.display!=='flex'&&$('pauseScreen').style.display!=='flex'){
+  paused=false;last=performance.now();
+ }
+}
+
 function updateZoneUI(){
  if(!player)return;
  const d=getDistrictAt(player.x,player.y);
@@ -1918,8 +2428,17 @@ function updateZoneUI(){
  }
  const zb=$('zoneBadge');
  if(zb){
-  zb.textContent=d.name;
-  zb.className='zoneBadge'+(d.badge?' '+d.badge:'');
+  const b=getPlayerBuilding();
+  if(b){
+   let rem=0;
+   for(let i=0;i<lootNodes.length;i++){if(lootNodes[i].buildingId===b.id&&!lootNodes[i].opened)rem++}
+   for(let i=0;i<groundLoot.length;i++){if(groundLoot[i].buildingId===b.id)rem++}
+   zb.textContent=`🚪 ${b.label} · ${rem>0?`${rem} 📦`:'ПУСТО'}`;
+   zb.className='zoneBadge'+(d.badge?' '+d.badge:'');
+  }else{
+   zb.textContent=d.name;
+   zb.className='zoneBadge'+(d.badge?' '+d.badge:'');
+  }
  }
 }
 
@@ -1930,6 +2449,12 @@ function updateUI(){
  $('money').textContent=money;
  $('shopMoney').textContent=money;
  if($('npcMoney'))$('npcMoney').textContent=money;
+ const cap=getLootCapacity();
+ if($('lootCount'))$('lootCount').textContent=`${lootBag.length}/${cap}`;
+ if($('lootStatBtn')){
+  $('lootStatBtn').classList.toggle('hasLoot',lootBag.length>0&&lootBag.length<cap);
+  $('lootStatBtn').classList.toggle('full',lootBag.length>=cap);
+ }
  const hpPct=Math.max(0,Math.min(100,(health/maxHealth)*100));
  $('healthfill').style.width=hpPct+'%';
  $('healthtrail').style.width=hpPct+'%';
@@ -1994,9 +2519,11 @@ function init(){
  upgrades={damage:1,speed:1,rate:1};
  prices={damage:20,speed:20,rate:25};
  ownedItems={};
- itemMods={dmgMult:1,rateMult:1,speedMult:1,rangeMult:1,armor:0,crit:0,coinBonus:0,extraShots:0,tesla:0,explosive:0,vamp:0,hasLaser:false};
+ itemMods={dmgMult:1,rateMult:1,speedMult:1,rangeMult:1,armor:0,crit:0,lootCapacity:0,lootBonus:0,extraShots:0,tesla:0,explosive:0,vamp:0,hasLaser:false};
+ initLootState();
  $('waveModal').style.display='none';
  if($('npcModal'))$('npcModal').style.display='none';
+ if($('bagModal'))$('bagModal').style.display='none';
  if($('interactBtn'))$('interactBtn').style.display='none';
  $('joystickThumb').style.transform='translate(0px,0px)';
  if($('aimJoystickThumb'))$('aimJoystickThumb').style.transform='translate(0px,0px)';
@@ -2037,6 +2564,23 @@ function resolveObstacles(entity,isZombie){
     const nx=d>0.001?dx/d:0,ny=d>0.001?dy/d:1;
     entity.x=npc.x+nx*minD;
     entity.y=npc.y+ny*minD;
+   }
+  }
+ }
+
+ for(let i=0;i<wallRects.length;i++){
+  const rect=wallRects[i];
+  const hitWall=resolveCircleRect(entity,rect);
+  if(hitWall&&isZombie&&player){
+   // Gently slide zombie along wall toward player or nearest doorway
+   const nearX=Math.max(rect.x,Math.min(entity.x,rect.x+rect.w));
+   const nearY=Math.max(rect.y,Math.min(entity.y,rect.y+rect.h));
+   if(Math.abs(entity.y-nearY)>=Math.abs(entity.x-nearX)){
+    const dir=player.x>=entity.x?1:-1;
+    entity.x+=dir*1.4;
+   }else{
+    const dir=player.y>=entity.y?1:-1;
+    entity.y+=dir*1.4;
    }
   }
  }
@@ -2114,6 +2658,7 @@ function spawnZombie(forceType,sx,sy){
     y=Math.max(WALL_PAD+24,Math.min(WORLD_H-WALL_PAD-24,y));
    }
    if(Math.hypot(x-player.x,y-player.y)<Math.min(W,H)*0.40)continue;
+   if(isNearAnyBuilding(x,y,24))continue;
    let blocked=false;
    for(let i=0;i<obstacles.length;i++){
     if(Math.hypot(x-obstacles[i].x,y-obstacles[i].y)<obstacles[i].r+20){blocked=true;break}
@@ -2231,6 +2776,13 @@ function getAimState(inSafe){
 function traceAimRay(mx,my,angle,maxRange,piercing){
  const ux=Math.cos(angle),uy=Math.sin(angle);
  let obsT=maxRange;
+ for(let i=0;i<wallRects.length;i++){
+  const t=segmentIntersectsRect(mx,my,mx+ux*maxRange,my+uy*maxRange,wallRects[i]);
+  if(t!==null){
+   const hitT=t*maxRange;
+   if(hitT<obsT)obsT=hitT;
+  }
+ }
  for(let i=0;i<obstacles.length;i++){
   const ob=obstacles[i];
   if(piercing&&ob.r<12)continue;
@@ -2325,8 +2877,12 @@ function shoot(targetOrAngle,preferredTarget){
   for(let i=0;i<totalCount;i++){
    const a=base+(i===0?0:(i-(totalCount-1)/2)*0.07);
    let ex=mx+Math.cos(a)*beamLen,ey=my+Math.sin(a)*beamLen;
-   // Clamp beam at first hard obstacle if hit
+   // Clamp beam at first hard obstacle or building wall if hit
    let bestObsT=1;
+   for(let wi=0;wi<wallRects.length;wi++){
+    const t=segmentIntersectsRect(mx,my,ex,ey,wallRects[wi]);
+    if(t!==null&&t<bestObsT)bestObsT=t;
+   }
    for(const ob of obstacles){
     if(ob.r<12)continue;
     const dx=ex-mx,dy=ey-my,lenSq=dx*dx+dy*dy||1;
@@ -2435,6 +2991,57 @@ function renderNpcOffers(){
  $('npcMoney').textContent=money;
  const box=$('npcOffers');
  box.innerHTML='';
+
+ // In Safe Zone, allow quick selling of loot at any trader, and full breakdown at 'trader'
+ if(activeNpc.id==='trader'){
+  const cap=getLootCapacity();
+  const total=getLootBagTotalValue();
+  const bonusPct=Math.round((itemMods.lootBonus||0)*100);
+  const summary=document.createElement('div');
+  summary.className='sellBanner';
+  summary.innerHTML=`<div class="sellBannerInfo"><b>🎒 В рюкзаке: ${lootBag.length}/${cap}</b><br>Сумма скупки: <b style="color:#ffe27a">${total} 🪙</b>${bonusPct>0?` (+${bonusPct}%)`:''}</div>`;
+  const sellBtn=document.createElement('button');
+  sellBtn.type='button';
+  sellBtn.className='sellAllBtn';
+  sellBtn.textContent=lootBag.length?`ПРОДАТЬ ВСЁ (+${total} 🪙)`:'ПУСТО';
+  if(!lootBag.length)sellBtn.disabled=true;
+  sellBtn.addEventListener('click',sellAllLoot);
+  summary.appendChild(sellBtn);
+  box.appendChild(summary);
+
+  const groups=getGroupedLoot();
+  if(!groups.length){
+   const empty=document.createElement('p');
+   empty.className='small';
+   empty.style.padding='10px 6px';
+   empty.textContent='В рюкзаке пока нет лута. Заходите в здания в жилом квартале, химзоне, медгородке и на блокпосте — открывайте ящики и несите находки сюда!';
+   box.appendChild(empty);
+  }else{
+   for(const g of groups){
+    const row=document.createElement('div');
+    row.className=`npcOffer lootRarity-${g.item.rarity||'common'}`;
+    const info=document.createElement('div');
+    info.className='npcOfferInfo';
+    info.innerHTML=`<div class="npcOfferName">${g.item.icon} ${g.item.name} ×${g.count}</div><div class="npcOfferDesc">${g.unitPrice} 🪙 за шт. · Всего ${g.totalPrice} 🪙</div>`;
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='buybtn';
+    btn.textContent=`Продать 1 (+${g.unitPrice} 🪙)`;
+    btn.addEventListener('click',()=>sellSingleLootType(g.item.id));
+    row.appendChild(info);row.appendChild(btn);
+    box.appendChild(row);
+   }
+  }
+  return;
+ }
+
+ if(lootBag.length>0){
+  const wrap=document.createElement('div');
+  wrap.innerHTML=renderSellBannerHtml(true);
+  const sbtn=wrap.querySelector('[data-sell-all]');
+  if(sbtn)sbtn.addEventListener('click',sellAllLoot);
+  box.appendChild(wrap);
+ }
 
  if(activeNpc.id==='armorer'){
   for(const wid of ['shotgun','rifle','minigun','plasma','railgun']){
@@ -2599,6 +3206,7 @@ function gameOver(){
  stopAllControls();
  $('waveModal').style.display='none';
  if($('npcModal'))$('npcModal').style.display='none';
+ if($('bagModal'))$('bagModal').style.display='none';
  if($('interactBtn'))$('interactBtn').style.display='none';
  uiEl.style.transform='';
  if(score>bestScore){
@@ -2617,7 +3225,7 @@ function gameOver(){
      <div class="sumCard"><div class="k">Убито</div><div class="v">${kills}</div></div>
      <div class="sumCard"><div class="k">Рекорд</div><div class="v" style="color:#ffe082">${bestScore}</div></div>
     </div>
-    <p class="small">Собрано монет: <b style="color:#ffe082">${money}</b> 🪙 · Забег: <b style="color:#72ff9f">${seenZombieTypes.size}/${ZOMBIE_KEYS.length}</b> видов · Всего в индексе: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
+    <p class="small">Монеты: <b style="color:#ffe082">${money}</b> 🪙 · В рюкзаке: <b>${lootBag.length}</b> 🎒 · Индекс: <b style="color:#9effa8">${Object.keys(codexData.seen).length}/${ZOMBIE_KEYS.length}</b></p>
    </div>
    <div class="boxFooter">
     <button type="button" class="mainbtn" id="restart">ИГРАТЬ СНОВА</button>
@@ -2634,6 +3242,7 @@ function startGame(){
  $('shop').style.display='none';
  $('pauseScreen').style.display='none';
  $('codexModal').style.display='none';
+ if($('bagModal'))$('bagModal').style.display='none';
  running=true;paused=false;last=performance.now();
 }
 
@@ -2752,23 +3361,104 @@ function update(dt,now){
  const inSafe=isInSafeZone(player.x,player.y,-4);
  updateZoneUI();
 
- // Check nearby NPC in Safe Zone
- let near=null,nearD=84;
- for(const npc of NPCS){
-  const d=Math.hypot(player.x-npc.x,player.y-npc.y);
-  if(d<nearD){nearD=d;near=npc}
- }
- if(near!==nearbyNpc){
-  nearbyNpc=near;
-  const ib=$('interactBtn');
-  if(ib){
-   if(nearbyNpc){
-    ib.textContent=`💬 Поговорить: ${nearbyNpc.short} [E]`;
-    ib.style.display='block';
-   }else{
-    ib.style.display='none';
+ // Building roof transparency, interior guard wake-up, loot containers & pickups
+ for(let i=0;i<buildings.length;i++){
+  const b=buildings[i];
+  const inside=isPointInBuilding(player.x,player.y,b,6);
+  const targetA=inside?0:1;
+  b.roofAlpha+=(targetA-b.roofAlpha)*Math.min(1,dt*12);
+  if(Math.abs(b.roofAlpha-targetA)<0.02)b.roofAlpha=targetA;
+
+  if(!b.guardSpawned&&Math.hypot(player.x-b.cx,player.y-b.cy)<340){
+   b.guardSpawned=true;
+   const hasLootInside=lootNodes.some(n=>n.buildingId===b.id&&!n.opened)||groundLoot.some(g=>g.buildingId===b.id);
+   if(hasLootInside&&zombies.length<58){
+    const chance=b.districtId==='suburb'?0.55:b.isTent?0.45:0.85;
+    if(Math.random()<chance){
+     const gPool=b.districtId==='chem'?['hazmat','acidic','spitter']:
+                 b.districtId==='hospital'?['nurse','medic','surgeon']:
+                 b.districtId==='military'?['soldier','commando']:['walker','crawler'];
+     const gType=gPool[Math.floor(Math.random()*gPool.length)];
+     const offX=b.doorSide==='W'?b.w*0.22:b.doorSide==='E'?-b.w*0.22:(Math.random()-.5)*b.w*0.35;
+     const offY=b.doorSide==='N'?b.h*0.22:b.doorSide==='S'?-b.h*0.22:(Math.random()-.5)*b.h*0.35;
+     spawnZombie(gType,b.cx+offX,b.cy+offY);
+    }
    }
   }
+ }
+
+ // Check nearby NPC in Safe Zone or nearby unopened loot container in buildings
+ let nearNpc=null,nearNpcD=84;
+ for(const npc of NPCS){
+  const d=Math.hypot(player.x-npc.x,player.y-npc.y);
+  if(d<nearNpcD){nearNpcD=d;nearNpc=npc}
+ }
+ nearbyNpc=nearNpc;
+
+ let nearNode=null,nearNodeD=52;
+ if(!nearbyNpc){
+  for(let i=0;i<lootNodes.length;i++){
+   const ln=lootNodes[i];
+   if(ln.opened)continue;
+   const d=Math.hypot(player.x-ln.x,player.y-ln.y);
+   if(d<nearNodeD){nearNodeD=d;nearNode=ln}
+  }
+ }
+ for(let i=0;i<lootNodes.length;i++){
+  const ln=lootNodes[i];
+  if(ln.opened)continue;
+  if(ln===nearNode){
+   ln.progress=Math.min(1,(ln.progress||0)+dt/0.55);
+   if(ln.progress>=1){
+    openLootNode(ln);
+    nearNode=null;
+   }
+  }else if(ln.progress>0){
+   ln.progress=Math.max(0,ln.progress-dt*1.8);
+  }
+ }
+ nearbyLootNode=nearNode;
+
+ const ib=$('interactBtn');
+ if(ib){
+  if(nearbyNpc){
+   ib.textContent=(nearbyNpc.id==='trader'&&lootBag.length>0)
+    ?`💰 Продать лут (${getLootBagTotalValue()} 🪙) [E]`
+    :`💬 Поговорить: ${nearbyNpc.short} [E]`;
+   ib.style.display='block';
+  }else if(nearbyLootNode){
+   ib.textContent='🔍 Обыскать ящик [E]';
+   ib.style.display='block';
+  }else{
+   ib.style.display='none';
+  }
+ }
+
+ // Ground loot pickups inside buildings
+ lootFullToastCd=Math.max(0,lootFullToastCd-dt);
+ for(let i=groundLoot.length-1;i>=0;i--){
+  const gl=groundLoot[i];
+  if(gl.pickupDelay>0){gl.pickupDelay=Math.max(0,gl.pickupDelay-dt);continue}
+  if(Math.hypot(player.x-gl.x,player.y-gl.y)<=38){
+   const cap=getLootCapacity();
+   if(lootBag.length<cap){
+    const lt=LOOT_TYPES[gl.typeId]||LOOT_TYPES.canned;
+    lootBag.push(lt);
+    addParticles(gl.x,gl.y,'#8bff9c',7,95,'spark');
+    addPopup(gl.x,gl.y-18,`+${lt.icon} ${lt.name} (${getLootSellPrice(lt)}🪙)`,'#9effa8',11);
+    groundLoot.splice(i,1);
+    updateUI();
+   }else if(lootFullToastCd<=0){
+    lootFullToastCd=1.8;
+    addPopup(player.x,player.y-34,'🎒 Рюкзак полон! Сдай на базе','#ffaa5c',13);
+   }
+  }
+ }
+
+ lootRespawnTimer+=dt;
+ if(lootRespawnTimer>=42){
+  lootRespawnTimer=0;
+  respawnBuildingLoot(2);
  }
 
  // Base Safe Zone HP regeneration + truce status
@@ -2960,6 +3650,12 @@ function update(dt,now){
    dead=true;
   }
   if(!dead){
+   for(let wi=0;wi<wallRects.length;wi++){
+    const r=wallRects[wi];
+    if(ep.x>=r.x&&ep.x<=r.x+r.w&&ep.y>=r.y&&ep.y<=r.y+r.h){dead=true;break}
+   }
+  }
+  if(!dead){
    for(const ob of obstacles){
     if(Math.hypot(ep.x-ob.x,ep.y-ob.y)<ob.r){dead=true;break}
    }
@@ -3007,6 +3703,23 @@ function update(dt,now){
     if(z.hp>0)addDecalSplat(b.x,b.y,'#1e331c',7,2);
     hit=true;
     break;
+   }
+  }
+  if(!hit){
+   for(let wi=0;wi<wallRects.length;wi++){
+    if(segmentIntersectsRect(b.px,b.py,b.x,b.y,wallRects[wi])!==null){
+     if(b.aoe>0){
+      for(const zz of zombies){
+       const dd=Math.hypot(zz.x-b.x,zz.y-b.y);
+       if(dd<=b.aoe+zz.r)applyDamageToZombie(zz,b.damage*0.75,b.angle);
+      }
+      particles.push({x:b.x,y:b.y,vx:0,vy:0,life:.24,max:.24,color:'#5ef4ff',size:b.aoe*0.56,kind:'ring',rot:0,vrot:0});
+      addParticles(b.x,b.y,'#7ef9ff',10,140,'spark');
+     }else{
+      addParticles(b.x,b.y,'#ffd580',3,75,'spark');
+     }
+     hit=true;break;
+    }
    }
   }
   if(!hit){
@@ -3064,16 +3777,12 @@ function update(dt,now){
     }
    }
 
-   const zDist=getDistrictAt(z.x,z.y);
-   const baseCoin=def.coins||(z.r>=20?5:2);
-   const gainCoins=baseCoin+(itemMods.coinBonus||0)+(zDist.coinBonus||0);
-   score+=z.points;money+=gainCoins;kills++;waveKills++;
+   score+=z.points;kills++;waveKills++;
    registerZombieKill(z.type);
    if(itemMods.vamp>0&&kills%4===0&&health<maxHealth){
     health=Math.min(maxHealth,health+itemMods.vamp);
     addPopup(player.x,player.y-28,`+${itemMods.vamp} ❤️`,'#6bff88',12);
    }
-   addPopup(z.x,z.y-z.r,`+${gainCoins}🪙`,'#ffe17d',12);
    if(allowExplode&&itemMods.explosive>0){
     explosions.push({x:z.x,y:z.y,r:78+itemMods.explosive*14,dmg:(1.6+itemMods.explosive*1.1)*upgrades.damage*itemMods.dmgMult});
    }
@@ -3100,6 +3809,7 @@ function update(dt,now){
    wave++;
    waveKills=0;
    waveGoal=Math.min(36,10+(wave-1)*4);
+   respawnBuildingLoot(5);
    updateUI();
    openWaveChoice(cleared);
    return;
@@ -3350,19 +4060,107 @@ function drawNpcTrader(npc,now){
  // Overhead role badge & name label
  ctx.textAlign='center';
  ctx.font='800 10px system-ui,-apple-system,sans-serif';
- const tag=npc.id==='armorer'?'🔫 ВЕКТОР':'✚ ДОК';
+ const tag=npc.id==='armorer'?'🔫 ВЕКТОР':npc.id==='trader'?'💰 СКУПЩИК':'✚ ДОК';
  ctx.lineWidth=3;
  ctx.strokeStyle='rgba(4,10,12,0.9)';
  ctx.strokeText(tag,0,-24);
- ctx.fillStyle=near?'#8dff76':(npc.id==='armorer'?'#ffd269':'#84f7e8');
+ ctx.fillStyle=near?'#8dff76':(npc.id==='armorer'?'#ffd269':npc.id==='trader'?'#ffe87a':'#84f7e8');
  ctx.fillText(tag,0,-24);
  if(near){
+  const actTxt=(npc.id==='trader'&&lootBag.length>0)?'[E] ПРОДАТЬ ЛУТ':'[E] ТОРГОВАТЬ';
   ctx.font='700 9px system-ui,-apple-system,sans-serif';
-  ctx.strokeText('[E] ТОРГОВАТЬ',0,30);
+  ctx.strokeText(actTxt,0,30);
   ctx.fillStyle='#ffffff';
-  ctx.fillText('[E] ТОРГОВАТЬ',0,30);
+  ctx.fillText(actTxt,0,30);
  }
  ctx.restore();
+}
+
+function drawBuildingLoot(now,viewX,viewY){
+ const minX=viewX-60,maxX=viewX+W+60,minY=viewY-60,maxY=viewY+H+60;
+
+ // Containers (crates, safes, med cabinets, tech racks)
+ for(let i=0;i<lootNodes.length;i++){
+  const n=lootNodes[i];
+  if(n.x<minX||n.x>maxX||n.y<minY||n.y>maxY)continue;
+  ctx.save();
+  ctx.translate(n.x,n.y);
+
+  // Box / Cabinet silhouette
+  ctx.fillStyle='rgba(0,0,0,0.42)';
+  ctx.fillRect(-12,-10,24,22);
+
+  if(n.opened){
+   ctx.fillStyle='#242c2d';
+   ctx.strokeStyle='#485757';
+   ctx.lineWidth=1.4;
+   ctx.beginPath();ctx.roundRect(-11,-9,22,18,3);ctx.fill();ctx.stroke();
+   ctx.fillStyle='#14191a';
+   ctx.fillRect(-8,-6,16,12);
+   ctx.restore();
+   continue;
+  }
+
+  const isMed=n.kind==='med';
+  const isTech=n.kind==='tech'||n.kind==='safe';
+  ctx.fillStyle=isMed?'#c8dedc':isTech?'#344854':'#6e5033';
+  ctx.strokeStyle=isMed?'#68c9be':isTech?'#6cb8dc':'#a87e4d';
+  ctx.lineWidth=1.8;
+  ctx.beginPath();ctx.roundRect(-11,-9,22,18,3);ctx.fill();ctx.stroke();
+
+  if(isMed){
+   ctx.fillStyle='#cf3b42';
+   ctx.fillRect(-4,-1.5,8,3);ctx.fillRect(-1.5,-4,3,8);
+  }else if(isTech){
+   ctx.fillStyle='#8cf2ff';
+   ctx.fillRect(-6,-4,12,2.5);
+   ctx.fillStyle='#ffcf5c';
+   ctx.fillRect(-3,1.5,6,3);
+  }else{
+   ctx.strokeStyle='rgba(255,220,145,0.48)';
+   ctx.lineWidth=1.3;
+   ctx.beginPath();ctx.moveTo(-8,-6);ctx.lineTo(8,6);ctx.stroke();
+  }
+
+  // Pulsing golden/cyan ring for unopened containers
+  const pulse=0.42+Math.sin(now*0.005+i)*0.24;
+  ctx.strokeStyle=`rgba(255,222,102,${pulse.toFixed(2)})`;
+  ctx.lineWidth=1.6;
+  ctx.beginPath();ctx.arc(0,0,17+Math.sin(now*0.005+i)*1.5,0,Math.PI*2);ctx.stroke();
+
+  // Search progress arc
+  if(n.progress>0){
+   ctx.strokeStyle='#6eff88';
+   ctx.lineWidth=3.2;
+   ctx.beginPath();
+   ctx.arc(0,0,20,-Math.PI/2,-Math.PI/2+Math.PI*2*n.progress);
+   ctx.stroke();
+  }
+  ctx.restore();
+ }
+
+ // Loose loot items on the floor inside buildings
+ for(let i=0;i<groundLoot.length;i++){
+  const gl=groundLoot[i];
+  if(gl.x<minX||gl.x>maxX||gl.y<minY||gl.y>maxY)continue;
+  const lt=LOOT_TYPES[gl.typeId]||LOOT_TYPES.canned;
+  const bob=Math.sin(now*0.006+(gl.bobPhase||0))*2.5;
+  const ringCol=lt.rarity==='epic'?'rgba(255,145,255,0.88)':lt.rarity==='rare'?'rgba(105,225,255,0.85)':'rgba(255,225,115,0.78)';
+
+  ctx.save();
+  ctx.translate(gl.x,gl.y+bob);
+  ctx.fillStyle='rgba(6,12,14,0.82)';
+  ctx.beginPath();ctx.arc(0,0,13,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=ringCol;
+  ctx.lineWidth=2;
+  ctx.stroke();
+
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.font='14px system-ui,Apple Color Emoji,Segoe UI Emoji,sans-serif';
+  ctx.fillText(lt.icon,0,1);
+  ctx.restore();
+ }
 }
 
 function drawPlayer(now){
@@ -3947,6 +4745,16 @@ function drawNightMask(now,viewX,viewY){
  lightCtx.globalAlpha=0.72;
  lightCtx.drawImage(glows.cutSoft,SAFE_ZONE.x-SAFE_ZONE.r*1.08,SAFE_ZONE.y-SAFE_ZONE.r*1.08,SAFE_ZONE.r*2.16,SAFE_ZONE.r*2.16);
 
+ // Entered building interior visibility cutout
+ for(let i=0;i<buildings.length;i++){
+  const b=buildings[i];
+  if(b.roofAlpha>=0.85)continue;
+  const vis=1-b.roofAlpha;
+  lightCtx.globalAlpha=0.88*vis;
+  const br=Math.max(b.w,b.h)*0.72;
+  lightCtx.drawImage(glows.cutSoft,b.cx-br,b.cy-br,br*2,br*2);
+ }
+
  // Bullets, Tesla bolts & railgun beams illuminate the night
  for(const b of bullets){
   const br=b.aoe?70:44;
@@ -4083,6 +4891,14 @@ function drawWorldLights(now,viewX,viewY){
   ctx.drawImage(sp.amber?glows.amber:glows.green,sp.x-gs/2,sp.y-gs/2,gs,gs);
  }
 
+ for(const gl of groundLoot){
+  if(gl.x<minX||gl.x>maxX||gl.y<minY||gl.y>maxY)continue;
+  const lt=LOOT_TYPES[gl.typeId];
+  ctx.globalAlpha=0.45+Math.sin(now*0.006+(gl.bobPhase||0))*0.18;
+  const gs=lt&&lt.rarity==='epic'?glows.red:lt&&lt.rarity==='rare'?glows.cyan:glows.amber;
+  ctx.drawImage(gs,gl.x-26,gl.y-26,52,52);
+ }
+
  ctx.restore();
 }
 
@@ -4148,10 +4964,17 @@ function renderRadar(now){
   g.fillRect((rd.pos-rd.w/2)*sx,0,rd.w*sx,rh);
  }
 
- // Buildings & tents on radar
+ // Buildings & tents on radar (golden dot marks buildings that still have loot)
  for(const b of radarBuildings){
   g.fillStyle=b.style==='tent'?'rgba(105,148,96,0.45)':'rgba(130,165,165,0.42)';
   g.fillRect(b.x*sx,b.y*sy,Math.max(2,b.w*sx),Math.max(2,b.h*sy));
+ }
+ for(const b of buildings){
+  const hasLoot=lootNodes.some(n=>n.buildingId===b.id&&!n.opened)||groundLoot.some(gl=>gl.buildingId===b.id);
+  if(hasLoot){
+   g.fillStyle='#ffd859';
+   g.beginPath();g.arc(b.cx*sx,b.cy*sy,2.0,0,Math.PI*2);g.fill();
+  }
  }
 
  // Central Safe Zone ring & NPC icons
@@ -4161,7 +4984,7 @@ function renderRadar(now){
  g.lineWidth=1.5;
  g.stroke();
  for(const npc of NPCS){
-  g.fillStyle=npc.id==='armorer'?'#ffb84d':'#62f5e6';
+  g.fillStyle=npc.id==='armorer'?'#ffb84d':npc.id==='trader'?'#ffe766':'#62f5e6';
   g.beginPath();g.arc(npc.x*sx,npc.y*sy,2.8,0,Math.PI*2);g.fill();
  }
 
@@ -4239,6 +5062,7 @@ function render(now){
  }
  drawSafeZoneBarrier(now);
  drawTargetReticle(now);
+ drawBuildingLoot(now,viewX,viewY);
 
  for(const p of particles){
   const t=Math.max(0,p.life/p.max);
@@ -4349,6 +5173,13 @@ function render(now){
  }
  ctx.restore();
 
+ // Dynamic building roofs fade smoothly when player steps inside
+ for(let i=0;i<buildings.length;i++){
+  const b=buildings[i];
+  if(b.x+b.w<viewX-60||b.x>viewX+W+60||b.y+b.h<viewY-60||b.y>viewY+H+60)continue;
+  drawDynamicBuildingRoof(b,now);
+ }
+
  drawCanopies(now,viewX,viewY);
  drawMist(now,viewX,viewY);
 
@@ -4393,6 +5224,12 @@ function getUpgradeLevel(key){
 
 function renderShop(){
  $('shopMoney').textContent=money;
+ if($('shopSellWrap')){
+  const inSafe=player?isInSafeZone(player.x,player.y,4):false;
+  $('shopSellWrap').innerHTML=renderSellBannerHtml(inSafe);
+  const sbtn=$('shopSellWrap').querySelector('[data-sell-all]');
+  if(sbtn)sbtn.addEventListener('click',sellAllLoot);
+ }
  $('shopItems').innerHTML='';
  const items=[
   ['damage','💥 Урон','Усиливает все виды оружия'],
@@ -4440,9 +5277,9 @@ function renderShop(){
  }
 }
 
-function openShop(){if(!running||waveChoosing||activeNpc)return;paused=true;stopAllControls();$('shop').style.display='flex';renderShop()}
+function openShop(){if(!running||waveChoosing||activeNpc)return;if($('bagModal'))$('bagModal').style.display='none';paused=true;stopAllControls();$('shop').style.display='flex';renderShop()}
 function closeShop(){$('shop').style.display='none';paused=false;last=performance.now()}
-function pauseGame(){if(!running||waveChoosing||activeNpc)return;paused=true;stopAllControls();$('pauseScreen').style.display='flex'}
+function pauseGame(){if(!running||waveChoosing||activeNpc)return;if($('bagModal'))$('bagModal').style.display='none';paused=true;stopAllControls();$('pauseScreen').style.display='flex'}
 function resumeGame(){paused=false;$('pauseScreen').style.display='none';last=performance.now()}
 
 const HOME_LABELS={
@@ -4544,7 +5381,7 @@ function renderCodex(){
      <span class="codexStat">⚡ ${def.speed}</span>
      <span class="codexStat">💥 ${def.dmg}</span>
      ${armorPct?`<span class="codexStat">🛡️ ${armorPct}%</span>`:''}
-     <span class="codexStat">🪙 ${def.coins||(def.r>=20?5:2)}+</span>
+     <span class="codexStat">⭐ ${def.points}</span>
     </div>
     <div class="codexWhere">Район: ${HOME_LABELS[def.home]||HOME_LABELS.suburb} · с ${def.minWave} волны</div>
    `;
@@ -4566,7 +5403,7 @@ function renderCodex(){
 }
 
 function openCodex(from){
- if(waveChoosing||activeNpc||$('shop').style.display==='flex')return;
+ if(waveChoosing||activeNpc||$('shop').style.display==='flex'||($('bagModal')&&$('bagModal').style.display==='flex'))return;
  if(from==='pause'){
   codexReturnTo='pause';
   $('pauseScreen').style.display='none';
@@ -4636,7 +5473,12 @@ if($('codexFilters'))$('codexFilters').addEventListener('click',e=>{
  codexFilter=tab.dataset.filter||'all';
  renderCodex();
 });
-if($('interactBtn'))$('interactBtn').addEventListener('click',()=>{if(nearbyNpc)openNpcDialog(nearbyNpc)});
+if($('lootStatBtn'))$('lootStatBtn').addEventListener('click',openBagModal);
+if($('bagClose'))$('bagClose').addEventListener('click',closeBagModal);
+if($('interactBtn'))$('interactBtn').addEventListener('click',()=>{
+ if(nearbyNpc)openNpcDialog(nearbyNpc);
+ else if(nearbyLootNode)openLootNode(nearbyLootNode);
+});
 if($('npcClose'))$('npcClose').addEventListener('click',closeNpcDialog);
 canvas.addEventListener('pointerdown',e=>{
  if(!running||paused||!player)return;
@@ -4648,6 +5490,13 @@ canvas.addEventListener('pointerdown',e=>{
  for(const npc of NPCS){
   if(Math.hypot(wx-npc.x,wy-npc.y)<=40&&Math.hypot(player.x-npc.x,player.y-npc.y)<=110){
    openNpcDialog(npc);
+   return;
+  }
+ }
+ for(let i=0;i<lootNodes.length;i++){
+  const ln=lootNodes[i];
+  if(!ln.opened&&Math.hypot(wx-ln.x,wy-ln.y)<=28&&Math.hypot(player.x-ln.x,player.y-ln.y)<=68){
+   openLootNode(ln);
    return;
   }
  }
@@ -4764,19 +5613,21 @@ window.addEventListener('keydown',e=>{
   if(running&&!paused&&e.preventDefault)e.preventDefault();
   keys.add('Space');
  }
- if((e.code==='KeyE'||e.key==='e'||e.key==='E'||e.key==='у'||e.key==='У')&&running&&!paused&&nearbyNpc){
-  openNpcDialog(nearbyNpc);
+ if((e.code==='KeyE'||e.key==='e'||e.key==='E'||e.key==='у'||e.key==='У')&&running&&!paused){
+  if(nearbyNpc)openNpcDialog(nearbyNpc);
+  else if(nearbyLootNode)openLootNode(nearbyLootNode);
  }
  if(['1','2','3','4','5','6'].includes(e.key)){
   const unlocked=WEAPON_ORDER.filter(id=>unlockedWeapons.has(id));
   const idx=Number(e.key)-1;
   if(unlocked[idx])selectWeapon(unlocked[idx]);
  }
- if((e.code==='KeyI'||e.code==='KeyB')&&!waveChoosing&&!activeNpc&&$('shop').style.display!=='flex'){
+ if((e.code==='KeyI'||e.code==='KeyB')&&!waveChoosing&&!activeNpc&&$('shop').style.display!=='flex'&&(!$('bagModal')||$('bagModal').style.display!=='flex')){
   if($('codexModal').style.display==='flex')closeCodex();
   else openCodex(paused&&running?'pause':running?'game':'overlay');
  }
  if(e.key==='Escape'){
+  if($('bagModal')&&$('bagModal').style.display==='flex'){closeBagModal();return;}
   if($('codexModal').style.display==='flex'){closeCodex();return;}
   if(running&&!waveChoosing){
    if(activeNpc)closeNpcDialog();
