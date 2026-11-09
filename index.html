@@ -529,6 +529,12 @@ let weapon='pistol';
 let shake=0,shakeTilt=0,hitKickX=0,hitKickY=0,hurtFlash=0;
 let upgrades={damage:1,speed:1,rate:1};
 let prices={damage:20,speed:20,rate:25};
+const MAX_SPEED_LVL=8;
+const SPEED_STEP=0.12;
+const MAX_SPEED_MULT=1.85;
+function getPlayerSpeedMult(){
+ return Math.min(MAX_SPEED_MULT,upgrades.speed+((itemMods.speedMult||1)-1));
+}
 let ownedItems={},itemMods={};
 let bestScore=0;
 try{bestScore=Number(localStorage.getItem('carantin_best')||0)||0}catch(_){}
@@ -558,7 +564,8 @@ const ITEMS_POOL=[
  {
   id:'armor',icon:'🛡️',name:'Кевларовый жилет',
   desc:'-20% получаемого урона (до 60%) и +15 HP',
-  apply:()=>{itemMods.armor=Math.min(0.6,itemMods.armor+0.2);health=Math.min(maxHealth,health+15)}
+  available:()=>itemMods.armor<0.6,
+  apply:()=>{itemMods.armor=Math.min(0.6,Number((itemMods.armor+0.2).toFixed(2)));health=Math.min(maxHealth,health+15)}
  },
  {
   id:'laser',icon:'🎯',name:'Лазерный целеуказатель',
@@ -582,8 +589,9 @@ const ITEMS_POOL=[
  },
  {
   id:'boots',icon:'🥾',name:'Тактические берцы',
-  desc:'+18% к скорости бега по кварталу',
-  apply:()=>{itemMods.speedMult+=0.18}
+  desc:'+12% к скорости бега (до 3×, макс. лимит 185%)',
+  available:()=>(ownedItems.boots||0)<3&&getPlayerSpeedMult()<MAX_SPEED_MULT,
+  apply:()=>{itemMods.speedMult=Number((itemMods.speedMult+0.12).toFixed(2))}
  },
  {
   id:'greed',icon:'🪙',name:'Трофейный подсумок',
@@ -1052,8 +1060,12 @@ function resize(){
 }
 window.addEventListener('resize',resize);
 
+function isUpgradeMaxed(key){
+ return key==='speed'&&(getUpgradeLevel('speed')>=MAX_SPEED_LVL||getPlayerSpeedMult()>=MAX_SPEED_MULT);
+}
+
 function updateShopBadge(){
- const canBuy=Object.keys(prices).some(k=>money>=prices[k]);
+ const canBuy=Object.keys(prices).some(k=>!isUpgradeMaxed(k)&&money>=prices[k]);
  $('shopBadge').classList.toggle('show',canBuy);
 }
 
@@ -1339,7 +1351,7 @@ function openWaveChoice(clearedWave){
  keys.clear();
  waveModalUnlockAt=performance.now()+400;
  $('waveModalTitle').textContent=`🎁 ВОЛНА ${clearedWave} ПРОЙДЕНА!`;
- const pool=[...ITEMS_POOL];
+ const pool=ITEMS_POOL.filter(it=>!it.available||it.available());
  for(let i=pool.length-1;i>0;i--){
   const j=Math.floor(Math.random()*(i+1));
   [pool[i],pool[j]]=[pool[j],pool[i]];
@@ -1490,11 +1502,12 @@ function update(dt,now){
  const moveMag=Math.hypot(joy.x,joy.y);
  player.moving=moveMag>0.06;
  if(player.moving){
-  const spd=player.speed*upgrades.speed*(itemMods.speedMult||1);
+  const speedMult=getPlayerSpeedMult();
+  const spd=player.speed*speedMult;
   player.x+=joy.x*spd*dt;
   player.y+=joy.y*spd*dt;
   resolveObstacles(player,false);
-  player.walkPhase+=dt*(9+upgrades.speed*1.6)*Math.min(1,moveMag);
+  player.walkPhase+=dt*(8+speedMult*2.5)*Math.min(1,moveMag);
  }
 
  const autoTarget=getNearestZombie(getAutoRange());
@@ -2239,7 +2252,9 @@ function render(now){
 }
 
 function getUpgradeLevel(key){
- return key==='rate'?Math.round((upgrades.rate-1)/0.25)+1:upgrades[key];
+ if(key==='rate')return Math.round((upgrades.rate-1)/0.25)+1;
+ if(key==='speed')return Math.round((upgrades.speed-1)/SPEED_STEP)+1;
+ return upgrades[key];
 }
 
 function renderShop(){
@@ -2247,13 +2262,14 @@ function renderShop(){
  $('shopItems').innerHTML='';
  const items=[
   ['damage','💥 Урон','Усиливает все виды оружия'],
-  ['speed','👟 Скорость','Быстрее маневрируй в бою'],
+  ['speed','👟 Скорость',`+12% к бегу (${Math.round(getPlayerSpeedMult()*100)}% / 185%)`],
   ['rate','⚡ Скорострельность','Меньше задержка выстрела']
  ];
  for(const [key,name,desc] of items){
   const lvl=getUpgradeLevel(key);
+  const maxed=isUpgradeMaxed(key);
   const price=prices[key];
-  const afford=money>=price;
+  const afford=!maxed&&money>=price;
   const row=document.createElement('div');
   row.className='shopRow';
 
@@ -2261,13 +2277,15 @@ function renderShop(){
   meta.className='shopMeta';
   let pips='';
   for(let p=1;p<=8;p++)pips+=`<span class="pip${p<=lvl?' on':''}"></span>`;
-  meta.innerHTML=`<div class="shopName">${name} · Ур. ${lvl}</div><div class="shopSub">${desc}</div><div class="lvlPips">${pips}</div>`;
+  meta.innerHTML=`<div class="shopName">${name} · Ур. ${lvl}${maxed?' (МАКС)':''}</div><div class="shopSub">${desc}</div><div class="lvlPips">${pips}</div>`;
 
   const b=document.createElement('button');
   b.type='button';
   b.className='buybtn'+(afford?'':' locked');
-  b.textContent=price+' 🪙';
+  b.textContent=maxed?'МАКС':(price+' 🪙');
+  if(maxed)b.disabled=true;
   b.addEventListener('click',()=>{
+   if(isUpgradeMaxed(key))return;
    if(money<prices[key]){
     b.classList.remove('shake');
     void b.offsetWidth;
@@ -2275,7 +2293,9 @@ function renderShop(){
     return;
    }
    money-=prices[key];
-   upgrades[key]+=key==='rate'?.25:1;
+   if(key==='rate')upgrades.rate=Number((upgrades.rate+0.25).toFixed(2));
+   else if(key==='speed')upgrades.speed=Number((upgrades.speed+SPEED_STEP).toFixed(2));
+   else upgrades[key]+=1;
    prices[key]=Math.ceil(prices[key]*1.55);
    updateUI();renderShop();
   });
