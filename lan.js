@@ -10,6 +10,7 @@ function lanBadge(text){$('lanBadge').textContent=text;$('lanBadge').style.displ
 function lanLeave(){
  if(lanRole==='solo')return;
  lanRole='solo';lanPeer=null;lanInput=null;lanGuestReady=false;lanHostPaused=false;
+ lanLootKey=null;lanLastMode=null;lanLastDialogueKey='';lanLastTravelKey='';
  document.body.classList.remove('lanGuest','lanCampaign','lanHost');lanBadge('');
  $('dialogueOverlay').style.display='none';$('travelOverlay').style.display='none';
  if(lanBridge)lanBridge.close();
@@ -72,6 +73,7 @@ window.lanReceive=function(kind,text){
  if(kind==='hosting'&&lanRole==='host'){lanBadge('📡 Ведущий: '+text);return;}
  if(kind==='connected'){
   if(lanRole==='host'&&running){
+   lanLootKey=null;lanLastSnapshot=0;lanInput=null;lanFireCooldown=0;
    lanPeer={x:player.x+36,y:player.y+36,r:15,angle:0,hp:100,inv:1,walkPhase:0,moving:false};
    lanBadge('📡 Второй игрок подключён');
   }else if(lanRole==='guest')lanStatus('Соединено. Загружаем мир ведущего…');
@@ -213,7 +215,8 @@ function lanApplyCampaign(c){
 function lanApplyState(s){
  if(!s.guest||!s.host||!Array.isArray(s.z)||!Array.isArray(s.b)||
     !['campaign','free'].includes(s.mode)||s.z.length>600||s.b.length>1000||
-    (s.mode==='campaign'&&(!s.c||!Number.isInteger(s.c.stage)||s.c.stage<0||s.c.stage>=CAMPAIGN_LOCATIONS.length))||
+    (s.mode==='campaign'&&(!s.c||!Number.isInteger(s.c.stage)||s.c.stage<0||s.c.stage>=CAMPAIGN_LOCATIONS.length||
+     !['investigate','approach','combat','hold','ready'].includes(s.c.state)))||
     !Number.isFinite(s.guest.x)||!Number.isFinite(s.guest.y))return;
  if(!lanGuestReady){
   // Start without a second, local dialogue/simulation. The host supplies the
