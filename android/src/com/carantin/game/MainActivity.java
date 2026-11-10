@@ -29,6 +29,7 @@ import java.util.Map;
 public class MainActivity extends Activity {
     private static final String ASSET_HOST = "appassets.androidplatform.net";
     private WebView webView;
+    private LanTransport lanTransport;
     private long lastBackPressMs = 0L;
 
     @SuppressWarnings("deprecation")
@@ -68,6 +69,8 @@ public class MainActivity extends Activity {
 
         WebSettings ws = webView.getSettings();
         ws.setJavaScriptEnabled(true);
+        lanTransport = new LanTransport(webView);
+        webView.addJavascriptInterface(lanTransport, "CarantinLan");
         ws.setDomStorageEnabled(true);
         ws.setDatabaseEnabled(true);
         ws.setUseWideViewPort(true);
@@ -81,6 +84,14 @@ public class MainActivity extends Activity {
 
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return !ASSET_HOST.equals(request.getUrl().getHost());
+            }
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return !ASSET_HOST.equals(Uri.parse(url).getHost());
+            }
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 WebResourceResponse res = serveLocalAsset(request.getUrl());
@@ -195,7 +206,7 @@ public class MainActivity extends Activity {
     public void onBackPressed() {
         if (webView != null) {
             webView.evaluateJavascript(
-                "(function(){var ids=['codexModal','shop','npcModal','pauseScreen'];" +
+                "(function(){var ids=['lanModal','mapModal','codexModal','shop','npcModal','pauseScreen'];" +
                 "for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);" +
                 "if(el&&el.style.display==='flex'){window.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}));return 'closed';}}" +
                 "return 'none';})()",
@@ -219,6 +230,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (lanTransport != null) lanTransport.close();
         if (webView != null) {
             webView.destroy();
             webView = null;
