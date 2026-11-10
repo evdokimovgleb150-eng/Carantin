@@ -13,6 +13,10 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Enumeration;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /** Two-player local-only transport. No cloud, matchmaking, or remote server. */
 public final class LanTransport {
@@ -23,12 +27,35 @@ public final class LanTransport {
     private volatile DataOutputStream output;
     private volatile boolean hosting;
     private volatile int generation;
+    // Network writes and UI callbacks never block the WebView game loop.
+    private final ArrayBlockingQueue<byte[]> realtime = new ArrayBlockingQueue<>(1);
+    private final ArrayBlockingQueue<byte[]> reliable = new ArrayBlockingQueue<>(8);
+    private final AtomicReference<String> latestPacket = new AtomicReference<>();
+    private final AtomicBoolean packetScheduled = new AtomicBoolean();
 
     public LanTransport(WebView view) { this.view = view; }
 
     private void deliver(String kind, String text) {
         final String js = "window.lanReceive(" + JSONObject.quote(kind) + "," + JSONObject.quote(text) + ")";
         view.post(() -> view.evaluateJavascript(js, null));
+    }
+
+    private void deliverPacket(String packet) {
+        if (packet.contains("\"t\":\"state\"") || packet.contains("\"t\":\"input\"")) {
+            latestPacket.set(packet);
+            scheduleLatestPacket();
+        } else deliver("data", packet); // interactions and endings must never be dropped
+    }
+
+    private void scheduleLatestPacket() {
+        if (!packetScheduled.compareAndSet(false, true)) return;
+        view.post(() -> {
+            String packet = latestPacket.getAndSet(null);
+            packetScheduled.set(false);
+            if (packet != null) view.evaluateJavascript(
+                "window.lanReceive(\"data\"," + JSONObject.quote(packet) + ")", null);
+            if (latestPacket.get() != null) scheduleLatestPacket();
+        });
     }
 
     @JavascriptInterface
@@ -112,6 +139,23 @@ public final class LanTransport {
         socket.setSoTimeout(30000);
         peer = socket;
         output = new DataOutputStream(socket.getOutputStream());
+        realtime.clear();reliable.clear();
+        new Thread(() -> {
+            try {
+                while (!socket.isClosed()) {
+                    byte[] bytes = reliable.poll();
+                    if (bytes == null) bytes = realtime.poll(50, TimeUnit.MILLISECONDS);
+                    if (bytes == null) continue;
+                    DataOutputStream stream = output;
+                    if (stream == null || peer != socket) break;
+                    stream.writeInt(bytes.length);
+                    stream.write(bytes);
+                    stream.flush();
+                }
+            } catch (Exception ignored) {
+                synchronized (LanTransport.this) { if (peer == socket) closePeer(); }
+            }
+        }, "carantin-lan-writer").start();
         deliver("connected", "Игрок подключён");
     }
 
@@ -123,7 +167,7 @@ public final class LanTransport {
                 if (size < 1 || size > maxSize) throw new IOException("Invalid packet");
                 byte[] payload = new byte[size];
                 input.readFully(payload);
-                deliver("data", new String(payload, java.nio.charset.StandardCharsets.UTF_8));
+                deliverPacket(new String(payload, java.nio.charset.StandardCharsets.UTF_8));
             }
         } catch (IOException ignored) {
         } finally {
@@ -131,6 +175,7 @@ public final class LanTransport {
                 if (peer == socket) {
                     try { socket.close(); } catch (IOException ignored) { }
                     peer = null; output = null;
+                    realtime.clear();reliable.clear();latestPacket.set(null);
                     deliver("disconnected", "Другой игрок вышел из сети");
                 }
             }
@@ -138,20 +183,20 @@ public final class LanTransport {
     }
 
     @JavascriptInterface
-    public synchronized void send(String message) {
-        if (output == null || message == null) return;
+    public void send(String message) {
+        if (peer == null || message == null) return;
         byte[] bytes = message.getBytes(java.nio.charset.StandardCharsets.UTF_8);
         if (bytes.length > 1048576) return;
-        try {
-            output.writeInt(bytes.length);
-            output.write(bytes);
-            output.flush();
-        } catch (IOException ignored) { closePeer(); }
+        if (message.contains("\"t\":\"state\"") || message.contains("\"t\":\"input\"")) {
+            realtime.clear(); // send the freshest frame; never accumulate stale snapshots
+            realtime.offer(bytes);
+        } else reliable.offer(bytes);
     }
 
     private void closePeer() {
         Socket old = peer;
         peer = null; output = null;
+        realtime.clear();reliable.clear();latestPacket.set(null);
         if (old != null) try { old.close(); } catch (IOException ignored) { }
     }
 

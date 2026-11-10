@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#0b1416">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>CARANTIN 4.4 — Локальная игра</title>
+<title>CARANTIN 4.5 — Совместная кампания</title>
 <style>
 :root{
  --bg-dark:#081012;
@@ -962,7 +962,12 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
 #lanModal input{width:100%;padding:12px;font-size:17px;color:#e8f3eb;background:#10201d;border:1px solid #69ce83;border-radius:9px;user-select:text;touch-action:auto}
 #lanStatus,#lanBadge{color:#9cffbb;font-weight:700;overflow-wrap:anywhere}
 #lanBadge{position:absolute;z-index:12;bottom:10px;left:50%;transform:translateX(-50%);pointer-events:none;background:#10231f;padding:4px 10px;border-radius:8px;display:none;font-size:13px}
-.lanGuest #shopButton,.lanGuest #storyBtn,.lanGuest #actionBar,.lanGuest #weaponBar,.lanGuest #lootStatBtn{display:none!important}
+.lanGuest #shopButton,.lanGuest #actionBar,.lanGuest #weaponBar,.lanGuest #lootStatBtn{display:none!important}
+.lanGuest:not(.lanCampaign) #storyBtn{display:none!important}
+.lanGuest.lanCampaign #actionBar{display:flex!important}
+.lanGuest.lanCampaign #actionBar button:not(#interactBtn){display:none!important}
+.lanGuest #dlgNext,.lanGuest #dlgSkip,.lanGuest #dlgChoices,.lanGuest #travelArrive,.lanGuest #travelRadioNext{display:none!important}
+.lanHost #pauseLoadCampaign,.lanHost #pauseRestart{display:none!important}
 .lanGuest #pauseExtras,.lanGuest #saveCampaign,.lanGuest #pauseLoadCampaign{display:none!important}
 </style>
 </head>
@@ -1094,13 +1099,18 @@ p{color:#cbe0d0;line-height:1.45;margin:8px 0;font-size:14px}
  <div class="box"><div class="hazardStrip"></div>
   <div class="boxBody">
    <h2>📡 ИГРАТЬ ВМЕСТЕ</h2>
-   <p class="small">Два Android-устройства с APK CARANTIN 4.4 в одной точке доступа. Интернет не нужен. Ведущий управляет миром, второй игрок может передвигаться и стрелять. Совместная игра доступна в открытом мире; сюжетные сохранения остаются одиночными.</p>
+   <p class="small">Два Android-устройства с APK CARANTIN 4.5 в одной точке доступа. Интернет не нужен. Выберите режим: сюжет или открытый мир. Ведущий управляет общим миром, оба игрока сражаются и собирают сюжетные улики.</p>
+   <div class="modeRow" role="group" aria-label="Режим совместной игры">
+    <button type="button" class="modeBtn lanMode" data-mode="campaign">📖 СЮЖЕТ ВДВОЁМ</button>
+    <button type="button" class="modeBtn lanMode" data-mode="free">🌍 ОТКРЫТЫЙ МИР</button>
+   </div>
    <p class="small" id="lanStatus" role="status">Создай точку доступа и подключи к ней второй телефон.</p>
    <label for="lanIp">IP телефона ведущего (показан после создания игры)</label>
    <input id="lanIp" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.43.1" aria-label="IP ведущего">
   </div>
   <div class="boxFooter">
    <button type="button" class="mainbtn" id="lanHost">СОЗДАТЬ ИГРУ</button>
+   <button type="button" class="mainbtn secondary" id="lanHostSave">💾 СОЗДАТЬ ИЗ СОХРАНЕНИЯ</button>
    <button type="button" class="mainbtn secondary" id="lanJoin">ПОДКЛЮЧИТЬСЯ ПО IP</button>
    <button type="button" class="mainbtn secondary" id="lanCancel">НАЗАД</button>
   </div>
@@ -3361,7 +3371,7 @@ function clampCamera(tx,ty){
 }
 
 function resize(){
- DPR=Math.min(devicePixelRatio||1,2);
+ DPR=Math.min(devicePixelRatio||1,lanRole==='guest'?1:2);
  W=innerWidth;H=innerHeight;
  if(W<=0||H<=0)return;
  canvas.width=W*DPR;canvas.height=H*DPR;
@@ -9165,8 +9175,10 @@ function renderRadar(now,g=radarCtx,scale=1){
    b.style==='tent'?'rgba(105,148,96,0.45)':'rgba(130,165,165,0.44)';
   g.fillRect(b.x*sx,b.y*sy,Math.max(2,b.w*sx),Math.max(2,b.h*sy));
  }
+ const lootBuildingIds=new Set(groundLoot.map(gl=>gl.buildingId));
+ for(const node of lootNodes)if(!node.opened)lootBuildingIds.add(node.buildingId);
  for(const b of buildings){
-  const hasLoot=lootNodes.some(n=>n.buildingId===b.id&&!n.opened)||groundLoot.some(gl=>gl.buildingId===b.id);
+  const hasLoot=lootBuildingIds.has(b.id);
   if(hasLoot){
    g.fillStyle='#ffd859';
    g.beginPath();g.arc(b.cx*sx,b.cy*sy,2.0,0,Math.PI*2);g.fill();
@@ -9269,6 +9281,7 @@ function renderRadar(now,g=radarCtx,scale=1){
  g.restore();
 }
 
+let lastRadarDraw=-Infinity;
 function render(now){
  ctx.fillStyle='#081012';
  ctx.fillRect(0,0,W,H);
@@ -9469,17 +9482,19 @@ function render(now){
 
  drawCanopies(now,viewX,viewY);
  drawEvacHelicopter(now,viewX,viewY);
- drawMist(now,viewX,viewY);
+ if(lanRole!=='guest')drawMist(now,viewX,viewY);
 
  ctx.restore(); // end world-space geometry pass
 
  // Night darkness mask with dynamic flashlight/lamps/muzzle cutouts
- drawNightMask(now,viewX,viewY);
+ if(lanRole==='guest'){
+  ctx.fillStyle='rgba(5,11,16,0.16)';ctx.fillRect(0,0,W,H);
+ }else drawNightMask(now,viewX,viewY);
 
  // Additive emissive lights, crisp aiming trajectory & world popups above the night mask
  ctx.save();
  ctx.translate(-viewX,-viewY);
- drawWorldLights(now,viewX,viewY);
+ if(lanRole!=='guest')drawWorldLights(now,viewX,viewY);
  drawAimTrajectory(now);
 
  ctx.textAlign='center';
@@ -9497,13 +9512,16 @@ function render(now){
  ctx.restore();
 
  // Screen-space rain, lighting vignette, evac pointer & hurt overlay
- drawRain();
- drawScreenVignette(now);
+ if(lanRole!=='guest'){drawRain();drawScreenVignette(now);}
  drawHeliPointer(now);
  ctx.restore();
 
- renderRadar(now);
- if($('mapModal').style.display==='flex')renderRadar(now,expandedRadarCtx,4);
+ // The tactical map is expensive: avoid rebuilding hundreds of markers on every frame.
+ if(now-lastRadarDraw>=180){
+  lastRadarDraw=now;
+  renderRadar(now);
+  if($('mapModal').style.display==='flex')renderRadar(now,expandedRadarCtx,4);
+ }
 }
 
 function getUpgradeLevel(key){
@@ -9900,6 +9918,7 @@ if($('turretBtn'))$('turretBtn').addEventListener('click',()=>{
 });
 if($('quickUseBtn'))$('quickUseBtn').addEventListener('click',useQuickAid);
 if($('interactBtn'))$('interactBtn').addEventListener('click',()=>{
+ if(lanRole==='guest'){lanGuestInteract();return;}
  if(gameMode==='campaign'&&campaignNearbySite())campaignInspectSite();
  else if(gameMode==='campaign'&&campaignNearbyCheckpoint())campaignStartTravel();
  else if(nearbyNpc)openNpcDialog(nearbyNpc);
@@ -10066,7 +10085,11 @@ window.addEventListener('keydown',e=>{
   if(running&&!paused&&e.preventDefault)e.preventDefault();
   keys.add('Space');
  }
- if(lanRole==='guest'&&e.key!=='Escape')return;
+ if(lanRole==='guest'&&e.key!=='Escape'){
+  if((e.code==='KeyE'||e.key==='e'||e.key==='E'||e.key==='у'||e.key==='У')&&running&&!paused)lanGuestInteract();
+  if((e.code==='KeyQ'||e.key==='q'||e.key==='Q')&&gameMode==='campaign'&&running)openStoryModal();
+  return;
+ }
  if($('dialogueOverlay').style.display==='flex'||$('travelOverlay').style.display==='flex')return;
  if((e.code==='KeyE'||e.key==='e'||e.key==='E'||e.key==='у'||e.key==='У')&&running&&!paused){
   if(gameMode==='campaign'&&campaignNearbySite())campaignInspectSite();
@@ -10150,7 +10173,7 @@ function loop(t){
  requestAnimationFrame(loop);
 }
 
-/* CARANTIN 4.4 — LAN co-op in free mode; campaign remains single player. */
+/* CARANTIN 4.5 — LAN co-op in campaign and free mode. */
 let lanRole='solo',lanPeer=null;
 let gameMode='campaign';
 function setGameMode(mode){
@@ -10207,12 +10230,12 @@ function campaignCurrentSite(){
  return gameMode==='campaign'&&campaignState==='investigate'
   ?CAMPAIGN_MISSIONS[campaignStage].sites[campaignObjectiveIndex]||null:null;
 }
-function campaignNearbySite(){
+function campaignNearbySite(actor=player){
  const site=campaignCurrentSite();
- return site&&player&&Math.hypot(player.x-site.x,player.y-site.y)<78?site:null;
+ return site&&actor&&Math.hypot(actor.x-site.x,actor.y-site.y)<78?site:null;
 }
-function campaignInspectSite(){
- const site=campaignNearbySite();if(!running||paused||!site)return false;
+function campaignInspectSite(actor=player){
+ const site=campaignNearbySite(actor);if(!running||paused||!site)return false;
  campaignObjectiveIndex++;
  if(campaignObjectiveIndex>=CAMPAIGN_MISSIONS[campaignStage].sites.length)campaignState='approach';
  addParticles(site.x,site.y,CAMPAIGN_LOCATIONS[campaignStage].color,14,120,'spark');
@@ -10347,6 +10370,10 @@ function campaignLoadLocation(index,carry){
   m.x=player.x+(Math.random()-.5)*45;m.y=player.y+34;
   m.inVehicle=player.inVehicle;
  }
+ if(lanRole==='host'&&lanPeer){
+  lanPeer.x=player.x+36;lanPeer.y=player.y+36;
+  lanPeer.inv=Math.max(lanPeer.inv||0,2);
+ }
  const c=clampCamera(player.x,player.y);cam.x=c.x;cam.y=c.y;
  wave=index+1;waveKills=0;waveGoal=999;spawnTimer=999;
  evacHeli=null;nearbyHeli=false;
@@ -10392,13 +10419,15 @@ function campaignUpdateHud(){
 function campaignUpdate(dt,now){
  const loc=CAMPAIGN_LOCATIONS[campaignStage],a=loc.arena;
  if(campaignState==='approach'){
-  if(Math.hypot(player.x-a.x,player.y-a.y)<145){
+  if(Math.hypot(player.x-a.x,player.y-a.y)<145||
+     lanRole==='host'&&lanPeer&&lanPeer.hp>0&&Math.hypot(lanPeer.x-a.x,lanPeer.y-a.y)<145){
    campaignState='combat';campaignPhase=0;campaignStartWave();
   }
  }else if(campaignState==='hold'){
   // Defend the terminal rather than simply waiting: leaving the area freezes
   // the upload while fresh infected keep approaching every few seconds.
-  if(Math.hypot(player.x-a.x,player.y-a.y)<190)campaignHold=Math.max(0,campaignHold-dt);
+  if(Math.hypot(player.x-a.x,player.y-a.y)<190||
+     lanRole==='host'&&lanPeer&&lanPeer.hp>0&&Math.hypot(lanPeer.x-a.x,lanPeer.y-a.y)<190)campaignHold=Math.max(0,campaignHold-dt);
   campaignSiegeTimer-=dt;
   if(campaignSiegeTimer<=0&&campaignHold>0){
    campaignSiegeTimer=5.5;
@@ -10686,6 +10715,8 @@ function campaignArrive(){
  campaignShowDialogue(CAMPAIGN_LOCATIONS[tr.to].intro);
 }
 function campaignFinish(){
+ if(lanRole==='host'&&lanPeer&&lanBridge)lanBridge.send(JSON.stringify({v:LAN_VERSION,t:'finish'}));
+ if(lanRole==='host')setTimeout(lanLeave,1200);
  storyCompleted=true;running=false;paused=false;stopAllControls();
  $('polygonBanner').style.display='none';$('bossBanner').style.display='none';
  const box=document.createElement('div');box.className='box';
@@ -10778,6 +10809,7 @@ function saveCampaign(){
  }
 }
 function loadCampaign(){
+ if(running&&lanRole==='host')return false; // Reloading a live shared world would desync the guest.
  const s=readCampaignSave();
  if(!s){refreshSaveInfo();return false;}
  gameMode='campaign';storyTab='story';
