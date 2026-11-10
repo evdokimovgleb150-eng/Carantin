@@ -38,7 +38,7 @@ cp "$ROOT_DIR/icon-192.png" "$BUILD_DIR/res/mipmap-xhdpi/ic_launcher.png"
 cp "$ROOT_DIR/icon-192.png" "$BUILD_DIR/res/mipmap-xxhdpi/ic_launcher.png"
 cp "$ROOT_DIR/icon-512.png" "$BUILD_DIR/res/mipmap-xxxhdpi/ic_launcher.png"
 
-cp "$ROOT_DIR/index.html" "$ROOT_DIR/manifest.json" "$ROOT_DIR/sw.js" "$ROOT_DIR/icon-192.png" "$ROOT_DIR/icon-512.png" "$BUILD_DIR/assets/www/"
+cp "$ROOT_DIR/index.html" "$ROOT_DIR/lan.js" "$ROOT_DIR/manifest.json" "$ROOT_DIR/sw.js" "$ROOT_DIR/icon-192.png" "$ROOT_DIR/icon-512.png" "$BUILD_DIR/assets/www/"
 
 "$AAPT2" compile --dir "$BUILD_DIR/res" -o "$BUILD_DIR/compiled.zip"
 "$AAPT2" link \
@@ -53,7 +53,8 @@ javac -source 11 -target 11 \
   -classpath "$ANDROID_JAR" \
   -d "$BUILD_DIR/obj" \
   "$BUILD_DIR/gen/com/carantin/game/R.java" \
-  "$ANDROID_DIR/src/com/carantin/game/MainActivity.java"
+  "$ANDROID_DIR/src/com/carantin/game/MainActivity.java" \
+  "$ANDROID_DIR/src/com/carantin/game/LanTransport.java"
 
 find "$BUILD_DIR/obj" -name '*.class' > "$BUILD_DIR/classes.txt"
 "$D8" --min-api 24 --lib "$ANDROID_JAR" --output "$BUILD_DIR/dex" $(cat "$BUILD_DIR/classes.txt")
