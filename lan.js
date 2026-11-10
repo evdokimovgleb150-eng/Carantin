@@ -48,7 +48,8 @@ $('lanJoin').addEventListener('click',()=>{
 // Called from Android on WebView's UI thread. All packets are JSON with a fixed schema.
 window.lanReceive=function(kind,text){
  if(kind==='error'){
-  if(lanRole==='guest'&&!lanGuestReady){lanRole='solo';lanStatus(text);}
+  if(lanRole==='guest'&&!lanGuestReady){lanLeave();lanStatus(text);}
+  else if(lanRole==='host'){lanLeave();lanBadge('📡 '+text);}
   else lanBadge('📡 '+text);
   return;
  }
@@ -118,14 +119,17 @@ function lanSendSnapshot(now){
  lanLastSnapshot=now;
  // Transfer only drawing state; definitions, terrain and game logic live on both APKs.
  const z=zombies.map(o=>({x:o.x,y:o.y,type:o.type,r:o.r,angle:o.angle,
-  phase:o.phase,seed:o.seed,hit:o.hit,speed:o.speed,aggro:o.aggro,isWaveBoss:o.isWaveBoss,hp:o.hp,maxHp:o.maxHp}));
+  phase:o.phase,seed:o.seed,hit:o.hit,speed:o.speed,aggro:o.aggro,
+  color:o.color,boostTimer:o.boostTimer,dashTimer:o.dashTimer,burnTimer:o.burnTimer,
+  chillTimer:o.chillTimer,isWaveBoss:o.isWaveBoss,hp:o.hp,maxHp:o.maxHp}));
  const b=bullets.map(o=>({x:o.x,y:o.y,vx:o.vx,vy:o.vy,sx:o.sx,sy:o.sy,
-  color:o.color,kind:o.kind,rocket:o.rocket,bolt:o.bolt,flame:o.flame,angle:o.angle}));
+  color:o.color,kind:o.kind,rocket:o.rocket,bolt:o.bolt,flame:o.flame,angle:o.angle,life:o.life}));
  lanBridge.send(JSON.stringify({v:LAN_VERSION,t:'state',paused:paused||waveChoosing,
   guest:{x:lanPeer.x,y:lanPeer.y,a:lanPeer.angle,hp:lanPeer.hp},
   host:{x:player.x,y:player.y,a:player.angle,hp:health},
   z,b,score,money,wave,waveKills,waveGoal,
-  cars:vehicles.map(v=>({id:v.id,x:v.x,y:v.y,angle:v.angle,hp:v.hp,broken:v.broken})),
+  cars:vehicles.map(v=>({id:v.id,x:v.x,y:v.y,angle:v.angle,hp:v.hp,broken:v.broken,
+   vx:v.vx,vy:v.vy,steer:v.steer,hit:v.hit,ramCd:v.ramCd})),
   loot:lootNodes.filter(n=>n.opened).map(n=>n.id)}));
 }
 function lanApplyState(s){
@@ -139,6 +143,7 @@ function lanApplyState(s){
   lanBadge('📡 С другом · открытый мир');
  }
  lanHostPaused=!!s.paused;
+ lanBadge(s.guest.hp<=0?'📡 Ожидай возрождения':lanHostPaused?'📡 Ведущий на паузе':'📡 С другом · открытый мир');
  player.x=s.guest.x;player.y=s.guest.y;player.angle=s.guest.a||0;
  lanPeer={x:s.host.x,y:s.host.y,angle:s.host.a||0,hp:s.host.hp||0};
  health=s.guest.hp;score=s.score;money=s.money;
@@ -148,7 +153,8 @@ function lanApplyState(s){
  bullets=s.b;
  if(Array.isArray(s.cars))for(const v of s.cars){
   const car=vehicles.find(c=>c.id===v.id);
-  if(car){car.x=v.x;car.y=v.y;car.angle=v.angle;car.hp=v.hp;car.broken=v.broken;}
+  if(car){car.x=v.x;car.y=v.y;car.angle=v.angle;car.hp=v.hp;car.broken=v.broken;
+   car.vx=v.vx;car.vy=v.vy;car.steer=v.steer;car.hit=v.hit;car.ramCd=v.ramCd;}
  }
  if(Array.isArray(s.loot))for(const n of lootNodes)if(s.loot.includes(n.id))n.opened=true;
  updateUI();

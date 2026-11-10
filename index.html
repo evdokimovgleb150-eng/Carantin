@@ -5470,7 +5470,8 @@ function spawnZombie(forceType,sx,sy,opts){
     // Campaign targets must never be recycled: their removal without a kill
     // would leave the polygon's objective counter impossible to complete.
     if(zz.aggro||zz.isWaveBoss||zz.campaignTag!==undefined)continue;
-    const dd=Math.hypot(zz.x-player.x,zz.y-player.y);
+    const dd=Math.min(Math.hypot(zz.x-player.x,zz.y-player.y),
+      lanRole==='host'&&lanPeer?Math.hypot(zz.x-lanPeer.x,zz.y-lanPeer.y):Infinity);
     if(dd>farDist){farDist=dd;farIdx=i;}
    }
   }
@@ -5479,16 +5480,17 @@ function spawnZombie(forceType,sx,sy,opts){
  }
 
  const viewX=cam.x-W/2,viewY=cam.y-H/2;
+ const spawnTarget=lanRole==='host'&&lanPeer&&lanPeer.hp>0&&Math.random()<.5?lanPeer:player;
  let x=sx,y=sy;
  if(x===undefined||y===undefined){
   const pad=54;
   for(let attempt=0;attempt<16;attempt++){
-   if(Math.random()<0.65&&player){
-    // Spawn around outer neighborhood so zombies wander nearby until spotting player
+   if(Math.random()<0.65&&spawnTarget){
+    // Spread encounters between both players while sharing one host-owned city.
     const a=Math.random()*Math.PI*2;
     const rDist=340+Math.random()*320;
-    x=player.x+Math.cos(a)*rDist;
-    y=player.y+Math.sin(a)*rDist;
+    x=spawnTarget.x+Math.cos(a)*rDist;
+    y=spawnTarget.y+Math.sin(a)*rDist;
    }else{
     const side=Math.floor(Math.random()*4);
     if(side===0){x=viewX+Math.random()*W;y=viewY-pad}
@@ -5505,7 +5507,7 @@ function spawnZombie(forceType,sx,sy,opts){
     x=Math.max(WALL_PAD+24,Math.min(WORLD_W-WALL_PAD-24,x));
     y=Math.max(WALL_PAD+24,Math.min(WORLD_H-WALL_PAD-24,y));
    }
-   if(Math.hypot(x-player.x,y-player.y)<290)continue;
+   if(spawnTarget&&Math.hypot(x-spawnTarget.x,y-spawnTarget.y)<290)continue;
    if(isNearAnyBuilding(x,y,24))continue;
    let blocked=false;
    for(let i=0;i<obstacles.length;i++){
@@ -7154,6 +7156,12 @@ function update(dt,now){
    addParticles(ep.x,ep.y,ep.color,5,90,'spark');
    dead=true;
   }
+  if(!dead&&lanRole==='host'&&lanPeer&&lanPeer.hp>0&&
+     Math.hypot(lanPeer.x-ep.x,lanPeer.y-ep.y)<lanPeer.r+ep.r){
+   lanDamagePeer(ep.dmg);
+   addParticles(ep.x,ep.y,ep.color,5,90,'spark');
+   dead=true;
+  }
   if(!dead){
    for(let wi=0;wi<wallRects.length;wi++){
     const r=wallRects[wi];
@@ -7178,10 +7186,16 @@ function update(dt,now){
  for(let i=hazardZones.length-1;i>=0;i--){
   const hz=hazardZones[i];
   hz.life-=dt;hz.tick-=dt;
+  hz.peerTick=(hz.peerTick||0)-dt;
   if(hz.life<=0){hazardZones.splice(i,1);continue}
   if(player&&!player.inVehicle&&!inSafe&&hz.tick<=0&&Math.hypot(player.x-hz.x,player.y-hz.y)<=hz.r+player.r*0.5){
    hz.tick=0.65;
    damagePlayer(hz.kind==='fire'?6:5,hz.x,hz.y);
+  }
+  if(lanRole==='host'&&lanPeer&&lanPeer.hp>0&&hz.peerTick<=0&&
+     !isInSafeZone(lanPeer.x,lanPeer.y,-4)&&
+     Math.hypot(lanPeer.x-hz.x,lanPeer.y-hz.y)<=hz.r+lanPeer.r*0.5){
+   hz.peerTick=0.65;lanDamagePeer(hz.kind==='fire'?6:5);
   }
  }
 
